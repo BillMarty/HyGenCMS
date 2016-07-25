@@ -24,6 +24,7 @@ from . import deepseaclient
 from . import logfilewriter
 from . import pins
 from . import woodwardcontrol
+from .groveledbar import GroveLedBar
 from .config import get_configuration
 
 #################################################
@@ -157,6 +158,12 @@ def main(config, handlers, daemon=True):
         logger.error("No clients started successfully. Exiting.")
         exit(-1)
 
+    ######################################
+    # LED Gauges
+    ######################################
+    fuel_gauge = GroveLedBar(pins.FUEL_DATA, pins.FUEL_CLK)
+    battery_gauge = GroveLedBar(pins.BAT_GG_DATA, pins.BAT_GG_CLK)
+
     # Start all the threads
     for thread in threads:
         thread.start()
@@ -170,6 +177,7 @@ def main(config, handlers, daemon=True):
         1.0: 0,
         5.0: 0,
         10.0: 0,
+        60.0: 0,
     }
 
     going = True
@@ -267,6 +275,15 @@ def main(config, handlers, daemon=True):
                 # Schedule next run
                 next_run[10.0] = now + 10.0
 
+            ###########################
+            # Once every minute
+            ###########################
+            if now >= next_run[60.0]:
+                update_gauges(fuel_gauge, battery_gauge)
+
+                # Schedule next run
+                next_run[60.0] = now + 60.0
+
             time.sleep(0.01)
 
         except SystemExit:
@@ -301,6 +318,28 @@ def revive(threads, logger):
             logger.error("%s not running. Restarting..."
                          % str(thread))
             thread.start()
+
+
+def update_gauges(fuel_gauge, battery_gauge):
+    """
+    Update both the fuel and the battery gauge using data from the central
+    data store.
+    :param fuel_gauge: GroveLedBar object of the fuel gauge
+    :param battery_gauge: GroveLedBar object of the battery gauge
+    :return: None
+    """
+    # Update interface gauges
+    # See DeepSea_Modbus_manualGenComm.docx, 10.6
+    fuel = data_store[1027]  # Modbus fuel address
+    fuel /= 10  # Scale to 10
+    fuel_gauge.set_bar_level(fuel)
+
+    # See DeepSea_Modbus_manualGenComm.docx, 10.6 (#199)
+    battery_charge = data_store[1223]  # Modbus DC voltage address
+    # TODO maybe replace this with our analog value
+    # Scale the range from 259 to 309 to 0-10
+    battery_charge = int(round((battery_charge - 259) * 0.2))
+    battery_gauge.set_bar_level(battery_charge)
 
 
 if __name__ == "__main__":
