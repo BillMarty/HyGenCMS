@@ -67,9 +67,11 @@ class FileWriter(AsyncIOThread):
         # If we get to this point, the required values are present
         return True
 
-    def get_directory(self):
+    @staticmethod
+    def usb_plugged():
         """
-        Get the directory in whatever USB drive we have plugged in.
+        Return the path to whatever drive is plugged in, or None
+        :return: '/media/[drive]' or None
         """
         # Check for USB directory
         media = os.listdir('/media')
@@ -81,15 +83,22 @@ class FileWriter(AsyncIOThread):
                 drive = os.path.join('/media', d)
                 break
 
-        if drive is not None:
-            log_directory = os.path.join(drive, self.directory)
-            self.drive = drive
+        return drive
+
+    def get_directory(self):
+        """
+        Get the directory to store logs to.
+        """
+        drive = self.usb_plugged()
+
+        if drive is None:
+            return os.path.join('/home/hygen', self.directory)
         else:
-            return None
+            log_directory = os.path.join(drive, self.directory)
 
         # Make any necessary paths
         try:
-            os.makedirs(log_directory, exist_ok=True)
+            os.makedirs(log_directory)
         except OSError:
             # Directory already exists
             pass

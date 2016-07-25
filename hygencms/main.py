@@ -324,9 +324,9 @@ def revive(threads, logger):
     """
     for thread in threads:
         if not thread.is_alive():
-            logger.error("%s not running. Restarting..."
+            logger.error("%s not running. Exiting"
                          % str(thread))
-            thread.start()
+            raise RuntimeError("%s died." % str(thread))
 
 
 def update_watchdog():
