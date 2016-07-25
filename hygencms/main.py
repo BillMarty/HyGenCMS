@@ -22,7 +22,7 @@ import serial
 
 from . import analogclient
 from . import bmsclient
-from . import deepseaclient
+from .deepseaclient import DeepSeaClient
 from . import logfilewriter
 from . import pins
 from . import woodwardcontrol
@@ -64,7 +64,7 @@ def main(config, handlers, daemon=False, watchdog=False):
     ############################################
     if 'deepsea' in config['enabled']:
         try:
-            deepsea = deepseaclient.DeepSeaClient(config['deepsea'], handlers, data_store)
+            deepsea = DeepSeaClient(config['deepsea'], handlers, data_store)
         except ValueError:
             exc_type, exc_value = sys.exc_info()[:2]
             logger.error("Error with DeepSeaClient config: %s: %s"
@@ -228,10 +228,12 @@ def main(config, handlers, daemon=False, watchdog=False):
                 try:
                     pid_enable = data_store[3345]  # From DeepSea GenComm manual
                     if pid_enable and int(pid_enable) & (1 << 6):
+                        woodward.integral_term = 0.0
                         woodward.set_auto(True)
                     else:
                         woodward.set_auto(False)
                         woodward.output = 0.0
+                        woodward.integral_term = 0.0
                 except UnboundLocalError:
                     pass
                 except KeyError:
