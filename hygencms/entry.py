@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 Perform the telemetric logging functions as a daemon.
 
@@ -10,6 +10,7 @@ including PID files, start / stop, and context management.
 import logging
 import signal
 import argparse
+import subprocess
 
 # Third party libraries
 import daemon
@@ -19,6 +20,8 @@ from daemon import pidfile
 from config import get_configuration
 from main import main
 
+# Run the shell script to setup IO pins
+subprocess.call(["bash", "../setup_io.sh"])
 
 # create logger
 logger = logging.getLogger(__name__)
@@ -26,24 +29,20 @@ logger.setLevel(logging.DEBUG)
 
 # create stream handler to stderr and set level to debug
 sh = logging.StreamHandler()  # default is sys.stderr
-sh.setLevel(logging.DEBUG)
 
 # Create file handler
 fh = logging.FileHandler(
     '/home/hygen/dev/PPI_Cdocs/PythonTools/hygen/logger/errors.log')
-fh.setLevel(logging.DEBUG)
 
 # create formatter
 formatter = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-# add formatter to sh and fh
-fh.setFormatter(formatter)
-sh.setFormatter(formatter)
-
 handlers = [sh, fh]
 # add sh to logger
 for h in handlers:
+    h.setLevel(logging.DEBUG)
+    h.setFormatter(formatter)
     logger.addHandler(h)
 
 

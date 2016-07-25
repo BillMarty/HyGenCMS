@@ -176,6 +176,7 @@ def main(config, handlers, daemon=True):
 
     going = True
     while going:
+        # noinspection PyBroadException
         try:
             now = monotonic.monotonic()
             now_time = time.time()
