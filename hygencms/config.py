@@ -55,7 +55,7 @@ from .utils import is_int, get_input
 # Constants
 ###############################
 default_config_file = \
-    "/home/hygen/dev/HyGenCMS/hygencms/hygen_logger.py"
+    "/home/hygen/HyGenCMS/hygencms/hygen_logger.py"
 
 ddefaults = {
     'mlistfile': "mdf.csv",

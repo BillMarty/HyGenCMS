@@ -9,7 +9,7 @@
     'deepsea': {
         # Where to find the measurement list
         'mlistfile':\
-        '/home/hygen/dev/PPI_Cdocs/PythonTools/hygen/logger/cur_rpm.csv',
+        '/home/hygen/HyGenCMS/hygencms/cur_rpm.csv',
         # Possible mode values are 'rtu' or 'tcp'
         'mode': 'rtu',
         # RTU settings
@@ -29,7 +29,7 @@
 
     # Control signal to Woodward
     'woodward': {
-        'pin': 'P9_21',
+        'pin': 'P9_29',
         'Kp': 1.0,
         'Ki': 0.8,
         'Kd': 0.0,
@@ -52,7 +52,8 @@
             # 'P9_39' = AIN0 = high bus voltage
             # 'P9_40' = AIN1 = high bus current shunt
             # These will change gains
-            ['an_300v_cur', 'A', 'P9_40', 40.0, -0.2],
+            ['pulse_count', 'V', 'P9_36', 1.0, 0.0],
+            ['an_300v_cur', 'A', 'P9_38', 40.0, -0.2],
             ['an_300v_volt', 'V', 'P9_39', 1.0, 0.0]
         ],
         # How often to report values
