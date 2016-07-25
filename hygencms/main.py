@@ -350,14 +350,20 @@ def update_gauges(fuel_gauge, battery_gauge):
     """
     # Update interface gauges
     # See DeepSea_Modbus_manualGenComm.docx, 10.6
-    fuel = data_store[1027]  # Modbus fuel address
+    try:
+        fuel = data_store[1027]  # Modbus fuel address
+    except KeyError:
+        pass
     fuel /= 10  # Scale to 10
     fuel_gauge.set_bar_level(fuel)
 
     # See DeepSea_Modbus_manualGenComm.docx, 10.6 (#199)
-    battery_charge = data_store[1223]  # Modbus DC voltage address
-    # TODO maybe replace this with our analog value
+    try:
+        battery_charge = data_store[1223]  # Modbus DC voltage address
+        # TODO maybe replace this with our analog value
     # Scale the range from 259 to 309 to 0-10
+    except KeyError:
+        pass
     battery_charge = int(round((battery_charge - 259) * 0.2))
     battery_gauge.set_bar_level(battery_charge)
 
