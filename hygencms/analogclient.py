@@ -45,6 +45,7 @@ class AnalogClient(AsyncIOThread):
         self.data_store.update({m[PIN]: None for m in self._input_list})
         self.partial_values = {m[PIN]: (0.0, 0) for m in self._input_list}
         self.last_updated = monotonic.monotonic()
+        self._last_written = 0
 
         # Open the ADC
         ADC.setup()
@@ -146,10 +147,13 @@ class AnalogClient(AsyncIOThread):
         The line is returned with no new line or trailing comma.
         """
         values = []
-        for m in self._input_list:
-            val = self.data_store[m[PIN]]
-            if val is not None:
-                values.append(str(val))
-            else:
-                values.append('')
+        now = monotonic.monotonic()
+        if now > self._last_written:
+            for m in self._input_list:
+                val = self.data_store[m[PIN]]
+                if val is not None:
+                    values.append(str(val))
+                else:
+                    values.append('')
+            self._last_written = now
         return ','.join(values)
