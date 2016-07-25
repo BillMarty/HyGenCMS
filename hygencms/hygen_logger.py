@@ -1,5 +1,5 @@
 # Configuration map
-config = {
+{
     # Enabled threads
     # Each string in this list corresponds to a sub-configuration map
     # in the top level configuration map

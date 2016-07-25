@@ -37,8 +37,6 @@ It will be structured as a nested dictionary of the following form:
     "woodward": {
         "ww_sig": "P9_21", # PWM signal to the Woodward
     },
-
-
 }
 """
 ###############################
@@ -57,7 +55,7 @@ from .utils import is_int, get_input
 # Constants
 ###############################
 default_config_file = \
-    "/home/hygen/dev/PPI_Cdocs/PythonTools/hygen/logger/hygen_logger.py"
+    "/home/hygen/dev/HyGenCMS/hygencms/hygen_logger.py"
 
 ddefaults = {
     'mlistfile': "mdf.csv",
