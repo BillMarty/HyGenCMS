@@ -262,7 +262,7 @@ def main(config, handlers, daemon=True):
             # Once every 5 seconds
             ###########################
             if now >= next_run[5.0]:
-                pass
+                update_watchdog()
                 # Schedule next run
                 next_run[5.0] = now + 5.0
 
@@ -318,6 +318,17 @@ def revive(threads, logger):
             logger.error("%s not running. Restarting..."
                          % str(thread))
             thread.start()
+
+
+def update_watchdog():
+    """
+    Write to the watchdog file, keeping the system from being restarted.
+    If we don't write to the watchdog for 60 seconds, the system will be
+    restarted.
+    :return: None
+    """
+    with open("/dev/watchdog", 'w') as f:
+        f.write('\n')
 
 
 def update_gauges(fuel_gauge, battery_gauge):
