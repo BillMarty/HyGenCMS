@@ -1,4 +1,5 @@
 # Configuration map
+# noinspection PyStatementEffect
 {
     # Enabled threads
     # Each string in this list corresponds to a sub-configuration map

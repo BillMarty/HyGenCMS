@@ -258,7 +258,8 @@ class WoodwardControl(AsyncIOThread):
         print("%20s %10.2f" % ("Ki", self.ki * factor / self._sample_time))
         print("%20s %10.2f" % ("Kd", self.kd * factor * self._sample_time))
 
-    def csv_header(self):
+    @staticmethod
+    def csv_header():
         """
         Return the CSV header line.
         Does not include newline or trailing comma.

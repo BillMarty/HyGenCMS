@@ -15,7 +15,6 @@ import subprocess
 from daemon import pidfile
 
 # Our Imports
-import hygencms
 from hygencms.config import get_configuration
 from hygencms.main import main
 

@@ -128,6 +128,7 @@ class BmsClient(AsyncIOThread):
         else:
             sum1, sum2 = 0, 0
             for byte in data:
+                # noinspection PyTypeChecker
                 sum1 = (sum1 + ord(byte)) % 255
                 sum2 = (sum2 + sum1) % 255
         return (sum1 << 8) | sum2
@@ -175,7 +176,8 @@ class BmsClient(AsyncIOThread):
         else:
             print("%20s %10s %10s" % ("Battery Current", "ERR", "A"))
 
-    def csv_header(self):
+    @staticmethod
+    def csv_header():
         """
         Return a string of the CSV header for our data.
 
