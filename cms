@@ -26,6 +26,9 @@ parser.add_argument(
 parser.add_argument(
     '-d', '--daemon', action='store_const', dest='daemon', const=True,
     default=False, help='run the logger as a daemon')
+parser.add_argument(
+    '-w', '--watchdog', action='store_const', dest='watchdog', const=True,
+    default=False, help='run the logger with a watchdog timer')
 args = parser.parse_args()
 
 # Handle --config
@@ -35,18 +38,18 @@ else:
     config = get_configuration()
 
 # Run the shell script to setup IO pins
-subprocess.call(["bash", "../setup_io.sh"])
+subprocess.call(["bash", "setup_io.sh"])
 
 # create logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 
 # create stream handler to stderr and set level to debug
 sh = logging.StreamHandler()  # default is sys.stderr
 
 # Create file handler
 fh = logging.FileHandler(
-    '/home/hygen/log/errors.log')
+    '/home/hygen/logs/errors.log')
 
 # create formatter
 formatter = logging.Formatter(
@@ -55,7 +58,7 @@ formatter = logging.Formatter(
 handlers = [sh, fh]
 # add sh to logger
 for h in handlers:
-    h.setLevel(logging.DEBUG)
+    h.setLevel(logging.ERROR)
     h.setFormatter(formatter)
     logger.addHandler(h)
 
@@ -76,7 +79,7 @@ if args.daemon:
                           signal.SIGTSTP: 'terminate',  # suspend - configurable
                           }
     with context:
-        main(config, handlers)
+        main(config, handlers, daemon=True, watchdog=args.watchdog)
 else:
-    main(config, handlers)
+    main(config, handlers, daemon=False, watchdog=args.watchdog)
 

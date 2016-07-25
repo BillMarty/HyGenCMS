@@ -46,7 +46,7 @@ else:
 data_store = {}
 
 
-def main(config, handlers, daemon=True):
+def main(config, handlers, daemon=False, watchdog=False):
     """
     Enter a main loop, polling values from sources enabled in config
     """
@@ -264,7 +264,8 @@ def main(config, handlers, daemon=True):
             # Once every 5 seconds
             ###########################
             if now >= next_run[5.0]:
-                update_watchdog()
+                if watchdog:
+                    update_watchdog()
                 # Schedule next run
                 next_run[5.0] = now + 5.0
 
@@ -288,6 +289,9 @@ def main(config, handlers, daemon=True):
 
             time.sleep(0.01)
 
+        except KeyboardInterrupt:
+            stop_threads(threads, logger)
+            exit(1)
         except SystemExit:
             going = False
             stop_threads(threads, logger)
@@ -352,20 +356,28 @@ def update_gauges(fuel_gauge, battery_gauge):
     # See DeepSea_Modbus_manualGenComm.docx, 10.6
     try:
         fuel = data_store[1027]  # Modbus fuel address
+        assert(fuel is not None)
     except KeyError:
         pass
-    fuel /= 10  # Scale to 10
-    fuel_gauge.set_bar_level(fuel)
+    except AssertionError:
+        pass
+    else:
+        fuel /= 10  # Scale to 10
+        fuel_gauge.set_bar_level(fuel)
 
     # See DeepSea_Modbus_manualGenComm.docx, 10.6 (#199)
     try:
         battery_charge = data_store[1223]  # Modbus DC voltage address
         # TODO maybe replace this with our analog value
-    # Scale the range from 259 to 309 to 0-10
+        assert(battery_charge is not None)
     except KeyError:
         pass
-    battery_charge = int(round((battery_charge - 259) * 0.2))
-    battery_gauge.set_bar_level(battery_charge)
+    except AssertionError:
+        pass
+    else:
+        # Scale the range from 259 to 309 to 0-10
+        battery_charge = int(round((battery_charge - 259) * 0.2))
+        battery_gauge.set_bar_level(battery_charge)
 
 
 if __name__ == "__main__":

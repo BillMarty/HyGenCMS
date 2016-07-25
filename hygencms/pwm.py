@@ -104,8 +104,6 @@ def start(key, duty_cycle=50.0, frequency=100000):
     pin.freq = 0
 
     pin.initialized = True
-    set_frequency(key, frequency)
-    set_duty_cycle(key, duty_cycle)
 
     # It sometimes takes a bit to open
     enabled = False
@@ -124,6 +122,8 @@ def start(key, duty_cycle=50.0, frequency=100000):
         print("Couldn't enable {:s}".format(key))
         pin.initialized = False
 
+    set_frequency(key, frequency)
+    set_duty_cycle(key, duty_cycle)
 
 def set_frequency(key, freq):
     try:

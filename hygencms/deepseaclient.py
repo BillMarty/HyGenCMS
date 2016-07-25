@@ -303,14 +303,14 @@ class DeepSeaClient(AsyncIOThread):
                 x = float(result[0]) * m[GAIN] + m[OFFSET]
         except ModbusInvalidResponseError:
             exc_type, exc_value = sys.exc_info()[:2]
-            self._logger.error("ModbusInvalidResponseError occurred: %s, %s"
+            self._logger.info("ModbusInvalidResponseError occurred: %s, %s"
                                % (str(exc_type), str(exc_value)))
         except ModbusError as e:
-            self._logger.error("DeepSea returned an exception: %s"
+            self._logger.info("DeepSea returned an exception: %s"
                                % e.args[0])
         except SerialException:
             exc_type, exc_value = sys.exc_info()[:2]
-            self._logger.error("SerialException occurred: %s, %s"
+            self._logger.info("SerialException occurred: %s, %s"
                                % (str(exc_type), str(exc_value)))
         # self._logger.debug("Returning from {0}, value {1}"
         #                    .format(address, x))
