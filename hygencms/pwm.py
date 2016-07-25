@@ -22,7 +22,7 @@ class PwmPin:
         self.period_ns = 0
         self.duty = duty
         self.freq = freq
-        self.enabled = False
+        self.initialized = False
 
 
 pins = {
@@ -103,6 +103,7 @@ def start(key, duty_cycle=50.0, frequency=100000):
     pin.duty = 0
     pin.freq = 0
 
+    pin.initialized = True
     set_frequency(key, frequency)
     set_duty_cycle(key, duty_cycle)
 
@@ -121,8 +122,7 @@ def start(key, duty_cycle=50.0, frequency=100000):
 
     if tries >= 100:
         print("Couldn't enable {:s}".format(key))
-    else:
-        pin.enabled = True
+        pin.initialized = False
 
 
 def set_frequency(key, freq):
@@ -131,7 +131,7 @@ def set_frequency(key, freq):
     except KeyError:
         raise ValueError("Unimplemented key")
 
-    if not pin.enabled:
+    if not pin.initialized:
         raise RuntimeError("Pin has not been initialized")
 
     if pin.freq == freq:
@@ -154,7 +154,7 @@ def set_duty_cycle(key, duty):
     except KeyError:
         raise ValueError("Unimplemented key")
 
-    if not pin.enabled:
+    if not pin.initialized:
         raise RuntimeError("Pin has not been initialized")
 
     if not 0 <= duty <= 100:
