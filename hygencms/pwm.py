@@ -5,7 +5,9 @@ import time
 
 class PwmPin:
     def __init__(self,
-                 chip, addr, index, name, description,
+                 chip, addr, index,
+                 name=None,
+                 description=None,
                  period_path=None,
                  duty_path=None,
                  polarity_path=None,
@@ -26,6 +28,17 @@ class PwmPin:
 
 
 pins = {
+    'P8_13': PwmPin(chip='48304000',
+                    addr='48304200',
+                    index=1),
+    'P8_19': PwmPin(chip='48304000',
+                    addr='48304200',
+                    index=0),
+    'P9_21': PwmPin(chip='48300000',
+                    addr='48300200',
+                    index=1,
+                    name='OLD_WW_PWM',
+                    description='[old] PWM signal to Woodward RPM setpoint'),
     'P9_29': PwmPin(chip="48300000",
                     addr='48300200',
                     index=1,
@@ -125,6 +138,7 @@ def start(key, duty_cycle=50.0, frequency=100000):
     set_frequency(key, frequency)
     set_duty_cycle(key, duty_cycle)
 
+
 def set_frequency(key, freq):
     try:
         pin = pins[key]
@@ -137,7 +151,7 @@ def set_frequency(key, freq):
     if pin.freq == freq:
         return  # nothing to do
 
-    period_ns = int(1e9 / float(freq))
+    period_ns = int(1e9 / freq)
     try:
         with open(pin.period_path, 'w') as f:
             f.write(str(period_ns))
