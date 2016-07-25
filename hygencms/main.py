@@ -313,6 +313,13 @@ def print_data(clients):
 
 
 def revive(threads, logger):
+    """
+    Check to make sure each thread is running, and restart any which
+    have stopped.
+    :param threads: An iterable of threads
+    :param logger: The logger to which any messages will be written
+    :return: None
+    """
     for thread in threads:
         if not thread.is_alive():
             logger.error("%s not running. Restarting..."
