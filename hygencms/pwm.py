@@ -157,6 +157,9 @@ def set_duty_cycle(key, duty):
     if not pin.enabled:
         raise RuntimeError("Pin has not been initialized")
 
+    if not 0 <= duty <= 100:
+        raise ValueError("Duty cycle must be between 0 and 100 percent")
+
     duty_cycle = int(pin.period_ns * (duty / 100))
     try:
         with open(pin.duty_path, 'w') as f:

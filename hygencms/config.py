@@ -46,12 +46,12 @@ It will be structured as a nested dictionary of the following form:
 ###############################
 import ast
 import os
-import serial
 
+import serial
 from modbus_tk.modbus_rtu import RtuMaster
 from modbus_tk.modbus_tcp import TcpMaster
 
-from utils import is_int, get_input
+from .utils import is_int, get_input
 
 ###############################
 # Constants
@@ -265,8 +265,7 @@ def get_bms_configuration():
     """
     Get configuration values for the Beckett BMS from the user console.
     """
-    config = {}
-    config['dev'] = get_input("Serial Device?", default=bdefaults['dev'])
+    config = {'dev': get_input("Serial Device?", default=bdefaults['dev'])}
 
     ans = get_input("Baud rate?", default=str(bdefaults['baudrate']))
     while not is_int(ans):
@@ -288,9 +287,8 @@ def get_woodward_configuration():
     """
     Get configuration values for the woodward PWM control signal
     """
-    config = {'ww_sig':
-                  get_input("Pin to Woodward RPM signal?",
-                            default=wdefaults['ww_sig'])}
+    config = {'ww_sig': get_input("Pin to Woodward RPM signal?",
+                                  default=wdefaults['ww_sig'])}
     return config
 
 
@@ -326,7 +324,8 @@ def get_analog_configuration():
             cont = False
         except ValueError:  # Invalid conversion to float
             cont = True
-    config['frequency'] = f
+        else:
+            config['frequency'] = f
 
     cont = True
     while cont:
@@ -337,7 +336,8 @@ def get_analog_configuration():
             cont = False
         except ValueError:  # Invalid conversion to int
             cont = True
-    config['averages'] = i
+        else:
+            config['averages'] = i
 
     return config
 
@@ -370,7 +370,7 @@ def write_config_file(config, path):
         with open(path, 'w') as f:
             f.write(str(config))
             f.write('\n')
-    except:
+    except IOError:
         return False
 
     return True

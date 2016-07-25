@@ -9,7 +9,7 @@ import sys
 import time
 from datetime import datetime
 
-from asynciothread import AsyncIOThread
+from .asynciothread import AsyncIOThread
 
 if sys.version_info[0] == 3:
     import queue

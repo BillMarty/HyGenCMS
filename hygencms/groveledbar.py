@@ -1,5 +1,6 @@
 import time
-import gpio
+
+from . import gpio
 
 LEDS_PER_INSTANCE = 12
 HIGH = 0xff

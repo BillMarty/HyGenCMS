@@ -1,7 +1,7 @@
 import serial
-from utils import PY2, PY3
 
-from asynciothread import AsyncIOThread
+from .asynciothread import AsyncIOThread
+from .utils import PY3
 
 
 class BmsClient(AsyncIOThread):

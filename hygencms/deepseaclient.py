@@ -1,15 +1,16 @@
 # System imports
-import time
 import sys
-from monotonic import monotonic
+import time
 
+import modbus_tk.defines as defines
+import serial
+from modbus_tk.exceptions import ModbusError, ModbusInvalidResponseError
 from modbus_tk.modbus_rtu import RtuMaster
 from modbus_tk.modbus_tcp import TcpMaster
-import modbus_tk.defines as defines
-from modbus_tk.exceptions import ModbusError, ModbusInvalidResponseError
+from monotonic import monotonic
 from serial import SerialException
-import serial
-from asynciothread import AsyncIOThread
+
+from .asynciothread import AsyncIOThread
 
 NAME = 0
 UNITS = 1
@@ -358,7 +359,7 @@ class DeepSeaClient(AsyncIOThread):
             key = m[ADDRESS]
             val = self._data_store[key]
             updated = self._last_updated[key]
-            if updated > self.last_written[key] and val is not None:
+            if updated > self._last_written[key] and val is not None:
                 values.append(str(val))
                 self._last_written[key] = now
             else:

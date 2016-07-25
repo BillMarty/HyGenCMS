@@ -10,23 +10,21 @@ The program implements the following functionality:
 ###############################
 # Import required libraries
 ###############################
-import sys
-import socket
-import time
 import logging
-import serial
-import monotonic
+import socket
+import sys
+import time
 
-##############################
-# Import my files
-##############################
-import deepseaclient
-import bmsclient
-import analogclient
-import woodwardcontrol
-import logfilewriter
-from config import get_configuration
-import pins
+import monotonic
+import serial
+
+from . import analogclient
+from . import bmsclient
+from . import deepseaclient
+from . import logfilewriter
+from . import pins
+from . import woodwardcontrol
+from .config import get_configuration
 
 #################################################
 # Conditional import for Python 2/3 compatibility
@@ -275,7 +273,7 @@ def main(config, handlers, daemon=True):
             going = False
             stop_threads(threads, logger)
 
-        except Exception as e:
+        except Exception:
             exc_type, exc_value = sys.exc_info()[:2]
             logger.error("%s raised in main loop: %s"
                          % (str(exc_type), str(exc_value)))

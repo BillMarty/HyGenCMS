@@ -35,7 +35,7 @@ def get_input(s, default=""):
 
 
 def is_int(s, *args):
-    "Return whether a value can be interpreted as an int."
+    """Return whether a value can be interpreted as an int."""
     try:
         int(s, *args)
         return True

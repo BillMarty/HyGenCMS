@@ -4,24 +4,24 @@ Implement PID control for the Woodward
 
 import time
 
-import Adafruit_BBIO.PWM as PWM
 import monotonic
 
-from asynciothread import AsyncIOThread
+from . import pwm
+from .asynciothread import AsyncIOThread
 
 DIRECT = 0
 REVERSE = 1
 
 
-class WoodwardPWM(AsyncIOThread):
+class WoodwardControl(AsyncIOThread):
     """
     Send a square wave input via the PWM
     """
 
     def __init__(self, wconfig, handlers):
-        super(WoodwardPWM, self).__init__(handlers)
+        super(WoodwardControl, self).__init__(handlers)
         # Check configuration to ensure all values present
-        WoodwardPWM.check_config(wconfig)
+        WoodwardControl.check_config(wconfig)
 
         # Initialize member variables
         self.cancelled = False
@@ -46,7 +46,7 @@ class WoodwardPWM(AsyncIOThread):
 
         # Initialize the property for output and PWM
         self._output = 0.0
-        PWM.start(self._pin, 0.0, 100000)
+        pwm.start(self._pin, 0.0, 100000)
 
         # { Step configuration
         # Values for step
@@ -65,7 +65,7 @@ class WoodwardPWM(AsyncIOThread):
     def set_output(self, value):
         # Only set it if it's in the valid range
         if 0 <= value <= 100:
-            PWM.set_duty_cycle(self._pin, value)
+            pwm.set_duty_cycle(self._pin, value)
             self._output = value
 
     def del_output(self):

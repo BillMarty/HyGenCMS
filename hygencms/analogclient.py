@@ -3,12 +3,13 @@ A module to asynchronously read in values from the ADC inputs.
 All values are read in at the same frequency.
 """
 
-import monotonic
-import time
 import sys
-import Adafruit_BBIO.ADC as ADC
+import time
 
-from asynciothread import AsyncIOThread
+import Adafruit_BBIO.ADC as ADC
+import monotonic
+
+from .asynciothread import AsyncIOThread
 
 NAME = 0
 UNITS = 1

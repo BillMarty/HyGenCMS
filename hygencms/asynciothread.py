@@ -12,10 +12,7 @@ class AsyncIOThread(Thread):
     def __init__(self, handlers):
         """
         Constructor
-        :param config: A configuration map
         :param handlers: A list of log handlers
-        :param data_store: A reference to the central dictionary where
-                           values are stored
         """
         super(AsyncIOThread, self).__init__()
         self.daemon = False

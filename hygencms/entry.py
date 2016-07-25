@@ -7,18 +7,15 @@ including PID files, start / stop, and context management.
 """
 
 # System imports
+import argparse
 import logging
 import signal
-import argparse
 import subprocess
 
-# Third party libraries
-import daemon
 from daemon import pidfile
 
-# My imports
-from config import get_configuration
-from main import main
+from .config import get_configuration
+from .main import main
 
 # Run the shell script to setup IO pins
 subprocess.call(["bash", "../setup_io.sh"])
