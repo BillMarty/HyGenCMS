@@ -2,9 +2,11 @@
 This will be the main entry point for the python program for the hygen.
 
 The program implements the following functionality:
-    - Read data asynchronously from the DeepSea, BMS, and
-        possibly other sources
+    - Read data asynchronously from the DeepSea, BMS, and analog
+        input pins
     - Write the read data to a USB memory stick location.
+    - When a flag from the DeepSea is enabled, control the Woodward
+        based on the Analog trunk current value
 """
 
 ###############################
@@ -24,8 +26,8 @@ from . import deepseaclient
 from . import logfilewriter
 from . import pins
 from . import woodwardcontrol
-from .groveledbar import GroveLedBar
 from .config import get_configuration
+from .groveledbar import GroveLedBar
 
 #################################################
 # Conditional import for Python 2/3 compatibility
@@ -115,7 +117,7 @@ def main(config, handlers, daemon=True):
     #######################################
     if 'woodward' in config['enabled']:
         try:
-            woodward = woodwardcontrol.WoodwardPWM(
+            woodward = woodwardcontrol.WoodwardControl(
                 config['woodward'], handlers
             )
         # ValueError can be from a missing value in the config map
