@@ -68,7 +68,7 @@ if args.daemon:
     # Setup daemon context
     context = daemon.DaemonContext(
         working_directory='/',
-        pidfile=pidfile.PIDLockFile('/var/run/hygenlogger.pid'),
+        pidfile=pidfile.PIDLockFile('/var/run/hygencms.pid'),
         files_preserve=[
             fh.stream,
         ],
