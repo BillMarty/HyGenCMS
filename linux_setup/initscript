@@ -1,0 +1,86 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: hygenlogger
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Log key metrics on the Planetary Power Hygen
+# Description:       Read data about the battery, temperatures, customer
+# power usage, and engine stats. Log these to file, and when appropriate,
+# send signals to update the user interface panel
+### END INIT INFO
+
+# Using debian policy manual: https://www.debian.org/doc/debian-policy/ch-opersys.html#s9.3.2
+# Using the LSB functions
+# Standard followed:
+# http://refspecs.linuxbase.org/LSB_3.1.0/LSB-Core-generic/LSB-Core-generic/iniscrptact.html
+. /lib/lsb/init-functions
+
+# Process name (for display)
+NAME=hygenlogger
+# Daemon name (actual executable)
+DAEMON=/home/hygen/dev/PPI_Cdocs/PythonTools/hygen/logger/entry.py
+# pid file for the daemon
+PIDFILE=/var/run/hygenlogger.pid
+
+# Test if the daemon is not there
+# exit "Program not installed" if missing
+# LSB demands exit 5, but Debian policy manual says must exit 0
+test -x $DAEMON || exit 0
+
+case $1 in
+    start)
+        if [ -e $PIDFILE ]; then
+            status_of_proc -p $PIDFILE $DAEMON $NAME && status="0" || status="$?"
+            # If status is SUCCESS, don't start again
+            if [ $status = "0" ]; then
+                exit # Exit
+            else
+                $0 restart
+            fi
+        fi
+        # Start the daemon
+        log_daemon_msg "Starting the process" "$NAME"
+        # Start the daemon with the help of start-stop-daemon
+        # Log the start
+        if start_daemon -p $PIDFILE $DAEMON ; then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+        ;;
+
+    stop)
+        if [ -e $PIDFILE ]; then
+            status_of_proc -p $PIDFILE $DAEMON $NAME && status="0" || status="$?"
+            if [ "$status" = 0 ]; then
+                killproc -p $PIDFILE $DAEMON
+                /bin/rm -rf $PIDFILE
+                if [ -e $PIDFILE ]; then
+                    log_failure_msg "Could not stop $NAME"
+                else
+                    log_success_msg "$NAME process stopped"
+                fi
+            fi
+        else
+            log_failure_msg "$NAME process is not running"
+        fi
+        ;;
+    restart|reload|force-reload)
+        # Restart the daemon
+        $0 stop && sleep 2 && $0 start
+        ;;
+
+    status)
+        # Check the status of the process
+        status_of_proc -p $PIDFILE $DAEMON $NAME && exit 0 || exit $?
+        ;;
+
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 2
+        ;;
+esac
+
+exit 0

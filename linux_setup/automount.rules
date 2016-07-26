@@ -1,0 +1,10 @@
+# /etc/udev/rules.d/automount.rules
+# Last changed: 
+# 2016-07-15
+# Purpose: 
+# Automount USB flash drives when plugged in.
+# On the BeagleBone, flash drives plugged into the USB show up on /dev/sda.
+# For most flash drives, the partition will appear on /dev/sda1. For some,
+# however, the main partition appears on /dev/sda. 
+# pmount mounts the USB drive partitions on /media/sda*.
+ACTION=="add", KERNEL=="sd?*", RUN+="/usr/bin/pmount --umask 000 %k"

@@ -96,7 +96,7 @@ class BmsClient(AsyncIOThread):
                     continue
 
                 # If the checksum fails we have a bad line
-                if not BmsClient.fletcher16(data) == checksum:
+                if not self.fletcher16(data) == checksum:
                     continue
 
                 try:
