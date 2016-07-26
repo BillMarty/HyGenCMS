@@ -156,8 +156,8 @@ config-pin P9_31 pwm
 # P9_35 AIN6
 # P9_36 AIN5
 # P9_37 AIN2
-# P9_38	n/a	AIN3	High bus voltage
-# P9_39	n/a	AIN0	Generator Amps (current shunt)
+# P9_38	n/a	AIN3	Generator current
+# P9_39	n/a	AIN0	High bus voltage
 # P9_40	n/a	AIN1	?
 
 # Defaults

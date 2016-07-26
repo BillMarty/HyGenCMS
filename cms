@@ -14,7 +14,6 @@ import subprocess
 
 from daemon import pidfile
 
-# Our Imports
 from hygencms.config import get_configuration
 from hygencms.main import main
 
@@ -29,6 +28,9 @@ parser.add_argument(
 parser.add_argument(
     '-w', '--watchdog', action='store_const', dest='watchdog', const=True,
     default=False, help='run the logger with a watchdog timer')
+parser.add_argument(
+    '-p', '--poweroff', action='store_const', dest='poweroff', const=True,
+    default=False, help='Trigger poweroff on GPIO P8_19 input')
 args = parser.parse_args()
 
 # Handle --config
@@ -79,7 +81,8 @@ if args.daemon:
                           signal.SIGTSTP: 'terminate',  # suspend - configurable
                           }
     with context:
-        main(config, handlers, daemon=True, watchdog=args.watchdog)
+        main(config, handlers, daemon=True, watchdog=args.watchdog,
+             power_off_enabled=args.poweroff)
 else:
-    main(config, handlers, daemon=False, watchdog=args.watchdog)
-
+    main(config, handlers, daemon=False, watchdog=args.watchdog,
+         power_off_enabled=args.poweroff)

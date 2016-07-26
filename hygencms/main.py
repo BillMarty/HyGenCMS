@@ -14,6 +14,7 @@ The program implements the following functionality:
 ###############################
 import logging
 import socket
+import subprocess
 import sys
 import time
 
@@ -22,11 +23,12 @@ import serial
 
 from . import analogclient
 from . import bmsclient
-from .deepseaclient import DeepSeaClient
+from . import gpio
 from . import logfilewriter
 from . import pins
 from . import woodwardcontrol
 from .config import get_configuration
+from .deepseaclient import DeepSeaClient
 from .groveledbar import GroveLedBar
 
 #################################################
@@ -46,7 +48,7 @@ else:
 data_store = {}
 
 
-def main(config, handlers, daemon=False, watchdog=False):
+def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False):
     """
     Enter a main loop, polling values from sources enabled in config
     """
@@ -183,6 +185,7 @@ def main(config, handlers, daemon=False, watchdog=False):
     }
 
     going = True
+    shutdown = False
     while going:
         # noinspection PyBroadException
         try:
@@ -259,6 +262,10 @@ def main(config, handlers, daemon=False, watchdog=False):
                     woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
                     woodward.setpoint = wc['setpoint']
 
+                if check_kill_switch():
+                    going = False
+                    shutdown = True
+
                 # Schedule next run
                 next_run[1.0] = now + 1.0
 
@@ -304,6 +311,10 @@ def main(config, handlers, daemon=False, watchdog=False):
                          % (str(exc_type), str(exc_value)))
             revive(threads, logger)
 
+    # After finish running
+    stop_threads(threads, logger)
+    if shutdown and power_off_enabled:
+        power_off()
     exit(0)
 
 
@@ -381,6 +392,21 @@ def update_gauges(fuel_gauge, battery_gauge):
         battery_charge = int(round((battery_charge - 259) * 0.2))
         battery_gauge.set_bar_level(battery_charge)
 
+
+kill_last = False
+kill_now = False
+
+
+def check_kill_switch():
+    global kill_now, kill_last
+    value = gpio.read(pins.OFF_SWITCH)
+    kill_last = kill_now
+    kill_now = value == gpio.HIGH  # TODO not sure whether this should be high or low
+    return kill_now and kill_last
+
+
+def power_off():
+    subprocess.call(["poweroff"])
 
 if __name__ == "__main__":
     sh = logging.StreamHandler()
