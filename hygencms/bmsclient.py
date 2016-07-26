@@ -50,6 +50,10 @@ class BmsClient(AsyncIOThread):
         self.last_string_status = ""
         self.last_module_status = ""
 
+        # Setup flags for fresh values
+        self._last_string_fresh = False
+        self._last_module_fresh = False
+
         self._cancelled = False
         self._logger.debug("Started BmsClient")
 
@@ -108,8 +112,10 @@ class BmsClient(AsyncIOThread):
                     pass
                 elif line[4] == 'S':
                     self.last_string_status = line
+                    self._last_string_fresh = True
                 elif line[4] == 'M':
                     self.last_module_status = line
+                    self._last_module_fresh = True
 
     @staticmethod
     def fletcher16(data):
@@ -149,9 +155,10 @@ class BmsClient(AsyncIOThread):
         Get the data
         """
         # If we have a last string
-        if self.last_string_status:
+        if self.last_string_status and self._last_string_fresh:
             charge = int(self.last_string_status[19:22])
             cur = int(self.last_string_status[34:39])
+            self._last_string_fresh = False
             return charge, cur
         else:
             return None, None
