@@ -12,6 +12,7 @@ import logging
 import signal
 import subprocess
 
+import daemon
 from daemon import pidfile
 
 from hygencms.config import get_configuration
@@ -40,7 +41,7 @@ else:
     config = get_configuration()
 
 # Run the shell script to setup IO pins
-subprocess.call(["bash", "setup_io.sh"])
+subprocess.call(["bash", "/home/hygen/HyGenCMS/setup_io.sh"])
 
 # create logger
 logger = logging.getLogger(__name__)
