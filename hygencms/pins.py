@@ -1,7 +1,7 @@
 """
 This file provides a key to pins using the official V3 CMS Schematic.
 
-Last updated to 2016-07-22 version.
+Last updated to 2016-07-26 version.
 """
 # DGND = P8_01
 # DGND = P8_02
@@ -21,7 +21,7 @@ AUX_START = "P8_15"
 CMS_WARN = "P8_16"
 AUX_STOP = "P8_17"
 CMS_FAULT = "P8_18"
-# P8_19
+OFF_SWITCH = "P8_19"
 # P8_20
 # P8_21
 # P8_22

@@ -46,8 +46,10 @@ config-pin P8_17 out
 # P8_18	7	gpio2[1]	CMS Fault
 config-pin P8_18 out
 
+# P8_19	7	gpio0[22]	OFF Switch
+config-pin P8_19 in
+
 # DEFAULTS
-# P8_19
 # P8_20	2	mmc1_cmd	Reserved for internal EMMC
 # P8_21	2	mmc1_clk	Reserved for internal EMMC
 # P8_22	1	mmc1_dat5	Reserved for internal EMMC
