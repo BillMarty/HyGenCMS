@@ -34,11 +34,35 @@ pins = {
     'P8_19': PwmPin(chip='48304000',
                     addr='48304200',
                     index=0),
+    'P8_34': PwmPin(chip='48302000',
+                    addr='48302200',
+                    index=1),
+    'P8_36': PwmPin(chip='48302000',
+                    addr='48302200',
+                    index=0),
+    'P8_45': PwmPin(chip='48304000',
+                    addr='48304200',
+                    index=0),
+    'P8_46': PwmPin(chip='48304000',
+                    addr='48304200',
+                    index=1),
+    'P9_14': PwmPin(chip='48302000',
+                    addr='48302200',
+                    index=0),
+    'P9_16': PwmPin(chip='48302000',
+                    addr='48302200',
+                    index=1),
     'P9_21': PwmPin(chip='48300000',
                     addr='48300200',
                     index=1,
                     name='OLD_WW_PWM',
                     description='[old] PWM signal to Woodward RPM setpoint'),
+    'P9_22': PwmPin(chip='48300000',
+                    addr='48300200',
+                    index=0),
+    'P9_24': PwmPin(chip='48304000',
+                    addr='48304100',
+                    index=2),
     'P9_29': PwmPin(chip="48300000",
                     addr='48300200',
                     index=1,
@@ -49,6 +73,9 @@ pins = {
                     index=0,
                     name='SOC_PWM',
                     description='State of Charge analog signal'),
+    'P9_42': PwmPin(chip='48300000',
+                    addr='48300100',
+                    index=0),
 }
 
 ocp_path = '/sys/devices/platform/ocp'
@@ -73,7 +100,7 @@ def start(key, duty_cycle=50.0, frequency=100000):
         raise RuntimeError("Could not find PWM subsystem")
 
     try:
-        addr_path = glob.glob(chip_path + '/*pwm')[0]
+        addr_path = glob.glob(chip_path + '/' + pin.addr + '.*')[0]
     except IndexError:
         raise RuntimeError("Could not find PWM address")
 
