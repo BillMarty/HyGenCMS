@@ -56,7 +56,7 @@ class WoodwardControl(AsyncIOThread):
         self.high_val = 50
         # }
 
-        self._logger.debug("Started Woodward controller")
+        self._logger.info("Started Woodward controller")
 
     # Output property automatically updates
     def get_output(self):

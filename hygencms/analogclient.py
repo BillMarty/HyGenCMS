@@ -49,8 +49,8 @@ class AnalogClient(AsyncIOThread):
         # Open the ADC
         ADC.setup()
 
-        # Log to debug that we've started
-        self._logger.debug("Started analogclient")
+        # Log to info that we've started
+        self._logger.info("Started analogclient")
 
     @staticmethod
     def check_config(aconfig):

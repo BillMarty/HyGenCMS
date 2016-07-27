@@ -55,7 +55,7 @@ class BmsClient(AsyncIOThread):
         self._last_module_fresh = False
 
         self._cancelled = False
-        self._logger.debug("Started BmsClient")
+        self._logger.info("Started BmsClient")
 
     def __del__(self):
         self._ser.close()
@@ -145,13 +145,6 @@ class BmsClient(AsyncIOThread):
     #########################################
     # Methods called from Main thread
     #########################################
-
-    def cancel(self):
-        """
-        Stop executing this thread
-        """
-        self._cancelled = True
-        self._logger.info('Stopping ' + str(self) + '...')
 
     def get_data(self):
         """

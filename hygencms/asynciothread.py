@@ -38,4 +38,4 @@ class AsyncIOThread(Thread):
 
     def cancel(self):
         self.cancelled = True
-        self._logger.debug("Stopping " + str(self) + "...")
+        self._logger.info("Stopping " + str(self) + "...")
