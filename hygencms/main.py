@@ -369,7 +369,7 @@ def update_gauges(fuel_gauge, battery_gauge):
         fuel = data_store[1027]  # Modbus fuel address
         assert(fuel is not None)
     except KeyError:
-        pass
+        fuel_gauge.set_bar_level(1)
     except AssertionError:
         fuel_gauge.set_bar_level(1)
     else:
@@ -382,9 +382,9 @@ def update_gauges(fuel_gauge, battery_gauge):
         # TODO maybe replace this with our analog value
         assert(battery_charge is not None)
     except KeyError:
-        pass
+        battery_gauge.set_bar_level(1)
     except AssertionError:
-        fuel_gauge.set_bar_level(1)
+        battery_gauge.set_bar_level(1)
     else:
         # Scale the range from 259 to 309 to 0-10
         battery_charge = int(round((battery_charge - 259) * 0.2))
