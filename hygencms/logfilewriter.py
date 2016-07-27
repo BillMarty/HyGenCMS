@@ -8,7 +8,7 @@ import os
 import sys
 import time
 from datetime import datetime
-from subprocess import check_call, CalledProcessError
+from subprocess import check_call, CalledProcessError, STDOUT
 
 from . import gpio
 from . import pins
@@ -175,13 +175,15 @@ class FileWriter(AsyncIOThread):
                         self._write_line(line)
 
                 # TODO Poll GPIOs in a separate thread
+                # If eject button pressed
                 if gpio.read(pins.USB_SW) == gpio.LOW:
                     drive = self.usb_plugged()
                     mounted = bool(drive)
+                    self._f.close()
                     tries = 0
                     while mounted and tries < 100:
                         try:
-                            check_call(["pumount", drive])
+                            check_call(["pumount", drive], stderr=STDOUT)
                         except CalledProcessError as e:
                             self._logger.critical("Could not unmount "
                                                   + drive
