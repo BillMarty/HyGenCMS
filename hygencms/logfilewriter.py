@@ -186,7 +186,7 @@ class FileWriter(AsyncIOThread):
                             self._logger.critical("Could not unmount "
                                                   + drive
                                                   + ". Failed with error "
-                                                  + str(e))
+                                                  + str(e.output))
                             tries += 1
                         else:
                             gpio.write(pins.USB_LED, gpio.HIGH)
