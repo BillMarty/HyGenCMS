@@ -54,7 +54,6 @@ class BmsClient(AsyncIOThread):
         self._last_string_fresh = False
         self._last_module_fresh = False
 
-        self._cancelled = False
         self._logger.info("Started BmsClient")
 
     def __del__(self):
@@ -80,7 +79,7 @@ class BmsClient(AsyncIOThread):
         Overloads Thread.run, continuously reads from the serial port.
         Updates self.lastline.
         """
-        while not self._cancelled:
+        while not self.cancelled:
             # noinspection PyBroadException
             try:
                 line = self._ser.readline()
