@@ -20,6 +20,24 @@ GAIN = 4
 OFFSET = 5
 PERIOD = 6
 
+# Mandatory values to read
+# See DeepSea_Modbus_manualGenComm.docx, 10.6
+FUEL_LEVEL = 1027  # section 10.6, address 3
+BATTERY_LEVEL = 1223  # section 10.6, address 199
+RPM = 1030  # section 10.6, address 6
+
+MANDATORY_ADDRESSES = {
+    FUEL_LEVEL,
+    BATTERY_LEVEL,
+    RPM,
+}
+
+MANDATORY_TEMPLATES = {
+    FUEL_LEVEL: ["Fuel level", '%', FUEL_LEVEL, 1, 1, 0, 60],
+    BATTERY_LEVEL: ["battery level", 'V', BATTERY_LEVEL, 1, 1.0, 0.0, 1.0],
+    RPM: ["Engine speed", 'RPM', RPM, 1, 1.0, 0.0, 0.1],
+}
+
 # List of addresses which hold signed values.
 # Ref: DeepSea_Modbus_manualGenComm
 SIGNED_ADDRESSES = {
@@ -188,7 +206,9 @@ class DeepSeaClient(AsyncIOThread):
             self._client.open()
 
         # Read and save measurement list
-        self._input_list = self.read_measurement_description(dconfig['mlistfile'])
+        measurement_list = self.read_measurement_description(dconfig['mlistfile'])
+        # Add mandatory measurements if they're not included
+        self._input_list = self.add_mandatory_measurements(measurement_list)
         # A list of last updated time
         self._data_store = data_store
         self._data_store.update({m[ADDRESS]: None for m in self._input_list})
@@ -226,6 +246,15 @@ class DeepSeaClient(AsyncIOThread):
                 exc_type, exc_value = sys.exc_info()[:2]
                 self._logger.error("%s raised in DeepSea thread: %s"
                                    % (str(exc_type), str(exc_value)))
+
+    @staticmethod
+    def add_mandatory_measurements(measurement_list):
+        addresses = set(map(lambda m: m[ADDRESS], measurement_list))
+        for address in MANDATORY_ADDRESSES:
+            if address not in addresses:
+                measurement_list.append(MANDATORY_TEMPLATES[address])
+
+        return measurement_list
 
     @staticmethod
     def check_config(config):
