@@ -35,18 +35,17 @@ class FileWriter(AsyncIOThread):
         super(FileWriter, self).__init__(handlers)
 
         # Specific config for the logger
-        FileWriter.check_config(config)
+        self.check_config(config)
 
-        self.directory = config['ldir']  # Relative directory on USB
+        self.relative_directory = config['ldir']  # Relative directory on USB
         self.log_directory = self.get_directory()
 
         self._queue = log_queue
         self._f = open(os.devnull, 'w')
         self._csv_header = csv_header
 
-        # self.eject_button = ""  # TODO fix this - this is bogus
+        self.eject_button = pins.USB_SW
         self._cancelled = False
-        self.drive = None
 
     def __del__(self):
         """
@@ -96,9 +95,9 @@ class FileWriter(AsyncIOThread):
         drive = self.usb_plugged()
 
         if drive is None:
-            return os.path.join('/home/hygen', self.directory)
+            return os.path.join('/home/hygen', self.relative_directory)
         else:
-            log_directory = os.path.join(drive, self.directory)
+            log_directory = os.path.join(drive, self.relative_directory)
 
         # Make any necessary paths
         try:
@@ -155,8 +154,6 @@ class FileWriter(AsyncIOThread):
         """
         prev_hour = datetime.now().hour - 1  # ensure starting file
 
-        # GPIO.add_event_detect(self.eject_button, GPIO.RISING)
-
         while not self._cancelled:
             # noinspection PyBroadException
             try:
@@ -179,15 +176,22 @@ class FileWriter(AsyncIOThread):
 
                 # TODO Poll GPIOs in a separate thread
                 if gpio.read(pins.USB_SW) == gpio.LOW:
-                    try:
-                        check_call(["pumount", self.drive])
-                    except CalledProcessError as e:
-                        self._logger.critical("Could not unmount "
-                                              + self.drive
-                                              + ". Failed with error code "
-                                              + str(e.returncode))
-                    else:
-                        gpio.write(pins.USB_LED, gpio.HIGH)
+                    drive = self.usb_plugged()
+                    mounted = bool(drive)
+                    tries = 0
+                    while mounted and tries < 100:
+                        try:
+                            check_call(["pumount", drive])
+                        except CalledProcessError as e:
+                            self._logger.critical("Could not unmount "
+                                                  + drive
+                                                  + ". Failed with error "
+                                                  + str(e))
+                            tries += 1
+                        else:
+                            gpio.write(pins.USB_LED, gpio.HIGH)
+                            mounted = False
+                        time.sleep(0.01)
 
                 if not os.path.exists(self.log_directory):
                     self._f.close()
