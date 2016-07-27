@@ -267,8 +267,10 @@ chmod +x cms
 
 To make the service start on boot, we create a service description file. Debian 8 just switched to a new init system called systemd. The init system is the mechanism which starts the Linux system. It is the first process to run on boot, and is responsible for starting all the other processes. Since it starts all other processes, it also is responsible for managing the other processes, and can ensure they continue to run. We will use this functionality to restart our Python program if it crashes.
 
-There is in the repository a `.service` file which provides a systemd service. We just need to load it up. This can be done using the `systemctl` command.
+The HyGenCMS repository contains two `.service` files which provide systemd services. We just need to load them up. This can be done using the `systemctl` command.
 
 ```bash
+cd
+sudo systemctl enable ~/HygenCMS/linux_setup/configure_outputs.service
 sudo systemctl enable ~/HyGenCMS/linux_setup/hygencms.service
 ```

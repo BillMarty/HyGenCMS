@@ -371,7 +371,7 @@ def update_gauges(fuel_gauge, battery_gauge):
     except KeyError:
         pass
     except AssertionError:
-        pass
+        fuel_gauge.set_bar_level(1)
     else:
         fuel /= 10  # Scale to 10
         fuel_gauge.set_bar_level(fuel)
@@ -384,7 +384,7 @@ def update_gauges(fuel_gauge, battery_gauge):
     except KeyError:
         pass
     except AssertionError:
-        pass
+        fuel_gauge.set_bar_level(1)
     else:
         # Scale the range from 259 to 309 to 0-10
         battery_charge = int(round((battery_charge - 259) * 0.2))
