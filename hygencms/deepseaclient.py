@@ -206,20 +206,26 @@ class DeepSeaClient(AsyncIOThread):
         Overloads Thread.run, runs and reads from the DeepSea.
         """
         while not self.cancelled:
-            for m in self._input_list:
-                key = m[ADDRESS]
-                t, last_time = monotonic(), self._last_updated[key]
-                if len(m) > PERIOD:
-                    period = m[PERIOD]
-                else:
-                    period = 1.0
+            # noinspection PyBroadException
+            try:
+                for m in self._input_list:
+                    key = m[ADDRESS]
+                    t, last_time = monotonic(), self._last_updated[key]
+                    if len(m) > PERIOD:
+                        period = m[PERIOD]
+                    else:
+                        period = 1.0
 
-                if t - last_time >= period:
-                    value = self.get_value(m)
-                    if value is not None:
-                        self._data_store[key] = value
-                        self._last_updated[key] = t
-            time.sleep(0.01)
+                    if t - last_time >= period:
+                        value = self.get_value(m)
+                        if value is not None:
+                            self._data_store[key] = value
+                            self._last_updated[key] = t
+                time.sleep(0.01)
+            except Exception:  # Log exceptions but don't exit
+                exc_type, exc_value = sys.exc_info()[:2]
+                self._logger.error("%s raised in DeepSea thread: %s"
+                                   % (str(exc_type), str(exc_value)))
 
     @staticmethod
     def check_config(config):

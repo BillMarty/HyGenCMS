@@ -305,11 +305,10 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             going = False
             stop_threads(threads, logger)
 
-        except Exception:
+        except Exception:  # Log any other exceptions
             exc_type, exc_value = sys.exc_info()[:2]
-            logger.error("%s raised in main loop: %s"
+            logger.error("%s raised: %s"
                          % (str(exc_type), str(exc_value)))
-            revive(threads, logger)
 
     # After finish running
     stop_threads(threads, logger)

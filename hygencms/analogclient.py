@@ -19,7 +19,6 @@ OFFSET = 4
 
 
 class AnalogClient(AsyncIOThread):
-
     def __init__(self, aconfig, handlers, data_store):
         """
         Set up a thread to read in analog values
@@ -82,36 +81,42 @@ class AnalogClient(AsyncIOThread):
         Overloads Thread.run, runs and reads analog inputs
         """
         while not self.cancelled:
-            t = monotonic.monotonic()
-            # If we've passed the ideal time, get the value
-            if t >= self.last_updated + self.mfrequency:
-                for m in self._input_list:
-                    key = m[PIN]
-                    sum_, n = self.partial_values[key]
+            # noinspection PyBroadException
+            try:
+                t = monotonic.monotonic()
+                # If we've passed the ideal time, get the value
+                if t >= self.last_updated + self.mfrequency:
+                    for m in self._input_list:
+                        key = m[PIN]
+                        sum_, n = self.partial_values[key]
 
-                    if n >= self.averages:
-                        average = sum_ / (n * 1000.)
-                        self.data_store[key] = average * m[GAIN] + m[OFFSET]
-                        sum_, n = 0., 0.
+                        if n >= self.averages:
+                            average = sum_ / (n * 1000.)
+                            self.data_store[key] = average * m[GAIN] + m[OFFSET]
+                            sum_, n = 0., 0.
 
-                    try:
-                        sum_, n = sum_ + ADC.read_raw(m[PIN]), n + 1
-                    except RuntimeError:  # Shouldn't ever happen
-                        exc_type, exc_value = sys.exc_info()[:2]
-                        self._logger.error("ADC reading error: %s %s"
-                                           % (exc_type, exc_value))
-                    except ValueError:  # Invalid AIN or pin name
-                        exc_type, exc_value = sys.exc_info()[:2]
-                        self._logger.error("Invalid AIN or pin name: %s %s"
-                                           % (exc_type, exc_value))
-                    except IOError:  # File reading error
-                        exc_type, exc_value = sys.exc_info()[:2]
-                        self._logger.error("%s %s", exc_type, exc_value)
+                        try:
+                            sum_, n = sum_ + ADC.read_raw(m[PIN]), n + 1
+                        except RuntimeError:  # Shouldn't ever happen
+                            exc_type, exc_value = sys.exc_info()[:2]
+                            self._logger.error("ADC reading error: %s %s"
+                                               % (exc_type, exc_value))
+                        except ValueError:  # Invalid AIN or pin name
+                            exc_type, exc_value = sys.exc_info()[:2]
+                            self._logger.error("Invalid AIN or pin name: %s %s"
+                                               % (exc_type, exc_value))
+                        except IOError:  # File reading error
+                            exc_type, exc_value = sys.exc_info()[:2]
+                            self._logger.error("%s %s", exc_type, exc_value)
 
-                    self.partial_values[key] = sum_, n
-                self.last_updated = t
+                        self.partial_values[key] = sum_, n
+                    self.last_updated = t
 
-            time.sleep(0.01)
+                time.sleep(0.01)
+            except Exception:
+                exc_type, exc_value = sys.exc_info()[:2]
+                self._logger.error("%s raised: %s"
+                                   % (str(exc_type), str(exc_value)))
 
     ###################################
     # Methods called from Main Thread

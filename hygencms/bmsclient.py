@@ -1,3 +1,5 @@
+import sys
+
 import serial
 
 from .asynciothread import AsyncIOThread
@@ -5,7 +7,6 @@ from .utils import PY3
 
 
 class BmsClient(AsyncIOThread):
-
     """
     This class specifies the specifics for the Becket battery
     management system to communicate asynchronously. The get_data and
@@ -81,10 +82,15 @@ class BmsClient(AsyncIOThread):
         Updates self.lastline.
         """
         while not self._cancelled:
+            # noinspection PyBroadException
             try:
                 line = self._ser.readline()
             except serial.SerialException:
                 self._logger.warning("BMS not connected")
+            except Exception:
+                exc_type, exc_value = sys.exc_info()[:2]
+                self._logger.error("%s raised: %s"
+                                   % (str(exc_type), str(exc_value)))
             else:
                 # If the checksum is wrong, skip it
                 try:

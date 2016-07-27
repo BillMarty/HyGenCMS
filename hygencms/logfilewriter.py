@@ -152,40 +152,46 @@ class FileWriter(AsyncIOThread):
         # GPIO.add_event_detect(self.eject_button, GPIO.RISING)
 
         while not self._cancelled:
-            hour = datetime.now().hour
-            if prev_hour != hour:
-                self._f.close()
-                self._f = self._get_new_logfile()
-                prev_hour = hour
-                self._write_line(self._csv_header)
+            # noinspection PyBroadException
+            try:
+                hour = datetime.now().hour
+                if prev_hour != hour:
+                    self._f.close()
+                    self._f = self._get_new_logfile()
+                    prev_hour = hour
+                    self._write_line(self._csv_header)
 
-            # Get lines to print
-            more_items = True
-            while more_items:
-                try:
-                    line = self._queue.get(False)
-                except queue.Empty:
-                    more_items = False
-                else:
-                    self._write_line(line)
+                # Get lines to print
+                more_items = True
+                while more_items:
+                    try:
+                        line = self._queue.get(False)
+                    except queue.Empty:
+                        more_items = False
+                    else:
+                        self._write_line(line)
 
-            # Reading the GPIO event detected flag resets it automatically
-            # See Adafruit_BBIO/sources/event_gpio.c:585
-            # if GPIO.event_detected(self.eject_button):
-            #     try:
-            #         check_call(["pumount", self.drive])
-            #     except CalledProcessError as e:
-            #         self._logger.critical("Could not unmount "
-            #                               + self.drive
-            #                               + ". Failed with error code "
-            #                               + str(e.returncode))
+                # Reading the GPIO event detected flag resets it automatically
+                # See Adafruit_BBIO/sources/event_gpio.c:585
+                # if GPIO.event_detected(self.eject_button):
+                #     try:
+                #         check_call(["pumount", self.drive])
+                #     except CalledProcessError as e:
+                #         self._logger.critical("Could not unmount "
+                #                               + self.drive
+                #                               + ". Failed with error code "
+                #                               + str(e.returncode))
 
-            if not os.path.exists(self.log_directory):
-                self._f.close()
-                self._f = self._get_new_logfile()
-                self._write_line(self._csv_header)
+                if not os.path.exists(self.log_directory):
+                    self._f.close()
+                    self._f = self._get_new_logfile()
+                    self._write_line(self._csv_header)
 
-            time.sleep(0.1)
+                time.sleep(0.1)
+            except Exception:  # Log any other exception
+                exc_type, exc_value = sys.exc_info()[:2]
+                self._logger.error("%s raised: %s"
+                                   % (str(exc_type), str(exc_value)))
 
     def cancel(self):
         """

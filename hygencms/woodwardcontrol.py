@@ -2,6 +2,7 @@
 Implement PID control for the Woodward
 """
 
+import sys
 import time
 
 import monotonic
@@ -222,21 +223,34 @@ class WoodwardControl(AsyncIOThread):
             # If we're in step mode, we do a square wave
             half_period = 0.5 * self.period
             while not self.cancelled:
-                # Period
-                if i >= half_period:
-                    if self.on:
-                        self.output = self.low_val
-                    else:
-                        self.output = self.high_val
-                    self.on = not self.on
-                    i = 0
-                i += 1
-                time.sleep(1.0)
+                # noinspection PyBroadException
+                try:
+                    # Period
+                    if i >= half_period:
+                        if self.on:
+                            self.output = self.low_val
+                        else:
+                            self.output = self.high_val
+                        self.on = not self.on
+                        i = 0
+                    i += 1
+                    time.sleep(1.0)
+                except Exception:
+                    exc_type, exc_value = sys.exc_info()[:2]
+                    self._logger.error("%s raised: %s"
+                                       % (str(exc_type), str(exc_value)))
+
         elif self.mode == 'pid':
             while not self.cancelled:
-                # output property automatically adjusts PWM output
-                self.output = self.compute()
-                time.sleep(0.1)  # avoid tight looping
+                # noinspection PyBroadException
+                try:
+                    # output property automatically adjusts PWM output
+                    self.output = self.compute()
+                    time.sleep(0.1)  # avoid tight looping
+                except Exception:
+                    exc_type, exc_value = sys.exc_info()[:2]
+                    self._logger.error("%s raised: %s"
+                                       % (str(exc_type), str(exc_value)))
 
     ##########################
     # Methods from Main thread
