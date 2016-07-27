@@ -12,8 +12,7 @@ import logging
 import signal
 import subprocess
 
-import daemon
-from daemon import pidfile
+from daemon import pidfile, DaemonContext
 
 from hygencms.config import get_configuration
 from hygencms.main import main
@@ -67,7 +66,7 @@ for h in handlers:
 
 if args.daemon:
     # Setup daemon context
-    context = daemon.DaemonContext(
+    context = DaemonContext(
         working_directory='/',
         pidfile=pidfile.PIDLockFile('/var/run/hygencms.pid'),
         files_preserve=[
