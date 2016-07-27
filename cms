@@ -44,7 +44,7 @@ subprocess.call(["bash", "/home/hygen/HyGenCMS/setup_io.sh"])
 
 # create logger
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.DEBUG)
 
 # create stream handler to stderr and set level to debug
 sh = logging.StreamHandler()  # default is sys.stderr
@@ -60,7 +60,6 @@ formatter = logging.Formatter(
 handlers = [sh, fh]
 # add sh to logger
 for h in handlers:
-    h.setLevel(logging.ERROR)
     h.setFormatter(formatter)
     logger.addHandler(h)
 
