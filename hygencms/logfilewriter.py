@@ -180,7 +180,7 @@ class FileWriter(AsyncIOThread):
                 # TODO Poll GPIOs in a separate thread
                 if gpio.read(pins.USB_SW) == gpio.LOW:
                     try:
-                        check_call(["pumount", self.drive])
+                        check_call(["pumount", self.usb_plugged()])
                     except CalledProcessError as e:
                         self._logger.critical("Could not unmount "
                                               + self.drive

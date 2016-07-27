@@ -5,11 +5,11 @@ Requires=configure_outputs.service
 [Service]
 Type=simple
 PIDFile=/var/run/hygencms.pid
-ExecStart=/home/hygen/HyGenCMS/cms --daemon --watchdog
+ExecStart=/home/hygen/HyGenCMS/cms --daemon
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 RestartSec=10
-Restart=always
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
