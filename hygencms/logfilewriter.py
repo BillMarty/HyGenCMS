@@ -9,6 +9,7 @@ import sys
 import time
 from datetime import datetime
 
+from . import utils
 from .asynciothread import AsyncIOThread
 
 if sys.version_info[0] == 3:
@@ -188,10 +189,8 @@ class FileWriter(AsyncIOThread):
                     self._write_line(self._csv_header)
 
                 time.sleep(0.1)
-            except Exception:  # Log any other exception
-                exc_type, exc_value = sys.exc_info()[:2]
-                self._logger.error("%s raised: %s"
-                                   % (str(exc_type), str(exc_value)))
+            except Exception as e:
+                utils.log_exception(self._logger, e)
 
     def cancel(self):
         """

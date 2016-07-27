@@ -1,7 +1,6 @@
-import sys
-
 import serial
 
+from . import utils
 from .asynciothread import AsyncIOThread
 from .utils import PY3
 
@@ -87,10 +86,8 @@ class BmsClient(AsyncIOThread):
                 line = self._ser.readline()
             except serial.SerialException:
                 self._logger.warning("BMS not connected")
-            except Exception:
-                exc_type, exc_value = sys.exc_info()[:2]
-                self._logger.error("%s raised: %s"
-                                   % (str(exc_type), str(exc_value)))
+            except Exception as e:
+                utils.log_exception(self._logger, e)
             else:
                 # If the checksum is wrong, skip it
                 try:

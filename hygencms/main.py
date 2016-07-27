@@ -26,6 +26,7 @@ from . import bmsclient
 from . import gpio
 from . import logfilewriter
 from . import pins
+from . import utils
 from . import woodwardcontrol
 from .config import get_configuration
 from .deepseaclient import DeepSeaClient
@@ -305,10 +306,8 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             going = False
             stop_threads(threads, logger)
 
-        except Exception:  # Log any other exceptions
-            exc_type, exc_value = sys.exc_info()[:2]
-            logger.error("%s raised: %s"
-                         % (str(exc_type), str(exc_value)))
+        except Exception as e:  # Log any other exceptions
+            utils.log_exception(logger, e)
 
     # After finish running
     stop_threads(threads, logger)

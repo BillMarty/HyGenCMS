@@ -2,13 +2,13 @@
 A module to asynchronously read in values from the ADC inputs.
 All values are read in at the same frequency.
 """
-
 import sys
 import time
 
 import Adafruit_BBIO.ADC as ADC
 import monotonic
 
+from . import utils
 from .asynciothread import AsyncIOThread
 
 NAME = 0
@@ -113,10 +113,8 @@ class AnalogClient(AsyncIOThread):
                     self.last_updated = t
 
                 time.sleep(0.01)
-            except Exception:
-                exc_type, exc_value = sys.exc_info()[:2]
-                self._logger.error("%s raised: %s"
-                                   % (str(exc_type), str(exc_value)))
+            except Exception as e:
+                utils.log_exception(self._logger, e)
 
     ###################################
     # Methods called from Main Thread

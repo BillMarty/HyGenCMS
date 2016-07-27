@@ -1,3 +1,4 @@
+import os
 import sys
 from contextlib import contextmanager
 
@@ -53,3 +54,14 @@ def ignore(*exceptions):
         yield
     except exceptions:
         pass
+
+
+def log_exception(logger, e):
+    tb = sys.last_traceback
+    logger.error("%s raised: %s (%s:%d)"
+                 % (e.__class__.__name__,
+                    str(e),
+                    os.path.basename(
+                        tb.tb_frame.f_code.co_filename),
+                    tb.tb_lineno))
+    del tb

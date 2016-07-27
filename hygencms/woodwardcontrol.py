@@ -1,13 +1,12 @@
 """
 Implement PID control for the Woodward
 """
-
-import sys
 import time
 
 import monotonic
 
 from . import pwm
+from . import utils
 from .asynciothread import AsyncIOThread
 
 DIRECT = 0
@@ -235,10 +234,8 @@ class WoodwardControl(AsyncIOThread):
                         i = 0
                     i += 1
                     time.sleep(1.0)
-                except Exception:
-                    exc_type, exc_value = sys.exc_info()[:2]
-                    self._logger.error("%s raised: %s"
-                                       % (str(exc_type), str(exc_value)))
+                except Exception as e:
+                    utils.log_exception(self._logger, e)
 
         elif self.mode == 'pid':
             while not self.cancelled:
@@ -247,10 +244,8 @@ class WoodwardControl(AsyncIOThread):
                     # output property automatically adjusts PWM output
                     self.output = self.compute()
                     time.sleep(0.1)  # avoid tight looping
-                except Exception:
-                    exc_type, exc_value = sys.exc_info()[:2]
-                    self._logger.error("%s raised: %s"
-                                       % (str(exc_type), str(exc_value)))
+                except Exception as e:
+                    utils.log_exception(self._logger, e)
 
     ##########################
     # Methods from Main thread
