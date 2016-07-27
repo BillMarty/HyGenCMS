@@ -1,5 +1,6 @@
 [Unit]
 Description=Hygen Communication Management System service
+Requires=configure_outputs.service
 
 [Service]
 Type=forking

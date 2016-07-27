@@ -1,0 +1,11 @@
+[Unit]
+Description=Setup output and input pins
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/bash /home/hygen/HyGenCMS/setup_io.sh
+
+[Install]
+WantedBy=multi-user.target
+Alias=hygenlogger.service

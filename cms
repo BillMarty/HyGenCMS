@@ -10,7 +10,6 @@ including PID files, start / stop, and context management.
 import argparse
 import logging
 import signal
-import subprocess
 
 from daemon import pidfile, DaemonContext
 
@@ -38,9 +37,6 @@ if args.config:
     config = get_configuration(from_console=True)
 else:
     config = get_configuration()
-
-# Run the shell script to setup IO pins
-subprocess.call(["bash", "/home/hygen/HyGenCMS/setup_io.sh"])
 
 # create logger
 logger = logging.getLogger(__name__)
