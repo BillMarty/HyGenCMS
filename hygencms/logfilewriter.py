@@ -8,7 +8,10 @@ import os
 import sys
 import time
 from datetime import datetime
+from subprocess import check_call, CalledProcessError
 
+from . import gpio
+from . import pins
 from . import utils
 from .asynciothread import AsyncIOThread
 
@@ -137,10 +140,12 @@ class FileWriter(AsyncIOThread):
         Write a line to the currently open file, ending in a single new-line.
         """
         try:
+            gpio.write(pins.DISK_ACT_LED, gpio.HIGH)
             if line[-1] == '\n':
                 self._f.write(line)
             else:
                 self._f.write(line + '\n')
+            gpio.write(pins.DISK_ACT_LED, gpio.LOW)
         except (IOError, OSError):
             self._logger.error("Could not write to log file")
 
@@ -172,16 +177,17 @@ class FileWriter(AsyncIOThread):
                     else:
                         self._write_line(line)
 
-                # Reading the GPIO event detected flag resets it automatically
-                # See Adafruit_BBIO/sources/event_gpio.c:585
-                # if GPIO.event_detected(self.eject_button):
-                #     try:
-                #         check_call(["pumount", self.drive])
-                #     except CalledProcessError as e:
-                #         self._logger.critical("Could not unmount "
-                #                               + self.drive
-                #                               + ". Failed with error code "
-                #                               + str(e.returncode))
+                # TODO Poll GPIOs in a separate thread
+                if gpio.read(pins.USB_SW) == gpio.LOW:
+                    try:
+                        check_call(["pumount", self.drive])
+                    except CalledProcessError as e:
+                        self._logger.critical("Could not unmount "
+                                              + self.drive
+                                              + ". Failed with error code "
+                                              + str(e.returncode))
+                    else:
+                        gpio.write(pins.USB_LED, gpio.HIGH)
 
                 if not os.path.exists(self.log_directory):
                     self._f.close()
