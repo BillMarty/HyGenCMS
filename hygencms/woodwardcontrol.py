@@ -2,6 +2,7 @@
 Implement PID control for the Woodward
 """
 import time
+
 import monotonic
 
 from . import pwm
@@ -158,6 +159,10 @@ class WoodwardControl(AsyncIOThread):
         if new_auto and not self.in_auto:
             self.initialize_pid()
         self.in_auto = new_auto
+        if new_auto:
+            self._logger.info('Entering auto mode')
+        else:
+            self._logger.info('Exiting auto mode')
 
     def initialize_pid(self):
         """
