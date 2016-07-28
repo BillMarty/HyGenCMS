@@ -2,7 +2,6 @@
 Implement PID control for the Woodward
 """
 import time
-
 import monotonic
 
 from . import pwm
