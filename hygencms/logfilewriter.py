@@ -106,11 +106,12 @@ class FileWriter(AsyncIOThread):
                     d = self.usb_plugged()
 
                     # If we've unplugged it, turn off light
-                    if not d and bool(d) != self.drive_mounted:
+                    if not d and self.drive_mounted:
                         # Reset safe to remove light
                         gpio.write(pins.USB_LED, gpio.LOW)
+                        self.drive_mounted = bool(d)
 
-                    if d and bool(d) != self.drive_mounted:
+                    if d and not self.drive_mounted:
                         # If USB has changed, get a new logfile
                         # Get new file (presumably on USB)
                         self._f.close()
