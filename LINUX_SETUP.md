@@ -111,9 +111,10 @@ Also change this:
 PermitEmptyPasswords no
 ```
 
-If you want, you can also setup a banner to show when logging in. This can be done with the following two steps:
+If you want, you can also setup a banner to show when logging in via SSH. This can be done with the following two steps:
 
 ```
+# /etc/ssh/sshd_config
 Banner /etc/banner
 ```
 
