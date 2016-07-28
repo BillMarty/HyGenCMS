@@ -93,6 +93,7 @@ class FileWriter(AsyncIOThread):
                 if now >= next_run[0.5]:
                     # Check if eject button is pressed
                     if gpio.read(pins.USB_SW) == gpio.LOW:
+                        # If eject button pressed, close file and unmount
                         self.unmount_usb()
                         gpio.write(pins.USB_LED, gpio.HIGH)
 
@@ -141,12 +142,6 @@ class FileWriter(AsyncIOThread):
                     next_run[60.0] = now + 60.0
 
                 # TODO Poll GPIOs in a separate thread
-                # If eject button pressed, close file and unmount
-
-                if not os.path.exists(self.log_directory):
-                    self._f.close()
-                    self._f = self._get_new_logfile()
-                    self._write_line(self._csv_header)
 
                 time.sleep(0.1)
             except Exception as e:
@@ -240,7 +235,7 @@ class FileWriter(AsyncIOThread):
             i += 1
 
         file_path = os.path.join(
-            self.log_directory,
+            directory,
             hour + "_run%d.csv" % i)
 
         # Try opening the file, else open the null file

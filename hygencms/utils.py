@@ -57,11 +57,16 @@ def ignore(*exceptions):
 
 
 def log_exception(logger, e):
-    tb = sys.last_traceback
-    logger.error("%s raised: %s (%s:%d)"
-                 % (e.__class__.__name__,
-                    str(e),
-                    os.path.basename(
-                        tb.tb_frame.f_code.co_filename),
-                    tb.tb_lineno))
-    del tb
+    tb = sys.exc_info()[-1]
+    if tb is not None:
+        logger.error("%s raised: %s (%s:%d)"
+                     % (e.__class__.__name__,
+                        str(e),
+                        os.path.basename(
+                            tb.tb_frame.f_code.co_filename),
+                        tb.tb_lineno))
+        del tb
+    else:
+        logger.error("%s raised: %s"
+                     % (e.__class__.__name__,
+                        str(e)))
