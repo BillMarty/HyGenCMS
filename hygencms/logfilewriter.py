@@ -104,10 +104,14 @@ class FileWriter(AsyncIOThread):
                 if now >= next_run[1.0]:
                     # Check whether USB is mounted
                     d = self.usb_plugged()
-                    # If USB has changed, get a new logfile
-                    if d and bool(d) != self.drive_mounted:
+
+                    # If we've unplugged it, turn off light
+                    if not d and bool(d) != self.drive_mounted:
                         # Reset safe to remove light
                         gpio.write(pins.USB_LED, gpio.LOW)
+
+                    if d and bool(d) != self.drive_mounted:
+                        # If USB has changed, get a new logfile
                         # Get new file (presumably on USB)
                         self._f.close()
                         self._f = self._get_new_logfile()
@@ -252,11 +256,13 @@ class FileWriter(AsyncIOThread):
         Write a line to the currently open file, ending in a single new-line.
         """
         try:
-            gpio.write(pins.DISK_ACT_LED, gpio.HIGH)
+            if self.drive_mounted:
+                gpio.write(pins.DISK_ACT_LED, gpio.HIGH)
             if line[-1] == '\n':
                 self._f.write(line)
             else:
                 self._f.write(line + '\n')
-            gpio.write(pins.DISK_ACT_LED, gpio.LOW)
+            if self.drive_mounted:
+                gpio.write(pins.DISK_ACT_LED, gpio.LOW)
         except (IOError, OSError):
             self._logger.error("Could not write to log file")
