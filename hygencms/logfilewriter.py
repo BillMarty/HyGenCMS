@@ -50,6 +50,59 @@ class FileWriter(AsyncIOThread):
 
         self.drive_mounted = bool(self.usb_plugged())
 
+        self._safe_to_remove = None
+        self._usb_activity = None
+
+    ########################################################
+    # Properties
+    ########################################################
+
+    @property
+    def safe_to_remove(self):
+        """Safe to remove LED"""
+        return self._safe_to_remove
+
+    @safe_to_remove.setter
+    def safe_to_remove(self, value):
+        if value:
+            gpio.write(pins.USB_LED, gpio.HIGH)
+            self._safe_to_remove = True
+        else:
+            gpio.write(pins.USB_LED, gpio.LOW)
+            self._safe_to_remove = False
+
+    @safe_to_remove.deleter
+    def safe_to_remove(self):
+        gpio.write(pins.USB_LED, gpio.LOW)
+        del self._safe_to_remove
+
+    @property
+    def usb_activity(self):
+        """USB Activity LED"""
+        return self._usb_activity
+
+    @usb_activity.setter
+    def usb_activity(self, value):
+        if value:
+            gpio.write(pins.DISK_ACT_LED, gpio.HIGH)
+            self._usb_activity = True
+        else:
+            gpio.write(pins.DISK_ACT_LED, gpio.LOW)
+            self._usb_activity = False
+
+    @usb_activity.getter
+    def usb_activity(self):
+        return self._usb_activity
+
+    @usb_activity.deleter
+    def usb_activity(self):
+        gpio.write(pins.DISK_ACT_LED, gpio.LOW)
+        del self._usb_activity
+
+    #######################################################
+    # Methods
+    #######################################################
+
     def __del__(self):
         """
         Close the file object on object deletion.
@@ -81,6 +134,7 @@ class FileWriter(AsyncIOThread):
         next_run = {
             0.5: 0,
             1.0: 0,
+            10.0: 0,
             60.0: 0,
         }
         prev_hour = -1  # Always start a new file to start
@@ -95,7 +149,6 @@ class FileWriter(AsyncIOThread):
                     if gpio.read(pins.USB_SW) == gpio.LOW:
                         # If eject button pressed, close file and unmount
                         self.unmount_usb()
-                        gpio.write(pins.USB_LED, gpio.HIGH)
 
                     # Schedule next run
                     next_run[0.5] = now + 0.5
@@ -106,10 +159,10 @@ class FileWriter(AsyncIOThread):
                     d = self.usb_plugged()
 
                     # If we've unplugged it, turn off light
-                    if not d and self.drive_mounted:
+                    if not d and self.safe_to_remove:
                         # Reset safe to remove light
-                        gpio.write(pins.USB_LED, gpio.LOW)
-                        self.drive_mounted = bool(d)
+                        self.safe_to_remove = False
+                        self.drive_mounted = False
 
                     if d and not self.drive_mounted:
                         # If USB has changed, get a new logfile
@@ -131,6 +184,15 @@ class FileWriter(AsyncIOThread):
 
                     # Schedule next run
                     next_run[1.0] = now + 1.0
+
+                # Every 10 seconds
+                if now >= next_run[10.0]:
+                    # Disable the safe-to-remove light if the drive is out
+                    if self.safe_to_remove:
+                        if self.drive_present():
+                            pass  # TODO remount the drive
+                        else:
+                            self.safe_to_remove = False
 
                 # Every minute
                 if now >= next_run[60.0]:
@@ -198,7 +260,7 @@ class FileWriter(AsyncIOThread):
                                       + str(e.output))
                 tries += 1
             else:
-                gpio.write(pins.USB_LED, gpio.HIGH)
+                self.safe_to_remove = True
                 self.drive_mounted = False
             time.sleep(0.01)
         self._f = self._get_new_logfile()
@@ -258,12 +320,26 @@ class FileWriter(AsyncIOThread):
         """
         try:
             if self.drive_mounted:
-                gpio.write(pins.DISK_ACT_LED, gpio.HIGH)
+                self.usb_activity = True
             if line[-1] == '\n':
                 self._f.write(line)
             else:
                 self._f.write(line + '\n')
             if self.drive_mounted:
-                gpio.write(pins.DISK_ACT_LED, gpio.LOW)
+                self.usb_activity = False
         except (IOError, OSError):
             self._logger.error("Could not write to log file")
+
+    def drive_present(self):
+        """Return whether a USB device is plugged in"""
+        try:
+            output = str(subprocess.check_output(['ls', '/dev']))
+        except CalledProcessError:
+            self._logger.debug("lsblk encountered an error.")
+            return False
+        else:
+            position = output.find('sd')
+            if position < 0:
+                return False
+            else:
+                return True
