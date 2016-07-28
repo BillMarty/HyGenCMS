@@ -23,6 +23,7 @@ import serial
 
 from . import analogclient
 from . import bmsclient
+from . import deepseaclient
 from . import gpio
 from . import logfilewriter
 from . import pins
@@ -366,7 +367,7 @@ def update_gauges(fuel_gauge, battery_gauge):
     # Update interface gauges
     # See DeepSea_Modbus_manualGenComm.docx, 10.6
     try:
-        fuel = data_store[1027]  # Modbus fuel address
+        fuel = data_store[deepseaclient.FUEL_LEVEL]
         assert(fuel is not None)
     except KeyError:
         fuel_gauge.set_bar_level(1)
@@ -378,7 +379,7 @@ def update_gauges(fuel_gauge, battery_gauge):
 
     # See DeepSea_Modbus_manualGenComm.docx, 10.6 (#199)
     try:
-        battery_charge = data_store[1223]  # Modbus DC voltage address
+        battery_charge = data_store[deepseaclient.BATTERY_LEVEL]
         # TODO maybe replace this with our analog value
         assert(battery_charge is not None)
     except KeyError:
