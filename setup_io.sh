@@ -97,7 +97,7 @@ config-pin P9_11 uart
 config-pin P9_12 out
 
 # P9_13	6	uart4_txd_mux2	BMS serial tx line
-config-pin P9_13 out
+config-pin P9_13 uart
 
 # P9_14
 # default
