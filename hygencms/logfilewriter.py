@@ -195,6 +195,9 @@ class FileWriter(AsyncIOThread):
                         else:
                             self.safe_to_remove = False
 
+                    # Schedule next run
+                    next_run[10.0] = now + 10.0
+
                 # Every minute
                 if now >= next_run[60.0]:
                     # Check to see whether it's a new hour
@@ -247,7 +250,7 @@ class FileWriter(AsyncIOThread):
         else:
             position = output.rfind('sd')
             if position >= 0:
-                # Get the device file
+                # Get the device fil
                 return '/dev/' + output[position:].split()[0]
             else:
                 return False
