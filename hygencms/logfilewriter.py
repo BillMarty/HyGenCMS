@@ -48,7 +48,7 @@ class FileWriter(AsyncIOThread):
         self._f = open(os.devnull, 'w')
         self._csv_header = csv_header
 
-        self.drive_mounted = bool(self.usb_plugged())
+        self.drive_mounted = bool(self.usb_mounted())
 
         self._safe_to_remove = None
         self._usb_activity = None
@@ -155,24 +155,25 @@ class FileWriter(AsyncIOThread):
 
                 # Every second
                 if now >= next_run[1.0]:
-                    # Check whether USB is mounted
-                    d = self.usb_plugged()
+                    # Check whether USB is plugged in, and mounted
+                    device = self.usb_plugged()
+                    drive = self.usb_mounted()
 
                     # If we've unplugged it, turn off light
-                    if not d and self.safe_to_remove:
+                    if not device and self.safe_to_remove:
                         # Reset safe to remove light
                         self.safe_to_remove = False
                         self.drive_mounted = False
 
-                    if d and not self.drive_mounted:
-                        # If USB has changed, get a new logfile
+                    # If we've mounted a new drive
+                    if drive and not self.drive_mounted:
                         # Get new file (presumably on USB)
                         self._f.close()
                         self._f = self._get_new_logfile()
                         self._write_line(self._csv_header)
-                        self.drive_mounted = bool(d)
+                        self.drive_mounted = bool(drive)
 
-                    # Get lines to print
+                    # Print out lines
                     more_items = True
                     while more_items:
                         try:
@@ -189,7 +190,7 @@ class FileWriter(AsyncIOThread):
                 if now >= next_run[10.0]:
                     # Disable the safe-to-remove light if the drive is out
                     if self.safe_to_remove:
-                        if self.drive_present():
+                        if self.usb_plugged():
                             pass  # TODO remount the drive
                         else:
                             self.safe_to_remove = False
@@ -210,14 +211,14 @@ class FileWriter(AsyncIOThread):
 
                 # TODO Poll GPIOs in a separate thread
 
-                time.sleep(0.1)
+                time.sleep(0.01)
             except Exception as e:
                 utils.log_exception(self._logger, e)
 
     @staticmethod
-    def usb_plugged():
+    def usb_mounted():
         """
-        Return the path to whatever drive is plugged in, or None
+        Return the path to whatever drive is mounted, or None
         :return: '/media/[drive]' or None
         """
         # Check for USB directory
@@ -236,6 +237,21 @@ class FileWriter(AsyncIOThread):
 
         return path
 
+    def usb_plugged(self):
+        """Return True if a USB device is plugged in"""
+        try:
+            output = str(subprocess.check_output(['ls', '/dev']))
+        except CalledProcessError:
+            self._logger.debug("Error in ls.")
+            return False
+        else:
+            position = output.rfind('sd')
+            if position >= 0:
+                # Get the device file
+                return '/dev/' + output[position:].split()[0]
+            else:
+                return False
+
     def unmount_usb(self):
         """
         Unmount the currently mounted USB. Close the current file
@@ -245,7 +261,7 @@ class FileWriter(AsyncIOThread):
         if not self.drive_mounted:
             return
         else:
-            drive = self.usb_plugged()
+            drive = self.usb_mounted()
 
         # Close file and unmount
         self._f.close()
@@ -269,7 +285,7 @@ class FileWriter(AsyncIOThread):
         """
         Get the directory to store logs to.
         """
-        drive = self.usb_plugged()
+        drive = self.usb_mounted()
 
         if drive is None:
             return os.path.join(base_dir, self.relative_directory)
@@ -329,17 +345,3 @@ class FileWriter(AsyncIOThread):
                 self.usb_activity = False
         except (IOError, OSError):
             self._logger.error("Could not write to log file")
-
-    def drive_present(self):
-        """Return whether a USB device is plugged in"""
-        try:
-            output = str(subprocess.check_output(['ls', '/dev']))
-        except CalledProcessError:
-            self._logger.debug("lsblk encountered an error.")
-            return False
-        else:
-            position = output.find('sd')
-            if position < 0:
-                return False
-            else:
-                return True
