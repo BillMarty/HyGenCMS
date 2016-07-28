@@ -1,7 +1,7 @@
 Check out the Expansion Module MODBUS Addresses,,,,,
 name,units,addr,len,gain,offset,[period (optional)]
 ds_time,sec,1792,2,1,0
-ds_rpm,RPM,1030,1,1,0,0.1
+ds_rpm,RPM,0,1,1,0,0.1
 ds_300v_volt,VDC,1223,1,1,0
 ds_300v_cur,A,1224,2,0.1,0
 ww_control,V,43811,1,1,0

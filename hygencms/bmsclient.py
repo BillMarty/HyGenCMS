@@ -83,8 +83,8 @@ class BmsClient(AsyncIOThread):
             # noinspection PyBroadException
             try:
                 line = self._ser.readline()
-            except serial.SerialException:
-                self._logger.warning("BMS not connected")
+            except serial.SerialException as e:
+                self._logger.warning("BMS not connected: %s" % str(e))
             except Exception as e:
                 utils.log_exception(self._logger, e)
             else:
