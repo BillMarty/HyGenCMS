@@ -8,4 +8,4 @@ ExecStart=/bin/bash /home/hygen/HyGenCMS/setup_io.sh
 
 [Install]
 WantedBy=multi-user.target
-Alias=hygenlogger.service
+Alias=configure_outputs.service

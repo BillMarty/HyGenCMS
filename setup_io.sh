@@ -1,4 +1,7 @@
 #!/bin/bash
+# Load overlay
+config-pin overlay univ-emmc
+
 # Pin   Mode	CPU Name	Function		P9	Mode	CPU Name	Function
 # Unmodifiable
 # P8_01		DGND
