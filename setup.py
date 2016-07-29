@@ -46,7 +46,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'hygencms.__main__:main'
+            'hygencms = hygencms.__main__:main'
         ]
     },
 )
