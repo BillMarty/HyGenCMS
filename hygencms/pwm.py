@@ -159,7 +159,7 @@ def start(key, duty_cycle=50.0, frequency=100000):
             enabled = True
 
     if tries >= 100:
-        print("Couldn't enable {:s}".format(key))
+        raise RuntimeError("Couldn't enable {:s}".format(key))
         pin.initialized = False
 
     set_frequency(key, frequency)
@@ -208,3 +208,4 @@ def set_duty_cycle(key, duty):
     except OSError as e:
         print("Error writing to {:s}: {:s}".format(pin.duty_path, str(e)))
     pin.duty = duty
+
