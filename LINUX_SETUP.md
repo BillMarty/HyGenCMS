@@ -191,7 +191,8 @@ sudo apt-get install python3-pip
 Now that we've got `pip`, we'll use that to grab modbus_tk. This will pull in `pyserial` as a dependency. We're not going to pull in `Adafruit_BBIO` from `pip`, since the version on there is not compatible with kernels newer than 3.8.
 
 ```bash
-sudo pip install modbus_tk
+sudo pip3 install modbus_tk
+sudo pip3 install recordclass
 ```
 
 We'll install the Adafruit_BBIO library from a commit which is known to work, directly from their Github repository. In order to do that, we'll need the `unzip` package to deal with the zip archive from Github.

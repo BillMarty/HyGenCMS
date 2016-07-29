@@ -5,9 +5,9 @@ All values are read in at the same frequency.
 import sys
 import time
 
-import Adafruit_BBIO.ADC as ADC
 import monotonic
 
+from . import adc
 from . import utils
 from .asynciothread import AsyncIOThread
 
@@ -47,7 +47,7 @@ class AnalogClient(AsyncIOThread):
         self._last_written = 0
 
         # Open the ADC
-        ADC.setup()
+        adc.setup()
 
         # Log to info that we've started
         self._logger.info("Started analogclient")
@@ -91,12 +91,12 @@ class AnalogClient(AsyncIOThread):
                         sum_, n = self.partial_values[key]
 
                         if n >= self.averages:
-                            average = sum_ / (n * 1000.)
+                            average = sum_ / n
                             self.data_store[key] = average * m[GAIN] + m[OFFSET]
                             sum_, n = 0., 0.
 
                         try:
-                            sum_, n = sum_ + ADC.read_raw(m[PIN]), n + 1
+                            sum_, n = sum_ + adc.read_volts(m[PIN]), n + 1
                         except RuntimeError:  # Shouldn't ever happen
                             exc_type, exc_value = sys.exc_info()[:2]
                             self._logger.error("ADC reading error: %s %s"
