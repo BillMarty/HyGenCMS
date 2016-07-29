@@ -188,25 +188,11 @@ We'll be using Python 3, so we need to install that package. We'll actually just
 sudo apt-get install python3-pip
 ```
 
-Now that we've got `pip`, we'll use that to grab modbus_tk. This will pull in `pyserial` as a dependency. We're not going to pull in `Adafruit_BBIO` from `pip`, since the version on there is not compatible with kernels newer than 3.8.
+Now that we've got `pip`, we'll use that to grab modbus_tk. This will pull in `pyserial` as a dependency. We'll also grab `recordclass`, a library which provides a mutable version of Python's `namedtuple`.
 
 ```bash
 sudo pip3 install modbus_tk
 sudo pip3 install recordclass
-```
-
-We'll install the Adafruit_BBIO library from a commit which is known to work, directly from their Github repository. In order to do that, we'll need the `unzip` package to deal with the zip archive from Github.
-
-```bash
-sudo apt-get install unzip
-cd ~
-wget https://github.com/adafruit/adafruit-beaglebone-io-python/archive/eb0b34746320690953134ebaa024a8171232655a.zip
-unzip adafruit*
-rm *.zip
-cd adafruit*
-sudo make install
-cd ..
-rm -R adafruit*
 ```
 
 We also use the `config-pin` utility from the [Beaglebone Universal IO](https://github.com/cdsteinkuehler/beaglebone-universal-io) library. This utility is included in most base images for the BeagleBone, but the console image we used left it out to save space. We'll install it (just the utility) from the Github repositories. The device tree overlays in that repository are already installed in kernel 4.1+ and some 3.8 images.
@@ -222,24 +208,13 @@ sudo make install_target  # This installs the utility but not the DTOs
 
 ## Setup USB Automounting
 
-Linux uses a system called `udev` to manage and respond to kernel events, such as the insertion or removal of hardware. This system allows the addition of rules files for implementing our own functionality. In our case, we'd like to automatically mount any USB device that is inserted, in order to write log files. We'll create a new `automount.rules` file in `/etc/udev/rules.d/`. Remember to open the file using `sudo` and whatever editor your want.
+Linux uses a system called `udev` to manage and respond to kernel events, such as the insertion or removal of hardware. This system allows the addition of rules files for implementing our own functionality. In our case, we'd like to automatically mount any USB device that is inserted, in order to write log files. We'll link in the `automount.rules` file from the `HyGenCMS/linux_setup/automount.rules` to `/etc/udev/rules.d/automount.rules`.
 
 ```
-# /etc/udev/rules.d/automount.rules
-# Last changed:
-# 2016-07-15
-# Reference:
-# http://unix.stackexchange.com/a/134903
-# Purpose:
-# Automount USB flash drives when plugged in.
-# On the BeagleBone, flash drives plugged into the USB show up on /dev/sda.
-# For most flash drives, the partition will appear on /dev/sda1. For some,
-# however, the main partition appears on /dev/sda.
-# pmount mounts the USB drive partitions on /media/sda*.
-ACTION=="add", KERNEL=="sd?*", RUN+="/usr/bin/pmount --umask=000 %k"
+sudo ln -s /path/to/automount.rules /etc/udev/rules.d/automount.rules
 ```
 
-This will automount any inserted USB drive so that it is readable for any user. There are two things left to do: first, `pmount` is not installed, so we need to add that. Second, we need to reload the udev rules in order for our new rule to take effect.
+This will check and automount any inserted USB drive so that it is readable for any user. There are two things left to do: first, `pmount` is not installed, so we need to add that. Second, we need to reload the udev rules in order for our new rule to take effect.
 
 ```bash
 sudo apt-get install pmount
@@ -269,10 +244,11 @@ chmod +x cms
 
 To make the service start on boot, we create a service description file. Debian 8 just switched to a new init system called systemd. The init system is the mechanism which starts the Linux system. It is the first process to run on boot, and is responsible for starting all the other processes. Since it starts all other processes, it also is responsible for managing the other processes, and can ensure they continue to run. We will use this functionality to restart our Python program if it crashes.
 
-The HyGenCMS repository contains two `.service` files which provide systemd services. We just need to load them up. This can be done using the `systemctl` command.
+The HyGenCMS repository contains two `.service` files which provide systemd services. We just need to load them up. This can be done using the `systemctl` command. If the paths to the repository are different than mine, we'll need to modify those in the .service files.
 
 ```bash
 cd
 sudo systemctl enable ~/HygenCMS/linux_setup/configure_outputs.service
 sudo systemctl enable ~/HyGenCMS/linux_setup/hygencms.service
 ```
+
