@@ -1,6 +1,8 @@
 #!/bin/bash
-# Load overlay
+
+# Load overlays that we need
 config-pin overlay univ-emmc
+config-pin overaly BB-ADC
 
 # Pin   Mode	CPU Name	Function		P9	Mode	CPU Name	Function
 # Unmodifiable
