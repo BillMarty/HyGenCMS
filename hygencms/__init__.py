@@ -2,3 +2,5 @@
 # Unauthorized copying of this file, via any medium is strictly prohibited
 # Proprietary and confidential
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
+
+__version__ = '0.1.0'
