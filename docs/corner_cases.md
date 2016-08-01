@@ -49,7 +49,7 @@
 
 # logfilewriter.py
 
-- 'ldir' key not in config - handled with ValueError in `logfilewriter.py`
+- 'ldir' key not in config - handled with ValueError in `FileWriter`
 - constructor errors - handled in `main`
 - Main thread crashes, how do we respond? - current approach: loop infinitely, never do anything.
 - File cannot be written to (full disk, USB removed, etc.) - Handled in `write_line` - simply logged and skipped

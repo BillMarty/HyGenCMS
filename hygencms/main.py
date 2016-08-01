@@ -27,16 +27,11 @@ import monotonic
 import serial
 
 import hygencms.asyncio
-from . import analogclient
-from . import bmsclient
-from . import deepseaclient
+from hygencms.asyncio import DeepSeaClient
 from . import gpio
-from . import logfilewriter
 from . import pins
 from . import utils
-from . import woodwardcontrol
 from .config import get_configuration
-from .deepseaclient import DeepSeaClient
 from .groveledbar import GroveLedBar
 
 #################################################
@@ -108,7 +103,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
     if 'bms' in config['enabled']:
         try:
-            bms = bmsclient.BmsClient(config['bms'], handlers)
+            bms = hygencms.asyncio.BmsClient(config['bms'], handlers)
         except serial.SerialException as e:
             logger.error("SerialException({0}) opening BmsClient: {1}"
                          .format(e.errno, e.strerror))
@@ -127,7 +122,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     #######################################
     if 'woodward' in config['enabled']:
         try:
-            woodward = woodwardcontrol.WoodwardControl(
+            woodward = hygencms.asyncio.WoodwardControl(
                 config['woodward'], handlers
             )
         # ValueError can be from a missing value in the config map
@@ -151,7 +146,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         csv_header = "linuxtime," + ','.join(headers)
         log_queue = queue.Queue()
         try:
-            filewriter = logfilewriter.FileWriter(
+            filewriter = hygencms.asyncio.FileWriter(
                 config['filewriter'], handlers, log_queue, csv_header
             )
         except ValueError as e:
@@ -373,8 +368,8 @@ def update_gauges(fuel_gauge, battery_gauge):
     # Update interface gauges
     # See DeepSea_Modbus_manualGenComm.docx, 10.6
     try:
-        fuel = data_store[deepseaclient.FUEL_LEVEL]
-        assert(fuel is not None)
+        fuel = data_store[DeepSeaClient.FUEL_LEVEL]
+        assert (fuel is not None)
     except KeyError:
         fuel_gauge.set_bar_level(1)
     except AssertionError:
@@ -385,9 +380,9 @@ def update_gauges(fuel_gauge, battery_gauge):
 
     # See DeepSea_Modbus_manualGenComm.docx, 10.6 (#199)
     try:
-        battery_charge = data_store[deepseaclient.BATTERY_LEVEL]
+        battery_charge = data_store[DeepSeaClient.BATTERY_LEVEL]
         # TODO maybe replace this with our analog value
-        assert(battery_charge is not None)
+        assert (battery_charge is not None)
     except KeyError:
         battery_gauge.set_bar_level(1)
     except AssertionError:
@@ -412,6 +407,7 @@ def check_kill_switch():
 
 def power_off():
     subprocess.call(["poweroff"])
+
 
 if __name__ == "__main__":
     sh = logging.StreamHandler()
