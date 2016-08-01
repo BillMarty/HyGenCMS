@@ -7,7 +7,7 @@
 """
 import logging
 import os
-import queue
+import queue  # For Python2, Queue as queue
 import subprocess
 import sys
 import time
