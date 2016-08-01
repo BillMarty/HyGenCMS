@@ -7,8 +7,8 @@
 Provides configuration utilities for the logger.
 
 The configuration file will be in the form of a python literal dictionary.
-It will be structured as a nested dictionary of the following form:
-.. code:: python
+It will be structured as a nested dictionary of the following form::
+
     {
         "enabled": ["deepsea", "bms"], # list of async components which are
                 # enabled. Sub configuration maps will use the strings
