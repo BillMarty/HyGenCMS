@@ -11,6 +11,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   hygencms
+   licenses_used.rst
+   corner_cases.rst
+   linux_setup.rst
+
+
 
 
 Indices and tables
