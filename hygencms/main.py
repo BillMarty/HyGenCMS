@@ -319,6 +319,13 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
 
 def stop_threads(threads, logger):
+    """
+    Stop each thread in the list, preparatory to shutdown
+
+    :param threads: A list of AsyncIOThread objects to shutdown
+    :param logger: A logger to record progress
+    :return: None
+    """
     for thread in threads:
         thread.cancel()
         thread.join()
@@ -326,6 +333,11 @@ def stop_threads(threads, logger):
 
 
 def print_data(clients):
+    """
+    Print the data for all the data source clients
+    :param clients: A list of clients with a print_data function
+    :return: None
+    """
     for client in clients:
         client.print_data()
     print('-' * 80)
@@ -333,8 +345,9 @@ def print_data(clients):
 
 def revive(threads, logger):
     """
-    Check to make sure each thread is running, and restart any which
+    Check to make sure each thread is running, and log about any which
     have stopped.
+
     :param threads: An iterable of threads
     :param logger: The logger to which any messages will be written
     :return: None
@@ -351,6 +364,7 @@ def update_watchdog():
     Write to the watchdog file, keeping the system from being restarted.
     If we don't write to the watchdog for 60 seconds, the system will be
     restarted.
+
     :return: None
     """
     with open("/dev/watchdog", 'w') as f:
@@ -361,6 +375,7 @@ def update_gauges(fuel_gauge, battery_gauge):
     """
     Update both the fuel and the battery gauge using data from the central
     data store.
+
     :param fuel_gauge: GroveLedBar object of the fuel gauge
     :param battery_gauge: GroveLedBar object of the battery gauge
     :return: None
@@ -398,6 +413,11 @@ kill_now = False
 
 
 def check_kill_switch():
+    """
+    Check whether we are to poweroff now. Only return when
+    the switch has been set for two loops.
+    :return: Whether to poweroff.
+    """
     global kill_now, kill_last
     value = gpio.read(pins.OFF_SWITCH)
     kill_last = kill_now
@@ -406,6 +426,10 @@ def check_kill_switch():
 
 
 def power_off():
+    """
+    Shut down the system immediately.
+    :return: None
+    """
     subprocess.call(["poweroff"])
 
 
