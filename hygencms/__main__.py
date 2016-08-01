@@ -19,7 +19,8 @@ import signal
 from daemon import pidfile, DaemonContext
 
 from hygencms.config import get_configuration
-from hygencms.main import main
+
+from hygencms.main import main as main_entry
 
 
 def main():
@@ -85,10 +86,10 @@ def main():
                               signal.SIGTSTP: 'terminate',  # suspend - configurable
                               }
         with context:
-            main(config, handlers, daemon=True, watchdog=args.watchdog,
+            main_entry(config, handlers, daemon=True, watchdog=args.watchdog,
                  power_off_enabled=args.poweroff)
     else:
-        main(config, handlers, daemon=False, watchdog=args.watchdog,
+        main_entry(config, handlers, daemon=False, watchdog=args.watchdog,
              power_off_enabled=args.poweroff)
 
 
