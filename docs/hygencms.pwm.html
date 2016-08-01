@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module hygencms.pwm</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="hygencms.html"><font color="#ffffff">hygencms</font></a>.pwm</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/hygen/HyGenCMS/hygencms/pwm.py">/home/hygen/HyGenCMS/hygencms/pwm.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Copyright&nbsp;(C)&nbsp;Planetary&nbsp;Power,&nbsp;Inc&nbsp;-&nbsp;All&nbsp;Rights&nbsp;Reserved<br>
+#&nbsp;Unauthorized&nbsp;copying&nbsp;of&nbsp;this&nbsp;file,&nbsp;via&nbsp;any&nbsp;medium&nbsp;is&nbsp;strictly&nbsp;prohibited<br>
+#&nbsp;Proprietary&nbsp;and&nbsp;confidential<br>
+#&nbsp;Written&nbsp;by&nbsp;Matthew&nbsp;West&nbsp;&lt;mwest@planetarypower.com&gt;,&nbsp;July&nbsp;2016</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="glob.html">glob</a><br>
+</td><td width="25%" valign=top><a href="posixpath.html">posixpath</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="hygencms.pwm.html#PwmPin">PwmPin</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PwmPin">class <strong>PwmPin</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="PwmPin-__init__"><strong>__init__</strong></a>(self, chip, addr, index, name=None, description=None, period_path=None, duty_path=None, polarity_path=None, duty=50.0, freq=100000)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-set_duty_cycle"><strong>set_duty_cycle</strong></a>(key, duty)</dt></dl>
+ <dl><dt><a name="-set_frequency"><strong>set_frequency</strong></a>(key, freq)</dt></dl>
+ <dl><dt><a name="-start"><strong>start</strong></a>(key, duty_cycle=50.0, frequency=100000)</dt><dd><tt>Start&nbsp;a&nbsp;PWM&nbsp;pin&nbsp;(export&nbsp;it)<br>
+:param&nbsp;key:&nbsp;The&nbsp;pin&nbsp;('P9_29'&nbsp;or&nbsp;'P9_31')<br>
+:param&nbsp;duty_cycle:&nbsp;Starting&nbsp;duty&nbsp;cycle<br>
+:param&nbsp;frequency:&nbsp;Starting&nbsp;frequency<br>
+:return:&nbsp;None</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>ocp_path</strong> = '/sys/devices/platform/ocp'<br>
+<strong>pins</strong> = {'P8_13': &lt;hygencms.pwm.PwmPin object&gt;, 'P8_19': &lt;hygencms.pwm.PwmPin object&gt;, 'P8_34': &lt;hygencms.pwm.PwmPin object&gt;, 'P8_36': &lt;hygencms.pwm.PwmPin object&gt;, 'P8_45': &lt;hygencms.pwm.PwmPin object&gt;, 'P8_46': &lt;hygencms.pwm.PwmPin object&gt;, 'P9_14': &lt;hygencms.pwm.PwmPin object&gt;, 'P9_16': &lt;hygencms.pwm.PwmPin object&gt;, 'P9_21': &lt;hygencms.pwm.PwmPin object&gt;, 'P9_22': &lt;hygencms.pwm.PwmPin object&gt;, ...}</td></tr></table>
+</body></html>
