@@ -40,7 +40,7 @@ setup(
 
     install_requires=['modbus_tk',
                       'pyserial',
-                      'daemon',
+                      'python-daemon',
                       'recordclass',
                       'monotonic'],
 
