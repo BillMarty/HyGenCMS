@@ -4,7 +4,7 @@ Description=Setup output and input pins
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/bash /home/hygen/HyGenCMS/setup_io.sh
+ExecStart=/bin/bash /home/hygen/HyGenCMS/linux_setup/setup_io.sh
 
 [Install]
 WantedBy=multi-user.target
