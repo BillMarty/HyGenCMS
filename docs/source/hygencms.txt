@@ -1,5 +1,13 @@
-hygencms package
-================
+HyGen Control Management System
+===============================
+
+Module contents
+---------------
+
+.. automodule:: hygencms
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Submodules
 ----------
@@ -80,15 +88,6 @@ hygencms.utils module
 ---------------------
 
 .. automodule:: hygencms.utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: hygencms
     :members:
     :undoc-members:
     :show-inheritance:
