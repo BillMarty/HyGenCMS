@@ -97,7 +97,7 @@ def start(key, duty_cycle=50.0, frequency=100000):
     """
     Start a PWM pin
 
-    :param key: The pin ('P9_29' or 'P9_31')
+    :param key: The pin name
     :param duty_cycle: Starting duty cycle
     :param frequency: Starting frequency
     :return: None
@@ -183,7 +183,7 @@ def set_frequency(key, freq):
     """
     Set the frequency for a PWM pin
 
-    :param key: The pin name ('P9_31' for instance)
+    :param key: The pin name
     :param freq: Frequency in Hz
     :return: None
     """
@@ -213,7 +213,7 @@ def set_duty_cycle(key, duty):
     """
     Set the duty cycle for a pin.
 
-    :param key: The pin key ('P9_31' for instance)
+    :param key: The pin name
     :param duty: The new duty cycle
     :return: None
     """
