@@ -16,7 +16,6 @@ from datetime import datetime
 from subprocess import CalledProcessError, check_call, STDOUT
 from threading import Thread
 
-import monotonic
 import serial
 from hygencms import adc, utils, gpio, pins, pwm
 from hygencms.utils import PY3
@@ -106,7 +105,7 @@ class AnalogClient(AsyncIOThread):
         self.data_store = data_store
         self.data_store.update({m[AnalogClient.PIN]: None for m in self._input_list})
         self.partial_values = {m[AnalogClient.PIN]: (0.0, 0) for m in self._input_list}
-        self.last_updated = monotonic.monotonic()
+        self.last_updated = monotonic()
         self._last_written = 0
 
         # Open the ADC
@@ -151,7 +150,7 @@ class AnalogClient(AsyncIOThread):
         while not self.cancelled:
             # noinspection PyBroadException
             try:
-                t = monotonic.monotonic()
+                t = monotonic()
                 # If we've passed the ideal time, get the value
                 if t >= self.last_updated + self.mfrequency:
                     for m in self._input_list:
@@ -222,7 +221,7 @@ class AnalogClient(AsyncIOThread):
         The line is returned with no new line or trailing comma.
         """
         values = []
-        now = monotonic.monotonic()
+        now = monotonic()
         if now > self._last_written:
             for m in self._input_list:
                 val = self.data_store[m[AnalogClient.PIN]]
@@ -517,7 +516,7 @@ class DeepSeaClient(AsyncIOThread):
             try:
                 for m in self._input_list:
                     key = m[self.ADDRESS]
-                    t, last_time = monotonic.monotonic(), self._last_updated[key]
+                    t, last_time = monotonic(), self._last_updated[key]
                     if len(m) > self.PERIOD:
                         period = m[self.PERIOD]
                     else:
@@ -718,7 +717,7 @@ class DeepSeaClient(AsyncIOThread):
         :rtype: string
         """
         values = []
-        now = monotonic.monotonic()
+        now = monotonic()
         for m in self._input_list:
             key = m[self.ADDRESS]
             val = self._data_store[key]
@@ -1054,7 +1053,7 @@ class FileWriter(AsyncIOThread):
         while not self.cancelled:
             # noinspection PyBroadException
             try:
-                now = monotonic.monotonic()
+                now = monotonic()
 
                 # Twice a second
                 if now >= next_run[0.5]:
@@ -1465,7 +1464,7 @@ class WoodwardControl(AsyncIOThread):
         if not self.in_auto:
             return self.output
 
-        now = monotonic.monotonic()
+        now = monotonic()
         time_change = (now - self.last_time)
 
         if time_change >= self._sample_time:
