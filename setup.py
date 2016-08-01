@@ -49,4 +49,8 @@ setup(
             'hygencms = hygencms.__main__:main'
         ]
     },
+
+    package_data={
+        'hygencms': ['*.csv'],
+    },
 )
