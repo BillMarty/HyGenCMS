@@ -142,6 +142,8 @@ class FileWriter(AsyncIOThread):
             10.0: 0,
             60.0: 0,
         }
+        # Initial values
+        device = None
         prev_hour = -1  # Always start a new file to start
         while not self.cancelled:
             # noinspection PyBroadException
@@ -150,10 +152,14 @@ class FileWriter(AsyncIOThread):
 
                 # Twice a second
                 if now >= next_run[0.5]:
-                    # Check if eject button is pressed
+                    # if eject button is pressed
                     if gpio.read(pins.USB_SW) == gpio.LOW:
-                        # If eject button pressed, close file and unmount
-                        self.unmount_usb()
+                        # if file closed and unmounted
+                        if self.unmount_usb():
+                            self.safe_to_remove = True
+
+                    # Update safe-to-remove LED
+                    self.safe_to_remove = device and not self.drive_mounted
 
                     # Schedule next run
                     next_run[0.5] = now + 0.5
@@ -162,21 +168,15 @@ class FileWriter(AsyncIOThread):
                 if now >= next_run[1.0]:
                     # Check whether USB is plugged in, and mounted
                     device = self.usb_plugged()
-                    drive = self.usb_mounted()
+                    mounted_drive = self.usb_mounted()
 
-                    # If we've unplugged it, turn off light
-                    if not device and self.safe_to_remove:
-                        # Reset safe to remove light
-                        self.safe_to_remove = False
-                        self.drive_mounted = False
-
-                    # If we've mounted a new drive
-                    if drive and not self.drive_mounted:
+                    # If we've mounted a new drive and Python hasn't handled it
+                    if mounted_drive and not self.drive_mounted:
                         # Get new file (presumably on USB)
                         self._f.close()
                         self._f = self._get_new_logfile()
                         self._write_line(self._csv_header)
-                        self.drive_mounted = bool(drive)
+                        self.drive_mounted = True
 
                     # Print out lines
                     more_items = True
