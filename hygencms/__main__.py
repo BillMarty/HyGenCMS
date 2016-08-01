@@ -5,9 +5,9 @@
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 
 """
-Perform the telemetric logging functions as a daemon.
+Open the HyGenCMS program, possibly as a daemon.
 
-This wraps logger, ensuring proper daemon functionality,
+This wraps logger, ensuring proper daemon functinality,
 including PID files, start / stop, and context management.
 """
 

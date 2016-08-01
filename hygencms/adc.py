@@ -4,7 +4,13 @@
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 
 """
-Module documentation
+The ADC module uses the Sysfs interface provided by the Linux kernel and
+drivers to control and read from the analog inputs to the BeagleBone.
+See `here <http://processors.wiki.ti.com/index.php/Linux_Core_ADC_User's_Guide>`_
+for more details.
+
+This module presumes that
+all pinmuxing is done ahead-of-time for all pins which are to be used.
 """
 
 import glob
@@ -32,6 +38,7 @@ SLOTS = '/sys/devices/platform/bone_capemgr/slots'
 def setup():
     """
     Setup the ADC for use. Load the ADC cape if needed.
+
     :return: True if ADC ready for use, else False.
     """
     global adc_setup
@@ -68,6 +75,12 @@ def setup():
 
 
 def read_raw(pin_name):
+    """
+    Read the ADC count straight from the Sysfs file, as a count
+
+    :param pin_name: The pin to read
+    :return: The 12-bit count returned for that pin.
+    """
     if pin_name not in pins:
         raise ValueError("%s is not an analog input pin" % pin_name)
 
@@ -92,5 +105,11 @@ def read_raw(pin_name):
 
 
 def read_volts(pin_name):
+    """
+    Read the value from a pin, scaled to volts.
+
+    :param pin_name: The pin to read
+    :return: The voltage read on that pin
+    """
     count = read_raw(pin_name)
-    return count / 4095 * 1.8
+    return count * (1.8 / 4095)
