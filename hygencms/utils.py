@@ -13,16 +13,15 @@ PY3 = sys.version_info[0] == 3
 
 def get_input(s, default=""):
     """
-    Get raw input using the correct version for the Python version.
+    Get raw input using the correct function for the Python version.
 
-    s:
-        The prompt string to show. A space will be added to the end so
+    :param s: The prompt string to show. A space will be added to the end so
         no trailing space is required
 
-    default:
-        A default value which will be returned if the user does not
+    :param default: A default value which will be returned if the user does not
         enter a value. Displayed in square brackets following the
         prompt
+    :return: The returned string value.
     """
     if default == "":
         d = " "
@@ -62,6 +61,13 @@ def ignore(*exceptions):
 
 
 def log_exception(logger, e):
+    """
+    Log an exception, complete with the stack trace.
+
+    :param logger: The logger to write to
+    :param e: The exception which was thrown
+    :return:
+    """
     tb = sys.exc_info()[-1]
     if tb is not None:
         logger.error("%s raised: %s (%s:%d)"

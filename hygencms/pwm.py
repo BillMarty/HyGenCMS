@@ -2,6 +2,13 @@
 # Unauthorized copying of this file, via any medium is strictly prohibited
 # Proprietary and confidential
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
+"""
+This module provides a wrapper around the sysfs interface to the BeagleBone's
+PWM system. It operates by writing to files in the /sys/ directory. Therefore,
+it either must be run as root, or permissions must be adjusted in such a way
+that the files are writable by non-root.
+"""
+
 
 import glob
 import os.path as path
@@ -88,7 +95,8 @@ ocp_path = '/sys/devices/platform/ocp'
 
 def start(key, duty_cycle=50.0, frequency=100000):
     """
-    Start a PWM pin (export it)
+    Start a PWM pin
+
     :param key: The pin ('P9_29' or 'P9_31')
     :param duty_cycle: Starting duty cycle
     :param frequency: Starting frequency
@@ -172,6 +180,13 @@ def start(key, duty_cycle=50.0, frequency=100000):
 
 
 def set_frequency(key, freq):
+    """
+    Set the frequency for a PWM pin
+
+    :param key: The pin name ('P9_31' for instance)
+    :param freq: Frequency in Hz
+    :return: None
+    """
     try:
         pin = pins[key]
     except KeyError:
@@ -195,6 +210,13 @@ def set_frequency(key, freq):
 
 
 def set_duty_cycle(key, duty):
+    """
+    Set the duty cycle for a pin.
+
+    :param key: The pin key ('P9_31' for instance)
+    :param duty: The new duty cycle
+    :return: None
+    """
     try:
         pin = pins[key]
     except KeyError:

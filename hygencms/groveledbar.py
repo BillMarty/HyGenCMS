@@ -3,6 +3,12 @@
 # Proprietary and confidential
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 
+"""
+This module provides the GroveLedBar class, which implements a driver for the
+Grove LED Bar v2.0. This bar, available from Grove electronics, provides ten
+LED segments, which represent a gauge.
+"""
+
 import time
 
 from . import gpio
@@ -20,6 +26,12 @@ class GroveLedBar:
     https://github.com/Pillar1989/upm/blob/BBGW/src/my9221
     """
     def __init__(self, data_pin, clock_pin):
+        """
+        Create a
+
+        :param data_pin:
+        :param clock_pin:
+        """
         self._data_pin = data_pin
         self._clock_pin = clock_pin
         self._auto_refresh = True
