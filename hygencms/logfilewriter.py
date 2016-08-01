@@ -161,14 +161,7 @@ class FileWriter(AsyncIOThread):
                 # Every second
                 if now >= next_run[1.0]:
                     # Check whether USB is plugged in, and mounted
-                    device = self.usb_plugged()
                     drive = self.usb_mounted()
-
-                    # If we've unplugged it, turn off light
-                    if not device and self.safe_to_remove:
-                        # Reset safe to remove light
-                        self.safe_to_remove = False
-                        self.drive_mounted = False
 
                     # If we've mounted a new drive
                     if drive and not self.drive_mounted:
@@ -176,7 +169,7 @@ class FileWriter(AsyncIOThread):
                         self._f.close()
                         self._f = self._get_new_logfile()
                         self._write_line(self._csv_header)
-                        self.drive_mounted = bool(drive)
+                        self.drive_mounted = True
 
                     # Print out lines
                     more_items = True
@@ -193,12 +186,10 @@ class FileWriter(AsyncIOThread):
 
                 # Every 10 seconds
                 if now >= next_run[10.0]:
-                    # Disable the safe-to-remove light if the drive is out
-                    if self.safe_to_remove:
-                        if self.usb_plugged():
-                            pass  # TODO remount the drive
-                        else:
-                            self.safe_to_remove = False
+                    # If we've unplugged it, turn off light
+                    if self.safe_to_remove and not self.usb_plugged():
+                        # Reset safe to remove light
+                        self.safe_to_remove = False
 
                     # Schedule next run
                     next_run[10.0] = now + 10.0
@@ -223,14 +214,17 @@ class FileWriter(AsyncIOThread):
             except Exception as e:
                 utils.log_exception(self._logger, e)
 
-    @staticmethod
-    def usb_mounted():
+    def usb_mounted(self):
         """
         Return the path to whatever drive is mounted, or None
         :return: '/media/[drive]' or None
         """
         # Check for USB directory
-        mount_list = str(subprocess.check_output(['mount']))
+        try:
+            mount_list = str(subprocess.check_output(['mount']))
+        except CalledProcessError:
+            self._logger.debug("Error in mount.")
+            return False
 
         position = mount_list.find('/dev/sd')
         if position == -1:
