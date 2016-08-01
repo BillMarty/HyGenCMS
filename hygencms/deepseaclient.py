@@ -15,7 +15,7 @@ from modbus_tk.modbus_tcp import TcpMaster
 from monotonic import monotonic
 from serial import SerialException
 
-from .asynciothread import AsyncIOThread
+from .asyncio import AsyncIOThread
 
 NAME = 0
 UNITS = 1

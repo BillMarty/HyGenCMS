@@ -21,7 +21,7 @@ import monotonic
 from . import gpio
 from . import pins
 from . import utils
-from .asynciothread import AsyncIOThread
+from .asyncio import AsyncIOThread
 
 if sys.version_info[0] == 3:
     import queue

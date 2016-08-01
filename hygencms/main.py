@@ -26,6 +26,7 @@ import time
 import monotonic
 import serial
 
+import hygencms.asyncio
 from . import analogclient
 from . import bmsclient
 from . import deepseaclient
@@ -91,7 +92,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
     if 'analog' in config['enabled']:
         try:
-            analog = analogclient.AnalogClient(config['analog'], handlers, data_store)
+            analog = hygencms.asyncio.AnalogClient(config['analog'], handlers, data_store)
         except ValueError:
             exc_type, exc_value = sys.exc_info()[:2]
             logger.error("Configuration error from AnalogClient: %s: %s"

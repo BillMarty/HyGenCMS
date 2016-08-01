@@ -6,7 +6,7 @@
 import serial
 
 from . import utils
-from .asynciothread import AsyncIOThread
+from .asyncio import AsyncIOThread
 from .utils import PY3
 
 

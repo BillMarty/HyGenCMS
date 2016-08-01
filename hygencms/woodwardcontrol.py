@@ -12,7 +12,7 @@ import monotonic
 
 from . import pwm
 from . import utils
-from .asynciothread import AsyncIOThread
+from .asyncio import AsyncIOThread
 
 DIRECT = 0
 REVERSE = 1
