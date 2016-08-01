@@ -960,6 +960,8 @@ class FileWriter(AsyncIOThread):
         self._safe_to_remove = None
         self._usb_activity = None
 
+        self.ejecting = False
+
     ########################################################
     # Properties
     ########################################################
@@ -1062,9 +1064,10 @@ class FileWriter(AsyncIOThread):
                         # if file closed and unmounted
                         if self.unmount_usb():
                             self.safe_to_remove = True
+                            self.ejecting = True
 
                     # Update safe-to-remove LED
-                    self.safe_to_remove = device and not self.drive_mounted
+                    self.safe_to_remove = self.ejecting and device and not self.drive_mounted
 
                     # Schedule next run
                     next_run[0.5] = now + 0.5
@@ -1073,6 +1076,10 @@ class FileWriter(AsyncIOThread):
                 if now >= next_run[1.0]:
                     # Check whether USB is plugged in, and mounted
                     device = self.usb_plugged()
+
+                    if self.ejecting and not device:
+                        self.ejecting = False
+
                     mounted_drive = self.usb_mounted()
 
                     # If we've mounted a new drive and Python hasn't handled it

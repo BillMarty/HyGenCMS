@@ -302,34 +302,30 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             time.sleep(0.01)
 
         except KeyboardInterrupt:
-            stop_threads(threads, logger)
+            stop_threads(threads)
             exit(1)
         except SystemExit:
             going = False
-            stop_threads(threads, logger)
+            stop_threads(threads)
 
         except Exception as e:  # Log any other exceptions
             utils.log_exception(logger, e)
 
-    # After finish running
-    stop_threads(threads, logger)
     if shutdown and power_off_enabled:
         power_off()
     exit(0)
 
 
-def stop_threads(threads, logger):
+def stop_threads(threads):
     """
     Stop each thread in the list, preparatory to shutdown
 
     :param threads: A list of AsyncIOThread objects to shutdown
-    :param logger: A logger to record progress
     :return: None
     """
     for thread in threads:
         thread.cancel()
         thread.join()
-        logger.debug("Joined " + str(thread))
 
 
 def print_data(clients):
