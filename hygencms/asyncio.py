@@ -4,6 +4,7 @@
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 
 """
+Provide subclasses of thread, which can be used to do asynchronous IO.
 """
 import logging
 import os
@@ -17,15 +18,14 @@ from threading import Thread
 
 import monotonic
 import serial
+from hygencms import adc, utils, gpio, pins, pwm
+from hygencms.utils import PY3
 from modbus_tk import defines as defines
 from modbus_tk.exceptions import ModbusInvalidResponseError, ModbusError
 from modbus_tk.modbus_rtu import RtuMaster
 from modbus_tk.modbus_tcp import TcpMaster
 from monotonic import monotonic
 from serial import SerialException
-
-from hygencms import adc, utils, gpio, pins, pwm
-from hygencms.utils import PY3
 
 
 class AsyncIOThread(Thread):
@@ -36,7 +36,8 @@ class AsyncIOThread(Thread):
     def __init__(self, handlers):
         """
         Constructor
-        :param handlers: A list of log handlers
+        :param handlers:
+            List of log handlers to use
         """
         super(AsyncIOThread, self).__init__()
         self.daemon = False
@@ -48,8 +49,9 @@ class AsyncIOThread(Thread):
     def start_logger(self, handlers):
         """
         Start a logger with the name of the instance type
-        :param handlers: Log handlers to add
-        :return: None
+
+        :param handlers:
+            Log handlers to add
         """
         self._logger = logging.getLogger(type(self).__name__)
         for h in handlers:
@@ -80,10 +82,14 @@ class AnalogClient(AsyncIOThread):
 
     def __init__(self, aconfig, handlers, data_store):
         """
-
         :param aconfig:
+            Configuration map for the AnalogClient
+
         :param handlers:
+            List of log handlers.
+
         :param data_store:
+            Reference to data store map to keep values
         """
         super(AnalogClient, self).__init__(handlers)
 
@@ -112,9 +118,13 @@ class AnalogClient(AsyncIOThread):
     @staticmethod
     def check_config(aconfig):
         """
+        Raise an exception if the configuration is not valid.
 
         :param aconfig:
+            Configuration map to check
+
         :return:
+            :const:`True` or an exception
         """
         required_config = ['measurements', 'frequency', 'averages']
         for val in required_config:
@@ -236,13 +246,20 @@ class BmsClient(AsyncIOThread):
         """
         Initialize the bms client from the configuration values.
 
-        Could throw the following exceptions:
-        - IOError
-        - serial.SerialException
-        - ValueError
-
         :param bconfig:
+            Configuration map for the BmsClient
+
         :param handlers:
+            List of log handlers.
+
+        :exception IOError:
+            In case the serial port does not open successfully
+
+        :exception SerialException:
+            In case the serial port does not open successfully
+
+        :exception ValueError:
+            Will be raised when configuration values are missing.
         """
         # Initialize the parent class
         super(BmsClient, self).__init__(handlers)
@@ -290,7 +307,13 @@ class BmsClient(AsyncIOThread):
         configuration values are missing.
 
         :param bconfig:
+            Configuration map.
+
         :return:
+            :const:`True`
+
+        :exception ValueError:
+            Will be raised when configuration map missing required configuration options.
         """
 
         required_config = ['dev', 'baudrate', 'sfilename']
@@ -352,8 +375,11 @@ class BmsClient(AsyncIOThread):
         Puts the bytes in the reverse order from the ordinary order.
         See https://en.wikipedia.org/wiki/Fletcher%27s_checksum
 
-        :param data: a ``bytes`` array
-        :return: the integer checksum
+        :param data:
+            a ``bytes`` array
+
+        :return:
+            the integer checksum
         """
         if not isinstance(data, bytes):
             return None
@@ -436,8 +462,16 @@ class BmsClient(AsyncIOThread):
 class DeepSeaClient(AsyncIOThread):
     def __init__(self, dconfig, handlers, data_store):
         """
-        Set up a DeepSeaClient
-        dconfig: the configuration values specific to deepsea
+        :param dconfig:
+            the configuration values specific to deepsea
+
+        :param handlers:
+            List of log handlers.
+
+        :param data_store:
+            Reference to the global dictionary to store data
+
+        Set up a DeepSea Client
         """
         super(DeepSeaClient, self).__init__(handlers)
 
@@ -506,8 +540,13 @@ class DeepSeaClient(AsyncIOThread):
         Ensure that all required measurements are present in the list.
         If any are missing, add them using the default templates.
 
-        :param measurement_list: The list of measurements read in
-        :return: A new measurement list, possibly changed.
+        :param measurement_list:
+            The list of measurements read in
+
+        :return:
+            A new measurement list, possibly changed.
+
+        :rtype: list
         """
         addresses = set(map(lambda m: m[DeepSeaClient.ADDRESS],
                             measurement_list))
@@ -525,8 +564,14 @@ class DeepSeaClient(AsyncIOThread):
         Check that the config is complete. Throw a ValueError if any
         configuration values are missing.
 
-        :param config: The configuration map to check
-        :return: True if success, else raise ValueError
+        :param config:
+            The configuration map to check
+
+        :return:
+            True if success
+
+        :exception ValueError:
+            Will be raised when configuration map missing required configuration options.
         """
         required_config = ['mode', 'mlistfile']
         required_rtu_config = ['dev', 'baudrate', 'id']
@@ -552,8 +597,11 @@ class DeepSeaClient(AsyncIOThread):
         """
         Read a CSV containing the descriptions of modbus values to fetch
 
-        :param filename: The filename from which to read the CSV
-        :return: a list of lists, containing the measurement list
+        :param filename:
+            The filename from which to read the CSV
+
+        :return:
+            a list of lists, containing the measurement list
         """
         with open(filename) as mdf:
             lines = mdf.readlines()
@@ -575,9 +623,13 @@ class DeepSeaClient(AsyncIOThread):
 
     def get_value(self, m):
         """
-        Get a data value from the deepSea
-        :param m: The measurement description list
-        :return: The value, an integer
+        Get a data value from the DeepSea
+
+        :param m:
+            The measurement description list
+
+        :return:
+            The value, an integer
         """
         x = None
         address = m[self.ADDRESS]
@@ -625,8 +677,6 @@ class DeepSeaClient(AsyncIOThread):
         """
         Print all the data as we currently have it, in human-
         readable format.
-
-        :return: None
         """
         for m in self._input_list:
             name = m[self.NAME]
@@ -646,7 +696,10 @@ class DeepSeaClient(AsyncIOThread):
         Get the CSV header line for the DeepSea.
         Does not include newline or trailing comma.
 
-        :return: A string containing the header line.
+        :return:
+            A string containing the header line.
+
+        :rtype: string
         """
         names = []
         for m in self._input_list:
@@ -662,6 +715,7 @@ class DeepSeaClient(AsyncIOThread):
         we last wrote them to file.
 
         :return: A String containing the csv line.
+        :rtype: string
         """
         values = []
         now = monotonic.monotonic()
@@ -872,10 +926,24 @@ class FileWriter(AsyncIOThread):
         - ValueError for invalid config
         - IOError (Python < 3.3) or OSError (Python >= 3.3) for inaccessible file
 
-        :param config: The configuration map for the FileWriter
-        :param handlers: All the log handlers to log to
-        :param log_queue: The queue to pull csv lines off
-        :param csv_header: The header to put at the top of each file
+        :param config:
+            The configuration map for the FileWriter
+
+        :param handlers:
+            All the log handlers to log to
+
+        :param log_queue:
+            The queue to pull csv lines off
+
+        :param csv_header:
+            The header to put at the top of each file
+
+        :exception ValueError:
+            Raised if the configuration map is missing values
+
+        :exception IOError:
+        :exception OSError:
+            Could not open file
         """
         # General config for the thread
         super(FileWriter, self).__init__(handlers)
@@ -960,7 +1028,8 @@ class FileWriter(AsyncIOThread):
         ValueError if any configuration values are missing from
         the dictionary.
 
-        :param config:  The configuration map for the FileWriter
+        :param config:
+            The configuration map for the FileWriter
         """
         required_config = ['ldir']
         for val in required_config:
@@ -1064,7 +1133,8 @@ class FileWriter(AsyncIOThread):
         """
         Return the path to whatever drive is mounted, or None
 
-        :return: '/media/[drive]' or None
+        :return:
+            '/media/[drive]' or None
         """
         # Check for USB directory
         try:
@@ -1105,8 +1175,6 @@ class FileWriter(AsyncIOThread):
         """
         Unmount the currently mounted USB. Close the current file
         and open a new file.
-
-        :return: None
         """
         if not self.drive_mounted:
             return
@@ -1155,7 +1223,8 @@ class FileWriter(AsyncIOThread):
         Open a new logfile for the current hour. If opening the file fails,
         returns the null file.
 
-        :return: A python file object to write to
+        :return:
+            A python file object to write to
         """
         directory = self.get_directory()
         if not os.path.isdir(directory):
@@ -1186,8 +1255,8 @@ class FileWriter(AsyncIOThread):
         """
         Write a line to the currently open file, ending in a single new-line.
 
-        :param line: Line to write to file.
-        :return: None
+        :param line:
+            Line to write to file.
         """
         try:
             if self.drive_mounted:
@@ -1204,13 +1273,20 @@ class FileWriter(AsyncIOThread):
 
 class WoodwardControl(AsyncIOThread):
     """
-    Send a square wave input via the PWM
+    Control the Woodward.
     """
     # Define directions
     DIRECT = 0
     REVERSE = 1
 
     def __init__(self, wconfig, handlers):
+        """
+        :param wconfig:
+            Configuration map for the Woodward.
+
+        :param handlers:
+            List of log handlers.
+        """
         super(WoodwardControl, self).__init__(handlers)
         # Check configuration to ensure all values present
         WoodwardControl.check_config(wconfig)
@@ -1252,6 +1328,7 @@ class WoodwardControl(AsyncIOThread):
 
     # Output property automatically updates
     def get_output(self):
+        """RPM Setpoint"""
         return self._output
 
     def set_output(self, value):
@@ -1271,6 +1348,9 @@ class WoodwardControl(AsyncIOThread):
         """
         Check to make sure all the required values are present in the
         configuration map.
+
+        :param wconfig:
+            Woodward configuration map
         """
         required_config = ['pin', 'Kp', 'Ki', 'Kd', 'setpoint', 'period']
         for val in required_config:
@@ -1284,6 +1364,15 @@ class WoodwardControl(AsyncIOThread):
 
         Kp, Ki, Kd are positive floats or integers that serve as the
         PID coefficients.
+
+        :param kp:
+            Proportional gain
+
+        :param ki:
+            Integral gain
+
+        :param kd:
+            Derivative gain
         """
         # We can't ever have negative tunings
         # that is accomplished with self.controller_direction
@@ -1300,8 +1389,8 @@ class WoodwardControl(AsyncIOThread):
 
     def set_controller_direction(self, direction):
         """
-        Set the controller direction to one of DIRECT
-        or REVERSE.
+        Set the controller direction. Possible values:
+        :const:`WoodwardControl.DIRECT`, :const:`WoodwardControl.REVERSE`
         """
         old_direction = self._direction
         if direction in [self.DIRECT, self.REVERSE]:
@@ -1413,7 +1502,7 @@ class WoodwardControl(AsyncIOThread):
 
     def run(self):
         """
-        Overloaded method from Thread.run. Start sending a square wave.
+        Overloaded method from Thread.run. Start the control loop.
         """
         i = 0
         if self.mode == 'step':
@@ -1470,6 +1559,9 @@ class WoodwardControl(AsyncIOThread):
         """
         Return the CSV header line.
         Does not include newline or trailing comma.
+
+        :return:
+            A string with the CSV header.
         """
         titles = ["pid_out_percent", "setpoint_amps", "kp", "ki", 'kd']
         return ','.join(titles)
@@ -1478,6 +1570,9 @@ class WoodwardControl(AsyncIOThread):
         """
         Return a CSV line of the data we currently have.
         Does not include newline or trailing comma.
+
+        :return:
+            A string with the CSV data.
         """
         if self._direction == self.REVERSE:
             factor = -1

@@ -39,7 +39,8 @@ def setup():
     """
     Setup the ADC for use. Load the ADC cape if needed.
 
-    :return: True if ADC ready for use, else False.
+    :return:
+        :const:`True` if ADC ready for use, else :const:`False`.
     """
     global adc_setup
     with open(SLOTS, 'r') as f:
@@ -74,29 +75,32 @@ def setup():
     return adc_setup
 
 
-def read_raw(pin_name):
+def read_raw(pin):
     """
     Read the ADC count straight from the Sysfs file, as a count
 
-    :param pin_name: The pin to read
-    :return: The 12-bit count returned for that pin.
+    :param pin:
+        Pin name to read
+
+    :return:
+        12-bit count.
     """
-    if pin_name not in pins:
-        raise ValueError("%s is not an analog input pin" % pin_name)
+    if pin not in pins:
+        raise ValueError("%s is not an analog input pin" % pin)
 
     if not adc_setup:
         raise RuntimeError("ADC must be setup before use")
 
-    pin = pins[pin_name]
+    pin = pins[pin]
     if not os.path.exists(pin.path):
-        raise RuntimeError("Sysfs file for {:s} disappeared".format(pin_name))
+        raise RuntimeError("Sysfs file for {:s} disappeared".format(pin))
 
     try:
         with open(pin.path, 'r') as f:
             value = int(f.read())
     except IOError:
         raise RuntimeError("Could not read sysfs file for {:s}"
-                           .format(pin_name))
+                           .format(pin))
     except ValueError:
         raise RuntimeError("Invalid non-integer value from sysfs file")
 
@@ -104,12 +108,15 @@ def read_raw(pin_name):
     return value
 
 
-def read_volts(pin_name):
+def read_volts(pin):
     """
     Read the value from a pin, scaled to volts.
 
-    :param pin_name: The pin to read
-    :return: The voltage read on that pin
+    :param pin:
+        Pin name to read
+
+    :return:
+        voltage.
     """
-    count = read_raw(pin_name)
+    count = read_raw(pin)
     return count * (1.8 / 4095)
