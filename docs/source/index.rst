@@ -12,9 +12,9 @@ Contents:
    :maxdepth: 2
 
    hygencms
-   licenses_used.rst
-   corner_cases.rst
-   linux_setup.rst
+   licenses_used
+   corner_cases
+   linux_setup
 
 
 
