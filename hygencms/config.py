@@ -8,41 +8,42 @@ Provides configuration utilities for the logger.
 
 The configuration file will be in the form of a python literal dictionary.
 It will be structured as a nested dictionary of the following form:
-{
-    "enabled": ["deepsea", "bms"], # list of async components which are
-            # enabled. Sub configuration maps will use the strings
-            # here as their key
+.. code:: python
+    {
+        "enabled": ["deepsea", "bms"], # list of async components which are
+                # enabled. Sub configuration maps will use the strings
+                # here as their key
 
-    "datafile": "/path/to/data.log",
+        "datafile": "/path/to/data.log",
 
-    "logfile": "/path/to/program/log.log",
+        "logfile": "/path/to/program/log.log",
 
-    # Sub-configuration maps
-    "deepsea": { # If enabled in enabled
-        "mode": "tcp", # or "rtu"
+        # Sub-configuration maps
+        "deepsea": { # If enabled in enabled
+            "mode": "tcp", # or "rtu"
 
-        "mlistfile": "/path/to/list/of/measurements.csv",
+            "mlistfile": "/path/to/list/of/measurements.csv",
 
-        # TCP
-        "host": "192.168.1.212", # IP as string
-        "port": 1003, # Integer port number
+            # TCP
+            "host": "192.168.1.212", # IP as string
+            "port": 1003, # Integer port number
 
-        # RTU
-        "dev": "/dev/ttyO1", # Linux device file for serial
-        "baudrate": 9600, # Integer baud rate
-        "id": 8, # Slave device id
-    },
+            # RTU
+            "dev": "/dev/ttyO1", # Linux device file for serial
+            "baudrate": 9600, # Integer baud rate
+            "id": 8, # Slave device id
+        },
 
-    "bms": {
-        "dev": "/dev/ttyO2", # Linux device file for serial
-        "baudrate": 9600, # baud rate to read in
-        "sfilename": "bmsstream.txt", # A file to store the stream of data verbatim
-    },
+        "bms": {
+            "dev": "/dev/ttyO2", # Linux device file for serial
+            "baudrate": 9600, # baud rate to read in
+            "sfilename": "bmsstream.txt", # A file to store the stream of data verbatim
+        },
 
-    "woodward": {
-        "ww_sig": "P9_21", # PWM signal to the Woodward
-    },
-}
+        "woodward": {
+            "ww_sig": "P9_21", # PWM signal to the Woodward
+        },
+    }
 """
 ###############################
 # Python imports
