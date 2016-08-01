@@ -27,10 +27,11 @@ class GroveLedBar:
     """
     def __init__(self, data_pin, clock_pin):
         """
-        Create a
-
         :param data_pin:
+            Pin to use for data.
+
         :param clock_pin:
+            Pin for clock.
         """
         self._data_pin = data_pin
         self._clock_pin = clock_pin
@@ -41,9 +42,21 @@ class GroveLedBar:
         self._clock_state = True
 
     def set_auto_refresh(self, enable):
+        """
+        Enable auto-refreshing on changes.
+        """
         self._auto_refresh = bool(enable)
 
     def set_bar_level(self, level, invert_direction=False):
+        """
+        Set the LED bar level.
+
+        :param level:
+            Level to set.
+
+        :param invert_direction:
+            Fill the bar in the opposite direction.
+        """
         if level > 10:
             level = 10
 
@@ -60,12 +73,18 @@ class GroveLedBar:
             self.refresh()
 
     def refresh(self):
+        """
+        Send the current state of the object out to the bar
+        """
         for i in range(LEDS_PER_INSTANCE):
             self.send_16_bit_block(self._bit_states[i])
 
         self.lock_data()
 
     def lock_data(self):
+        """
+        Ensure the data is set in the LED bar.
+        """
         gpio.write(self._data_pin, 0)
         # We don't need a sleep here to latch data,
         # because we're not driving multiple bars
@@ -76,6 +95,12 @@ class GroveLedBar:
         # same here
 
     def send_16_bit_block(self, data):
+        """
+        Send a 16-bit block of bytes.
+
+        :param data:
+            16-bits, as an integer.
+        """
         for i in range(16):
             gpio.write(self._data_pin, data & 0x8000)
             self._clock_state = not self._clock_state
@@ -84,6 +109,9 @@ class GroveLedBar:
 
 
 def main():
+    """
+    Testing routine
+    """
     bar = GroveLedBar("P9_12", "P9_15")
 
     while True:
