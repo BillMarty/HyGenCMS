@@ -19,7 +19,6 @@ import signal
 from daemon import pidfile, DaemonContext
 
 from hygencms.config import get_configuration
-
 from hygencms.main import main as main_entry
 
 
@@ -87,10 +86,10 @@ def main():
                               }
         with context:
             main_entry(config, handlers, daemon=True, watchdog=args.watchdog,
-                 power_off_enabled=args.poweroff)
+                       power_off_enabled=args.poweroff)
     else:
         main_entry(config, handlers, daemon=False, watchdog=args.watchdog,
-             power_off_enabled=args.poweroff)
+                   power_off_enabled=args.poweroff)
 
 
 if __name__ == '__main__':
