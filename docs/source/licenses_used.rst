@@ -1,0 +1,5 @@
+- pyserial: BSD license
+- python: python license (specific to python, very permissive)
+- code from StackOverflow: MIT License
+- modbus_tk: LGPL license
+- monotonic: apache license

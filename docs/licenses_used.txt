@@ -1,8 +1,0 @@
-pymodbus: BSD License
-pyserial: BSD license
-python: python license (specific to python, very permissive)
-code from StackOverflow: MIT License
-monit: AGPLv3 (not actually used in any of our code, only if we make modifications to that tool)
-Adafruit Beaglebone IO: MIT license
-modbus_tk: LGPL license
-monotonic: apache license
