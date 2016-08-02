@@ -58,9 +58,9 @@
             # 'P9_39' = AIN0 = high bus voltage
             # 'P9_40' = AIN1 = high bus current shunt
             # These will change gains
-            ['pulse_count', 'V', 'P9_36', 1.0, 0.0],
-            ['an_300v_cur', 'A', 'P9_40', 40.0, -0.2],
-            ['an_300v_volt', 'V', 'P9_39', 1.0, 0.0]
+            #  ['pulse_count', 'V', 'P9_36', 1.0, 0.0],
+            ['an_300v_cur', 'A', 'P9_40', 40.0, -0.2],  # Theoretical gain, observed offset
+            ['an_300v_volt', 'V', 'P9_39', 190.7, 0.0],  # Theoretical values
         ],
         # How often to report values
         'frequency': 1.0,
