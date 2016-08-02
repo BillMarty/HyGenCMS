@@ -64,6 +64,9 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     threads = []
     clients = []
 
+    # Keep an exit code variable so we can exit nicely
+    exit_code = 0
+
     ############################################
     # Async Data Sources
     ############################################
@@ -130,6 +133,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         except ValueError as e:
             logger.error("ValueError: %s"
                          % (e.args[0]))
+            exit("WoodwardControl thread did not start")
         else:
             clients.append(woodward)
             threads.append(woodward)
@@ -163,7 +167,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     # Check whether we have some input
     if len(clients) == 0:
         logger.error("No clients started successfully. Exiting.")
-        exit(-1)
+        exit("No clients started successfully. Exiting.")  # Exits with code 1
 
     ######################################
     # LED Gauges
@@ -287,8 +291,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             # Once every 10 seconds
             ###########################
             if now >= next_run[10.0]:
-                # Check threads to ensure they're running
-                revive(threads, logger)
+                # Ensure analog and woodward control are running
+                if analog.cancelled or woodward.cancelled:
+                    logger.error("Missing analog or woodward")
+                    going = False
+                    exit_code = 1
                 # Schedule next run
                 next_run[10.0] = now + 10.0
 
@@ -304,10 +311,15 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             time.sleep(0.01)
 
         except KeyboardInterrupt:
+            going = False
+            # Standard exit code when interrupted by Ctrl-C
+            # http://tldp.org/LDP/abs/html/exitcodes.html
+            exit_code = 130
             stop_threads(threads)
-            exit(1)
+
         except SystemExit:
             going = False
+            exit_code = 0
             stop_threads(threads)
 
         except Exception as e:  # Log any other exceptions
@@ -315,7 +327,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
     if shutdown and power_off_enabled:
         power_off()
-    exit(0)
+    exit(exit_code)
 
 
 def stop_threads(threads):

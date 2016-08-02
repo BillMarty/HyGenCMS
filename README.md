@@ -8,3 +8,7 @@ The pin lists are located in three places, which should be kept synchronized. `S
 # Installation
 
 Follow the documentation in the [Linux setup guide](LINUX_SETUP.md).
+
+# Error Codes
+
+Error codes follow Linux standards. Exiting success returns a 0. Exiting most errors returns a 1. Exiting by `Ctrl-C` returns 130 ([reference](http://tldp.org/LDP/abs/html/exitcodes.html)).
