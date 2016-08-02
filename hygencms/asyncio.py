@@ -886,12 +886,14 @@ class DeepSeaClient(AsyncIOThread):
     FUEL_LEVEL = 1027  # section 10.6, address 3
     BATTERY_LEVEL = 1223  # section 10.6, address 199
     RPM = 1030  # section 10.6, address 6
+    VIRTUAL_LED_1 = 191*256 + 0  # section 10.57, address 0
 
     # Addresses which are required
     MANDATORY_ADDRESSES = {
         FUEL_LEVEL,
         BATTERY_LEVEL,
         RPM,
+        VIRTUAL_LED_1,
     }
 
     # Templates to use if mandatory values are missing.
@@ -899,6 +901,7 @@ class DeepSeaClient(AsyncIOThread):
         FUEL_LEVEL: ["Fuel level", '%', FUEL_LEVEL, 1, 1, 0, 60],
         BATTERY_LEVEL: ["battery level", 'V', BATTERY_LEVEL, 1, 1.0, 0.0, 1.0],
         RPM: ["Engine speed", 'RPM', RPM, 1, 1.0, 0.0, 0.1],
+        VIRTUAL_LED_1: ["Enable RPM Control", 'boolean', VIRTUAL_LED_1, 1, 1, 0, 1.0],
     }
 
 

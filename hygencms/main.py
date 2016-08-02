@@ -232,9 +232,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             if now >= next_run[0.5]:
                 # Connect the on / off signal from the deepSea to the PID
                 try:
-                    pid_enable = data_store[3345]  # From DeepSea GenComm manual
-                    if pid_enable and int(pid_enable) & (1 << 6):
-                        #  woodward.integral_term = 0.0
+                    # Virtual LED 1
+                    # From DeepSea GenComm manual, 10.57
+                    pid_enable = data_store[191*256 + 0]
+                    if not woodward.in_auto and pid_enable:
+                        woodward.integral_term = 0.0
                         woodward.set_auto(True)
                     else:
                         woodward.set_auto(False)
@@ -400,6 +402,7 @@ def update_gauges(fuel_gauge, battery_gauge):
         battery_gauge.set_bar_level(1)
     else:
         # Scale the range from 259 to 309 to 0-10
+        # noinspection PyTypeChecker
         battery_charge = int(round((battery_charge - 259) * 0.2))
         battery_gauge.set_bar_level(battery_charge)
 
