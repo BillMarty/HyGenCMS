@@ -60,7 +60,9 @@
             # These will change gains
             #  ['pulse_count', 'V', 'P9_36', 1.0, 0.0],
             ['an_300v_cur', 'A', 'P9_40', 40.0, -0.2],  # Theoretical gain, observed offset
-            ['an_300v_volt', 'V', 'P9_39', 190.7, 0.0],  # Theoretical values
+            #  ['an_300v_volt', 'V', 'P9_39', 190.7, 0.0],  # Theoretical values
+            ['an_300v_volt', 'V', 'P9_39', 191.4, 0.4],  # Theoretical values
+
         ],
         # How often to report values
         'frequency': 1.0,
