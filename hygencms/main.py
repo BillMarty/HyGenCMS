@@ -48,7 +48,7 @@ else:
 # b) analog pin in
 # c) our assigned "one true name" for each BMS variable
 # d) PWM pin out for Woodward signals
-data_store = {}
+data_store = {pins.GEN_CUR: None}
 
 
 def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False):
@@ -214,7 +214,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 # Connect the analog current in to the woodward process
                 if woodward and not woodward.cancelled:
                     try:
-                        cur = data_store[pins.GEN_CUR]
+                        cur = data_store["P9_40"]
                         if cur is not None:
                             woodward.process_variable = cur
                     except UnboundLocalError:
@@ -234,7 +234,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 try:
                     pid_enable = data_store[3345]  # From DeepSea GenComm manual
                     if pid_enable and int(pid_enable) & (1 << 6):
-                        woodward.integral_term = 0.0
+                        #  woodward.integral_term = 0.0
                         woodward.set_auto(True)
                     else:
                         woodward.set_auto(False)

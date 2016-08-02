@@ -36,8 +36,8 @@
     # Control signal to Woodward
     'woodward': {
         'pin': 'P9_29',
-        'Kp': 1.0,
-        'Ki': 0.8,
+        'Kp': 0.0,
+        'Ki': 0.5,
         'Kd': 0.0,
         'setpoint': 25.0,  # Amps
         'period': 1.0,
@@ -59,7 +59,7 @@
             # 'P9_40' = AIN1 = high bus current shunt
             # These will change gains
             ['pulse_count', 'V', 'P9_36', 1.0, 0.0],
-            ['an_300v_cur', 'A', 'P9_38', 40.0, -0.2],
+            ['an_300v_cur', 'A', 'P9_40', 40.0, -0.2],
             ['an_300v_volt', 'V', 'P9_39', 1.0, 0.0]
         ],
         # How often to report values
