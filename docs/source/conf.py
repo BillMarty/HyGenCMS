@@ -58,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'HyGenCMS'
-copyright = '2016, Matthew West'
+copyright = '2016, Planetary Power'
 author = 'Matthew West'
 
 # The version info for the project you're documenting, acts as replacement for

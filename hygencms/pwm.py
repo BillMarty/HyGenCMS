@@ -12,7 +12,7 @@ This module supports all PWM pins that are implemented on the
 BeagleBone Black. Before using this library, each pin must be correctly
 pinmuxed for PWM and its Device Tree Overlay must have been loaded. The
 recommended way to do this is via the BeagleBone Universal IO library
-[here](https://github.com/cdsteinkuehler/beaglebone-universal-io).
+`here <https://github.com/cdsteinkuehler/beaglebone-universal-io>`_.
 
 This module requires a Linux kernel >= 4.1, in order for the ``sysfs``
 file paths in the library to work.

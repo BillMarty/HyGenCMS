@@ -1,5 +1,39 @@
-HyGen Control Management System
-===============================
+HyGen CMS
+=========
+
+The HyGen Communication Management System, or CMS, is controlled by
+this Python package, running on a BeagleBone Black or BeagleBone Black
+clone such as the one manufactured by Arrow. It is intended to function
+on the Linux kernel version 4.1+, as 4.1 introduced a number of changes
+to the kernel interface file structure, and supports the Arrow
+BeagleBone Black Industrial on the same image as other BeagleBone Black
+devices.
+
+Dependencies
+------------
+
+This software relies on a number of other pieces of software. The most
+prominent among them is Python. While an effort has been made to keep
+the software compatible between Python 2 and Python 3, it is
+recommended to use Python 3, as it is perfectly stable, and is the
+platform being used for development.
+
+Within Python, there are several dependencies, which are best installed
+with ``pip``. These are listed in the ``dependencies.txt`` file in the
+top level of this repository.
+
+Apart from these tools, the program relies on several shell commands to
+be installed and present in the root PATH:
+
+- ``pmount``
+- ``pumount``
+- ``lsblk``
+- ``mount``
+
+Program Flow
+------------
+
+
 
 Module contents
 ---------------
