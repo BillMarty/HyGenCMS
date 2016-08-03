@@ -309,33 +309,15 @@ device tree overlays in that repository are already installed in kernel
     cd beaglebone-universal-io
     sudo make install_target  # This installs the utility but not the DTOs
 
-Setup USB Automounting
+Setup USB Mounting
 ----------------------
 
-Linux uses a system called ``udev`` to manage and respond to kernel
-events, such as the insertion or removal of hardware. This system
-allows the addition of rules files for implementing our own
-functionality. In our case, we'd like to automatically mount any USB
-device that is inserted, in order to write log files. We'll link in the
-\ ``automount.rules`` file from the
-``HyGenCMS/linux_setup/automount.rules`` to
-``/etc/udev/rules.d/automount.rules``.
-
-.. code:: bash
-
-    sudo ln -s /path/to/automount.rules /etc/udev/rules.d/automount.rules
-
-This will check and automount any inserted USB drive so that it is
-readable for any user. There are two things left to do: first,
-``pmount`` is not installed, so we need to add that. Second, we need to
-reload the udev rules in order for our new rule to take effect.
+``pmount``, the tool we use to mount and unmount usb drives in userspace,
+ is not installed, so we need to add that.
 
 .. code:: bash
 
     sudo apt-get install pmount
-    sudo udevadm control --reload-rules
-
-Now USB drives will mount automatically.
 
 Hygen Software
 --------------
