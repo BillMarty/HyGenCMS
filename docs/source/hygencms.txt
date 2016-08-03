@@ -6,8 +6,6 @@ Module contents
 
 .. automodule:: hygencms
     :members:
-    :undoc-members:
-    :show-inheritance:
 
 Submodules
 ----------

@@ -3,12 +3,26 @@
 # Proprietary and confidential
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 
+"""
+This module provides a very simple interface to the gpio pins on the
+BeagleBone Black. Pins can be written to using ``gpio.write`` or read
+with ``gpio.read``. It is assumed that all necessary pinmuxing has
+been done prior to calling any functions from this module. This module
+implements only the pins which are used as gpio pins in the version of
+the HyGenCMS software in which it is included.
+
+This gpio module requires a Linux kernel version >= 4.1, in order to
+have correct paths for the sysfs files.
+
+All gpio functions accept pin titles as their argument, of the form
+'P9_08'.
+"""
+
 import re
 import platform
 
 if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
     raise EnvironmentError('Requires Linux >=4.1.0')
-    # pass
 
 pins = {
     'P8_07': {
@@ -95,9 +109,15 @@ def normalize_pin(pin):
 def write(pin, value):
     """
     Write to a GPIO pin.
-    :param pin: Pin to write to, such as P9_11
-    :param value: Interpreted as boolean
-    :return: None
+
+    :param pin:
+        Pin to write to, such as P9_11
+
+    :param value:
+        Interpreted as boolean
+
+    :return: 
+        :const:`None`
     """
     normalized_pin = normalize_pin(pin)
     try:
@@ -111,9 +131,15 @@ def write(pin, value):
 
 def read(pin):
     """
-    Read a GPIO pin. Return gpio.HIGH=1=True or gpio.LOW=0=False
-    :param pin: A GPIO pin
-    :return: True/False
+    Read a GPIO pin.
+
+    Return gpio.HIGH or gpio.LOW.
+
+    :param pin:
+        A GPIO pin.
+
+    :return:
+        :const:`True` or :const:`False`
     """
     normalized_pin = normalize_pin(pin)
     try:

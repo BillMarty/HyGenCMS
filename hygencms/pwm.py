@@ -3,16 +3,34 @@
 # Proprietary and confidential
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 """
-This module provides a wrapper around the sysfs interface to the BeagleBone's
-PWM system. It operates by writing to files in the /sys/ directory. Therefore,
-it either must be run as root, or permissions must be adjusted in such a way
-that the files are writable by non-root.
+This module provides a wrapper around the sysfs interface to the
+BeagleBone PWM system. It operates by writing to files in the ``/sys``
+directory. Therefore, it either must be run as root, or permissions
+must be adjusted in such a way that the files are writable by non-root.
+
+This module supports all PWM pins that are implemented on the
+BeagleBone Black. Before using this library, each pin must be correctly
+pinmuxed for PWM and its Device Tree Overlay must have been loaded. The
+recommended way to do this is via the BeagleBone Universal IO library
+[here](https://github.com/cdsteinkuehler/beaglebone-universal-io).
+
+This module requires a Linux kernel >= 4.1, in order for the ``sysfs``
+file paths in the library to work.
+
+Each pin must be started before setting its frequency or duty cycle.
+
+Every pin name argument uses the notation on the BeagleBone Black:
+Pa_bb, where ``a = header number`` and ``bb = pin number``.
 """
 
 
 import glob
 import os.path as path
 import time
+import platform
+
+if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
+    raise EnvironmentError('Requires Linux >=4.1.0')
 
 
 class PwmPin:
@@ -93,17 +111,21 @@ pins = {
 ocp_path = '/sys/devices/platform/ocp'
 
 
-def start(key, duty_cycle=50.0, frequency=100000):
+def start(pin_name, duty_cycle=50.0, frequency=100000):
     """
-    Start a PWM pin
+    Start a PWM pin.
 
-    :param key: The pin name
-    :param duty_cycle: Starting duty cycle
-    :param frequency: Starting frequency
-    :return: None
+    :param pin_name: The pin name
+    :param duty_cycle: Initial duty cycle
+    :param frequency: Initial frequency
+
+    :exception ValueError:
+        Raised if the pin name entered is invalid.
+    :exception RunTimeError:
+        Raised if unable to start the PWM pin.
     """
     try:
-        pin = pins[key]
+        pin = pins[pin_name]
     except KeyError:
         raise ValueError("PWM pin not implemented")
 
@@ -173,22 +195,26 @@ def start(key, duty_cycle=50.0, frequency=100000):
 
     if tries >= 100:
         pin.initialized = False
-        raise RuntimeError("Couldn't enable {:s}".format(key))
+        raise RuntimeError("Couldn't enable {:s}".format(pin_name))
 
-    set_frequency(key, frequency)
-    set_duty_cycle(key, duty_cycle)
+    set_frequency(pin_name, frequency)
+    set_duty_cycle(pin_name, duty_cycle)
 
 
-def set_frequency(key, freq):
+def set_frequency(pin_name, freq):
     """
-    Set the frequency for a PWM pin
+    Set the frequency for a PWM pin.
 
-    :param key: The pin name
+    :param pin_name: The pin name
     :param freq: Frequency in Hz
-    :return: None
+
+    :exception ValueError:
+        Raised if the pin name entered is invalid.
+    :exception RuntimeError:
+        Raised if the pin has not been initialized first.
     """
     try:
-        pin = pins[key]
+        pin = pins[pin_name]
     except KeyError:
         raise ValueError("Unimplemented key")
 
@@ -206,7 +232,7 @@ def set_frequency(key, freq):
         print("Error writing to {:s}: {:s}".format(pin.period_path, str(e)))
     pin.period_ns = period_ns
     pin.freq = freq
-    set_duty_cycle(key, pin.duty)  # stay constant after changing period
+    set_duty_cycle(pin_name, pin.duty)  # stay constant after changing period
 
 
 def set_duty_cycle(key, duty):
@@ -214,8 +240,13 @@ def set_duty_cycle(key, duty):
     Set the duty cycle for a pin.
 
     :param key: The pin name
-    :param duty: The new duty cycle
-    :return: None
+    :param duty: The new duty cycle between 0 and 100 inclusive
+
+    :exception ValueError:
+        Raised if the pin name entered is invalid or
+        if the duty cycle given is out of range.
+    :exception RuntimeError:
+        Raised if the pin has not been initialized first.
     """
     try:
         pin = pins[key]
@@ -235,4 +266,3 @@ def set_duty_cycle(key, duty):
     except OSError as e:
         print("Error writing to {:s}: {:s}".format(pin.duty_path, str(e)))
     pin.duty = duty
-

@@ -4,14 +4,28 @@
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 
 """
-This will be the main entry point for the python program for the hygen.
+This module is the main loop for HyGenCMS software.
 
-The program implements the following functionality:
-    - Read data asynchronously from the DeepSea, BMS, and analog
-        input pins
-    - Write the read data to a USB memory stick location.
-    - When a flag from the DeepSea is enabled, control the Woodward
-        based on the Analog trunk current value
+The primary functions of the main loop are as follows:
+
+- Start all necessary threads to read data asynchronously from the
+    DeepSea, BMS, and analog input pins
+- Start the thread to write data to a USB memory stick or fallback
+    location on local disk.
+- Start the thread to control the Woodward's RPM setpoint based on
+    the Analog trunk current value.
+- Pass through analog current value to the RPM setpoint controller
+    thread.
+- Enable and disable the RPM setpoint controller.
+- Compile and pass through csv lines of data to the file writer
+    thread.
+- Update fuel and battery gauges based on values from the DeepSea.
+- Read the "USB eject" switch and pass through to the file writer.
+- Update the tunings of the RPM setpoint controller.
+- Check kill relay and shutdown if instructed to.
+- Check if new USB is plugged in and pass through to file writer.
+- Check if old USB is removed to turn off safe-to-remove LED.
+- Handle exceptions which arise in the main loop.
 """
 
 ###############################
@@ -402,9 +416,9 @@ def revive(threads, logger):
 
 def update_watchdog():
     """
-    Write to the watchdog file, keeping the system from being restarted.
-    If we don't write to the watchdog for 60 seconds, the system will be
-    restarted.
+    Write to the watchdog file, keeping the system from being
+    restarted. If we don't write to the watchdog for 60 seconds, the
+    system will be restarted.
 
     :return: None
     """
@@ -414,11 +428,11 @@ def update_watchdog():
 
 def update_gauges(fuel_gauge, battery_gauge):
     """
-    Update both the fuel and the battery gauge using data from the central
-    data store.
+    Update both the fuel and the battery gauge using data from the
+    central data store.
 
-    :param fuel_gauge: GroveLedBar object of the fuel gauge
-    :param battery_gauge: GroveLedBar object of the battery gauge
+    :param fuel_gauge: GroveLedBar object, the fuel gauge
+    :param battery_gauge: GroveLedBar object, the battery gauge
     :return: None
     """
     # Update interface gauges
@@ -456,8 +470,9 @@ kill_now = False
 
 def check_kill_switch():
     """
-    Check whether we are to poweroff now. Only return when
-    the switch has been set for two loops.
+    Check whether we are to poweroff now. Only return when the switch
+    has been set for two iterations.
+
     :return: Whether to poweroff.
     """
     global kill_now, kill_last
@@ -470,6 +485,7 @@ def check_kill_switch():
 def power_off():
     """
     Shut down the system immediately.
+
     :return: None
     """
     subprocess.call(["poweroff"])

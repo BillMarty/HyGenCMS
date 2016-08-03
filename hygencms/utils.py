@@ -13,12 +13,15 @@ PY3 = sys.version_info[0] == 3
 
 def get_input(s, default=""):
     """
-    Get raw input using the correct function for the Python version.
+    Get raw input from the user, using the correct function for the
+    Python version.
 
-    :param s: The prompt string to show. A space will be added to the end so
+    :param s:
+        The prompt string to show. A space will be added to the end so
         no trailing space is required
 
-    :param default: A default value which will be returned if the user does not
+    :param default:
+        A default value which will be returned if the user does not
         enter a value. Displayed in square brackets following the
         prompt
     :return: The returned string value.
@@ -40,7 +43,9 @@ def get_input(s, default=""):
 
 
 def is_int(s, *args):
-    """Return whether a value can be interpreted as an int."""
+    """
+    Return whether a value can be interpreted as an int.
+    """
     try:
         int(s, *args)
         return True
@@ -51,8 +56,12 @@ def is_int(s, *args):
 @contextmanager
 def ignore(*exceptions):
     """
-    Ignore whichever exceptions are given as arguments.
-    Taken from http://stackoverflow.com/a/15573313 (MIT license)
+    A context manager, used to ignore certain types of exceptions.
+    Used in an enclosing ``with``, it ignores whichever exceptions
+    are given as arguments.
+
+    Taken from http://stackoverflow.com/a/15573313 under the MIT
+    license.
     """
     try:
         yield

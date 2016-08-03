@@ -5,8 +5,10 @@
 
 """
 This file provides a key to pins using the official V3 CMS Schematic.
+It should be kept synchronized with the SBC_IO.xlsx spreadsheet in the
+``docs`` folder.
 
-Last updated to 2016-07-26 version.
+Last updated: 2016-07-26
 """
 # DGND = P8_01
 # DGND = P8_02
