@@ -23,11 +23,15 @@ import subprocess
 import sys
 import time
 
+import hygencms.analogclient
+import hygencms.bmsclient
+import hygencms.filewriter
+import hygencms.woodwardcontrol
 import monotonic
 import serial
 
 import hygencms.asyncio
-from hygencms.asyncio import DeepSeaClient
+from hygencms.deepseaclient import DeepSeaClient
 from . import gpio
 from . import pins
 from . import utils
@@ -70,6 +74,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     ############################################
     # Async Data Sources
     ############################################
+    deepsea = None
     if 'deepsea' in config['enabled']:
         try:
             deepsea = DeepSeaClient(config['deepsea'], handlers, data_store)
@@ -88,9 +93,10 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             clients.append(deepsea)
             threads.append(deepsea)
 
+    analog = None
     if 'analog' in config['enabled']:
         try:
-            analog = hygencms.asyncio.AnalogClient(config['analog'], handlers, data_store)
+            analog = hygencms.analogclient.AnalogClient(config['analog'], handlers, data_store)
         except ValueError:
             exc_type, exc_value = sys.exc_info()[:2]
             logger.error("Configuration error from AnalogClient: %s: %s"
@@ -104,9 +110,10 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             clients.append(analog)
             threads.append(analog)
 
+    bms = None
     if 'bms' in config['enabled']:
         try:
-            bms = hygencms.asyncio.BmsClient(config['bms'], handlers)
+            bms = hygencms.bmsclient.BmsClient(config['bms'], handlers)
         except serial.SerialException as e:
             logger.error("SerialException({0}) opening BmsClient: {1}"
                          .format(e.errno, e.strerror))
@@ -123,9 +130,10 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     #######################################
     # Other Threads
     #######################################
+    woodward = None
     if 'woodward' in config['enabled']:
         try:
-            woodward = hygencms.asyncio.WoodwardControl(
+            woodward = hygencms.woodwardcontrol.WoodwardControl(
                 config['woodward'], handlers
             )
         # ValueError can be from a missing value in the config map
@@ -138,6 +146,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             clients.append(woodward)
             threads.append(woodward)
 
+    filewriter = None
     if 'filewriter' in config['enabled']:
         headers = []
         for c in clients:
@@ -150,7 +159,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         csv_header = "linuxtime," + ','.join(headers)
         log_queue = queue.Queue()
         try:
-            filewriter = hygencms.asyncio.FileWriter(
+            filewriter = hygencms.filewriter.FileWriter(
                 config['filewriter'], handlers, log_queue, csv_header
             )
         except ValueError as e:
@@ -168,6 +177,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     if len(clients) == 0:
         logger.error("No clients started successfully. Exiting.")
         exit("No clients started successfully. Exiting.")  # Exits with code 1
+
+    # We must always have Woodward thread and Analog thread at a minimum
+    if not woodward or not analog:
+        logger.error("Woodward or Analog client missing")
+        exit("Woodward or Analog client did not start successfully. Exiting.")
 
     ######################################
     # LED Gauges
