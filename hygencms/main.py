@@ -24,14 +24,14 @@ import sys
 import time
 
 import hygencms.analogclient
+import hygencms.asyncio
 import hygencms.bmsclient
 import hygencms.filewriter
 import hygencms.woodwardcontrol
 import monotonic
 import serial
-
-import hygencms.asyncio
 from hygencms.deepseaclient import DeepSeaClient
+
 from . import gpio
 from . import pins
 from . import utils
@@ -256,7 +256,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     if not woodward.in_auto and pid_enable:
                         woodward.integral_term = 0.0
                         woodward.set_auto(True)
-                    else:
+                    elif not pid_enable:
                         woodward.set_auto(False)
                         woodward.output = 0.0
                         woodward.integral_term = 0.0
