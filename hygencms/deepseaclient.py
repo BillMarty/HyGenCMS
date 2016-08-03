@@ -439,7 +439,7 @@ class DeepSeaClient(AsyncIOThread):
     FUEL_LEVEL = 1027  # section 10.6, address 3
     BATTERY_LEVEL = 1223  # section 10.6, address 199
     RPM = 1030  # section 10.6, address 6
-    VIRTUAL_LED_1 = 191*256 + 0  # section 10.57, address 0
+    VIRTUAL_LED_1 = 191 * 256 + 0  # section 10.57, address 0
 
     # Addresses which are required
     MANDATORY_ADDRESSES = {

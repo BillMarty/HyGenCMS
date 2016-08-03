@@ -73,6 +73,10 @@ class FileWriter(AsyncIOThread):
         self._safe_to_remove = None
         self._usb_activity = None
 
+        # Initialize LEDs to off
+        self.safe_to_remove = False
+        self.usb_activity = False
+
         # Flags set by main thread
         self.eject_drive = None
         self.mount_drive = None

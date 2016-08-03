@@ -59,9 +59,12 @@ def mount_point():
     return drive_path
 
 
-def mounted():
+def mounted(device=None):
     """
     Return the device file of a mounted USB
+
+    :param device:
+        Optionally, the device to look for.
 
     :return:
         The device file '/dev/sd??'
@@ -71,7 +74,11 @@ def mounted():
     except CalledProcessError:
         return None
 
-    position = mount_list.find('/dev/sd')
+    if device:
+        position = mount_list.find(device)
+    else:
+        position = mount_list.find('/dev/sd')
+
     if position == -1:
         return None
 
@@ -119,11 +126,12 @@ def unmount(device):
         True if success, else False
     """
     device = path.basename(device)
-    m = mounted()
-    if m and path.basename(m) != device:
-        return True  # That device isn't mounted
+    m = mounted(device)
+    if not m:
+        return False  # That device isn't mounted
 
     # Try to unmount
+    drive_mounted = True
     tries = 0
     while drive_mounted and tries < 100:
         try:
