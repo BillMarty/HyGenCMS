@@ -1,13 +1,12 @@
 import os
 import queue
-import subprocess
 import time
 from datetime import datetime
-from subprocess import CalledProcessError, check_call, STDOUT
+from os import path
 
 from hygencms import gpio, pins, utils
+from hygencms import usbdrive
 from hygencms.asyncio import AsyncIOThread
-from monotonic import monotonic
 
 
 class FileWriter(AsyncIOThread):
@@ -22,7 +21,7 @@ class FileWriter(AsyncIOThread):
     If a drive is plugged in, begins logging files on drive again.
     """
     # Location to store log files if a USB is not available
-    base_dir = '/home/hygen'
+    fallback_directory = '/home/hygen'
 
     def __init__(self, config, handlers, log_queue, csv_header):
         """
@@ -63,12 +62,20 @@ class FileWriter(AsyncIOThread):
         self._f = open(os.devnull, 'w')
         self._csv_header = csv_header
 
-        self.drive_mounted = bool(self.usb_mounted())
+        # Set the base directory to use
+        mounted_directory = usbdrive.mount_point()
+        if mounted_directory:
+            self.base_directory = mounted_directory
+        else:
+            self.base_directory = self.fallback_directory
 
+        # Private variables behind properties
         self._safe_to_remove = None
         self._usb_activity = None
 
-        self.ejecting = False
+        # Flags set by main thread
+        self.eject_drive = None
+        self.mount_drive = None
 
     ########################################################
     # Properties
@@ -106,10 +113,6 @@ class FileWriter(AsyncIOThread):
         else:
             gpio.write(pins.DISK_ACT_LED, gpio.LOW)
             self._usb_activity = False
-
-    @usb_activity.getter
-    def usb_activity(self):
-        return self._usb_activity
 
     @usb_activity.deleter
     def usb_activity(self):
@@ -151,219 +154,44 @@ class FileWriter(AsyncIOThread):
         """
         Overrides Thread.run. Run the FileWriter.
         """
-        next_run = {
-            0.5: 0,
-            1.0: 0,
-            10.0: 0,
-            60.0: 0,
-        }
-        # Initial values
-        device = None
         prev_hour = -1  # Always start a new file to start
+
         while not self.cancelled:
             # noinspection PyBroadException
             try:
-                now = monotonic()
+                if self.mount_drive:
+                    self._f.close()
+                    usbdrive.mount(self.mount_drive)
 
-                # Twice a second
-                if now >= next_run[0.5]:
-                    # if eject button is pressed
-                    if gpio.read(pins.USB_SW) == gpio.LOW:
-                        # if file closed and unmounted
-                        if self.unmount_usb():
-                            self.safe_to_remove = True
-                            self.ejecting = True
+                    self.base_directory = self.mount_drive
+                    self._f = self.new_logfile()
+                    self.mount_drive = None
 
-                    # Update safe-to-remove LED
-                    self.safe_to_remove = self.ejecting and device and not self.drive_mounted
+                elif self.eject_drive:
+                    self._f.close()
+                    usbdrive.unmount_mounted()
+                    self.safe_to_remove = True
 
-                    # Schedule next run
-                    next_run[0.5] = now + 0.5
+                    self.base_directory = self.fallback_directory
+                    self._f = self.new_logfile()
+                    self.eject_drive = False
 
-                # Every second
-                if now >= next_run[1.0]:
-                    # Check whether USB is plugged in, and mounted
-                    device = self.usb_plugged()
+                elif datetime.now().hour != prev_hour:
+                    self._f = self.new_logfile()
 
-                    if self.ejecting and not device:
-                        self.ejecting = False
+                # Print out lines
+                more_items = True
+                while more_items:
+                    try:
+                        line = self._queue.get(False)
+                    except queue.Empty:
+                        more_items = False
+                    else:
+                        self._write_line(line)
 
-                    mounted_drive = self.usb_mounted()
-
-                    # If we've mounted a new drive and Python hasn't handled it
-                    if mounted_drive and not self.drive_mounted:
-                        # Get new file (presumably on USB)
-                        self._f.close()
-                        self._f = self._get_new_logfile()
-                        self._write_line(self._csv_header)
-                        self.drive_mounted = True
-
-                    # Print out lines
-                    more_items = True
-                    while more_items:
-                        try:
-                            line = self._queue.get(False)
-                        except queue.Empty:
-                            more_items = False
-                        else:
-                            self._write_line(line)
-
-                    # Schedule next run
-                    next_run[1.0] = now + 1.0
-
-                # Every 10 seconds
-                if now >= next_run[10.0]:
-                    # Disable the safe-to-remove light if the drive is out
-                    if self.safe_to_remove:
-                        if self.usb_plugged():
-                            pass  # TODO remount the drive
-                        else:
-                            self.safe_to_remove = False
-
-                    # Schedule next run
-                    next_run[10.0] = now + 10.0
-
-                # Every minute
-                if now >= next_run[60.0]:
-                    # Check to see whether it's a new hour
-                    # and open a new file
-                    hour = datetime.now().hour
-                    if prev_hour != hour:
-                        self._f.close()
-                        self._f = self._get_new_logfile()
-                        prev_hour = hour
-                        self._write_line(self._csv_header)
-
-                    # Schedule next run
-                    next_run[60.0] = now + 60.0
-
-                # TODO Poll GPIOs in a separate thread
-
-                time.sleep(0.01)
+                time.sleep(0.1)
             except Exception as e:
                 utils.log_exception(self._logger, e)
-
-    def usb_mounted(self):
-        """
-        Return the path to whatever drive is mounted, or None
-
-        :return:
-            '/media/[drive]' or None
-        """
-        # Check for USB directory
-        try:
-            mount_list = str(subprocess.check_output(['mount']))
-        except CalledProcessError:
-            self._logger.debug("Error in mount")
-            return None
-
-        position = mount_list.find('/dev/sd')
-        if position == -1:
-            return None
-
-        line = mount_list[position:].splitlines()[0]
-        position = line.find("/media/sd")
-        if position == -1:
-            return None
-
-        path = line[position:].split()[0]
-
-        return path
-
-    def usb_plugged(self):
-        """Return True if a USB device is plugged in"""
-        try:
-            output = str(subprocess.check_output(['ls', '/dev']))
-        except CalledProcessError:
-            self._logger.debug("Error in ls.")
-            return False
-        else:
-            position = output.rfind('sd')
-            if position >= 0:
-                # Get the device fil
-                return '/dev/' + output[position:].split()[0]
-            else:
-                return False
-
-    def unmount_usb(self):
-        """
-        Unmount the currently mounted USB. Close the current file
-        and open a new file.
-        """
-        if not self.drive_mounted:
-            return
-        else:
-            drive = self.usb_mounted()
-
-        # Close file and unmount
-        self._f.close()
-        tries = 0
-        while self.drive_mounted and tries < 100:
-            try:
-                check_call(["pumount", drive], stderr=STDOUT)
-            except CalledProcessError as e:
-                self._logger.critical("Could not unmount "
-                                      + drive
-                                      + ". Failed with error "
-                                      + str(e.output))
-                tries += 1
-            else:
-                self.safe_to_remove = True
-                self.drive_mounted = False
-            time.sleep(0.01)
-        self._f = self._get_new_logfile()
-
-    def get_directory(self):
-        """
-        Get the directory to store logs to.
-        """
-        drive = self.usb_mounted()
-
-        if drive is None:
-            return os.path.join(self.base_dir, self.relative_directory)
-        else:
-            log_directory = os.path.join(drive, self.relative_directory)
-
-        # Make any necessary paths
-        try:
-            os.makedirs(log_directory)
-        except OSError:
-            # Directory already exists
-            pass
-        return log_directory
-
-    def _get_new_logfile(self):
-        """
-        Open a new logfile for the current hour. If opening the file fails,
-        returns the null file.
-
-        :return:
-            A python file object to write to
-        """
-        directory = self.get_directory()
-        if not os.path.isdir(directory):
-            return open(os.devnull)  # If the directory doesn't exist, fail
-
-        # Find unique file name for this hour
-        now = datetime.now()
-        hour = now.strftime("%Y-%m-%d_%H")
-        i = 0
-        while os.path.exists(
-                os.path.join(directory, hour + "_run%d.csv" % i)):
-            i += 1
-
-        file_path = os.path.join(
-            directory,
-            hour + "_run%d.csv" % i)
-
-        # Try opening the file, else open the null file
-        try:
-            f = open(file_path, 'w')
-        except IOError:
-            self._logger.critical("Failed to open log file: %s" % file_path)
-            return open(os.devnull, 'w')  # return a null file
-        else:
-            return f
 
     def _write_line(self, line):
         """
@@ -383,3 +211,62 @@ class FileWriter(AsyncIOThread):
                 self.usb_activity = False
         except (IOError, OSError):
             self._logger.error("Could not write to log file")
+
+    def get_directory(self):
+        """
+        Get the directory to store logs to.
+
+        :return:
+            Either a folder in the fallback directory, or a
+            folder on the mounted drive.
+        """
+        drive = usbdrive.mount_point()
+
+        if drive is None:
+            log_directory = path.join(self.fallback_directory,
+                                      self.relative_directory)
+        else:
+            log_directory = path.join(drive,
+                                      self.relative_directory)
+
+        # Make any necessary paths
+        try:
+            os.makedirs(log_directory)
+        except OSError:
+            # Directory already exists
+            pass
+        return log_directory
+
+    def new_logfile(self):
+        """
+        Open a new logfile for the current hour. If opening the file fails,
+        returns the null file.
+
+        :return:
+            A writeable file object from open(), either a log file or
+            the null file.
+        """
+        directory = self.get_directory()
+        if not path.isdir(directory):
+            return open(os.devnull)  # If the directory doesn't exist, fail
+
+        # Find unique file name for this hour
+        now = datetime.now()
+        base_file_name = now.strftime("%Y-%m-%d_%H")
+        i = 0
+        while path.exists(path.join(directory,
+                                    base_file_name + "_run%d.csv" % i)):
+            i += 1
+
+        file_path = os.path.join(
+            directory,
+            base_file_name + "_run%d.csv" % i)
+
+        # Try opening the file, else open the null file
+        try:
+            f = open(file_path, 'w')
+        except IOError:
+            self._logger.critical("Failed to open log file: %s" % file_path)
+            return open(os.devnull, 'w')  # return a null file
+        else:
+            return f

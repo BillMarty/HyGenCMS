@@ -12,4 +12,4 @@
 #
 # 2016-07-29
 # Added fsck every time the drive is mounted
-ACTION=="add", KERNEL=="sd?*", RUN+="/bin/sh -c '/sbin/fsck /dev/%k && /usr/bin/pmount --umask=000 %k'"
+# ACTION=="add", KERNEL=="sd?*", RUN+="/bin/sh -c '/sbin/fsck /dev/%k && /usr/bin/pmount --umask=000 %k'"

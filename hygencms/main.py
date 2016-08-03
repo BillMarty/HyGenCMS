@@ -30,6 +30,7 @@ import hygencms.filewriter
 import hygencms.woodwardcontrol
 import monotonic
 import serial
+from hygencms import usbdrive
 from hygencms.deepseaclient import DeepSeaClient
 
 from . import gpio
@@ -207,6 +208,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
     going = True
     shutdown = False
+    ejecting = False
     while going:
         # noinspection PyBroadException
         try:
@@ -265,6 +267,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 except KeyError:
                     logger.critical("Key does not exist for the PID enable flag")
 
+                # Check the eject button to see whether it's held
+                if gpio.read(pins.USB_SW) == gpio.LOW:
+                    filewriter.eject_drive = True
+                    ejecting = True
+
                 # Schedule next run
                 next_run[0.5] = now + 0.5
 
@@ -298,6 +305,17 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             if now >= next_run[5.0]:
                 if watchdog:
                     update_watchdog()
+
+                # Check for new USB drive
+                plugged = usbdrive.plugged()
+                if usbdrive.mounted() != plugged and not ejecting:
+                    filewriter.mount_drive = plugged
+
+                # If we're ejecting and the drive is gone, turn off light
+                if ejecting and usbdrive.plugged():
+                    filewriter.safe_to_remove = False
+                    ejecting = False
+
                 # Schedule next run
                 next_run[5.0] = now + 5.0
 
