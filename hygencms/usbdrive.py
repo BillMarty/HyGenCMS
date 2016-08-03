@@ -27,10 +27,10 @@ def unmount_mounted():
         True if a drive unmounted, else False
     """
     m = mounted()
-    if not m:
-        return False
-    else:
+    if m:
         return unmount(m)
+    else:
+        return False
 
 
 def mount_point():
@@ -118,8 +118,9 @@ def unmount(device):
     :return:
         True if success, else False
     """
-    drive_mounted = mounted()
-    if drive_mounted and path.basename(drive_mounted) != path.basename(device):
+    device = path.basename(device)
+    m = mounted()
+    if m and path.basename(m) != device:
         return True  # That device isn't mounted
 
     # Try to unmount
@@ -138,7 +139,9 @@ def unmount(device):
 
 def mount(device):
     """
-    Mount the given device using the ``pmount`` command
+    Mount the given device using the ``pmount`` command.
+    If another USB device is mounted, unmount it and mount
+    this one instead.
 
     :param device:
         The device file of a partition.
