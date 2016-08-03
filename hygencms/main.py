@@ -228,8 +228,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     try:
                         log_queue.put(','.join(csv_parts))
                     except queue.Full:
-                        pass
-                        # TODO What should we do here?
+                        exit("File writer queue full. Exiting.")
 
                 # Connect the analog current in to the woodward process
                 if woodward and not woodward.cancelled:
@@ -268,7 +267,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     logger.critical("Key does not exist for the PID enable flag")
 
                 # Check the eject button to see whether it's held
-                if gpio.read(pins.USB_SW) == gpio.LOW:
+                if gpio.read(pins.USB_SW) == gpio.LOW and not ejecting:
                     filewriter.eject_drive = True
                     ejecting = True
 
