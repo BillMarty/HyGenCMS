@@ -1,5 +1,5 @@
 import subprocess
-from subprocess import check_call, CalledProcessError, STDOUT
+from subprocess import check_call, CalledProcessError, STDOUT, check_output
 import time
 import os.path as path
 import os
@@ -13,10 +13,10 @@ def mount_plugged():
         True if a drive is mounted, else False
     """
     p = plugged()
-    if not p:
-        return False
-    else:
+    if p:
         return mount(p)
+    else:
+        return False
 
 
 def unmount_mounted():
@@ -41,7 +41,7 @@ def mount_point():
         '/media/[drive]' or None
     """
     try:
-        mount_list = str(subprocess.check_output(['mount']))
+        mount_list = subprocess.check_output(['mount']).decode('utf-8')
     except CalledProcessError:
         return None
 
@@ -67,7 +67,7 @@ def mounted():
         The device file '/dev/sd??'
     """
     try:
-        mount_list = str(subprocess.check_output(['mount']))
+        mount_list = subprocess.check_output(['mount']).decode('utf-8')
     except CalledProcessError:
         return None
 
@@ -85,7 +85,7 @@ def plugged():
     :return:
         The device file '/dev/sd??' or None
     """
-    lines = str(check_call(['lsblk'])).splitlines()
+    lines = check_output(['lsblk']).decode('utf-8').splitlines()
 
     device_file = None
     for line in lines:
@@ -119,7 +119,7 @@ def unmount(device):
         True if success, else False
     """
     drive_mounted = mounted()
-    if path.basename(drive_mounted) != path.basename(device):
+    if drive_mounted and path.basename(drive_mounted) != path.basename(device):
         return True  # That device isn't mounted
 
     # Try to unmount
@@ -147,8 +147,13 @@ def mount(device):
     :return:
         True if success, else False
     """
-    if path.basename(mounted()) == path.basename(device):
-        return True  # Already mounted
+    device = path.basename(device)
+    m = mounted()
+    if m:
+        if path.basename(m) == device:
+            return True  # Already mounted
+        else:
+            unmount(m)
 
     if not path.basename(plugged()) == path.basename(device):
         return False  # Device not present
