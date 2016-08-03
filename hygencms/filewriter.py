@@ -59,7 +59,6 @@ class FileWriter(AsyncIOThread):
 
         self.relative_directory = config['ldir']  # Relative directory on USB
         self._queue = log_queue
-        self._f = open(os.devnull, 'w')
         self._csv_header = csv_header
 
         # Set the base directory to use
@@ -68,6 +67,9 @@ class FileWriter(AsyncIOThread):
             self.base_directory = mounted_directory
         else:
             self.base_directory = self.fallback_directory
+
+        # Open file
+        self._f = open(os.devnull, 'w')
 
         # Private variables behind properties
         self._safe_to_remove = None
@@ -163,6 +165,7 @@ class FileWriter(AsyncIOThread):
         while not self.cancelled:
             # noinspection PyBroadException
             try:
+                hour = datetime.now().hour
                 if self.mount_drive:
                     self._f.close()
                     usbdrive.mount(self.mount_drive)
@@ -180,8 +183,9 @@ class FileWriter(AsyncIOThread):
                     self._f = self.new_logfile()
                     self.eject_drive = False
 
-                elif datetime.now().hour != prev_hour:
+                elif hour != prev_hour:
                     self._f = self.new_logfile()
+                    prev_hour = hour
 
                 # Print out lines
                 more_items = True
@@ -204,7 +208,7 @@ class FileWriter(AsyncIOThread):
         :param line:
             Line to write to file.
         """
-        if self.base_directory.startswith('/media'):
+        if self._f.name.startswith('/media'):
             drive = True
         else:
             drive = False
@@ -277,4 +281,5 @@ class FileWriter(AsyncIOThread):
             self._logger.critical("Failed to open log file: %s" % file_path)
             return open(os.devnull, 'w')  # return a null file
         else:
+            self._logger.info("Opened new file at %s" % f.name)
             return f

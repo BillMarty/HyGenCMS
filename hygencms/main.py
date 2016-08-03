@@ -308,11 +308,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
                 # Check for new USB drive
                 plugged = usbdrive.plugged()
-                if usbdrive.mounted() != plugged and not ejecting:
+                if plugged and usbdrive.mounted() is None and not ejecting:
                     filewriter.mount_drive = plugged
 
                 # If we're ejecting and the drive is gone, turn off light
-                if ejecting and usbdrive.plugged():
+                if ejecting and not plugged:
                     filewriter.safe_to_remove = False
                     ejecting = False
 
