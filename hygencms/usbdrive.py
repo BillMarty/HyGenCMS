@@ -174,7 +174,7 @@ def mount(device):
     drive_mounted = False
     while not drive_mounted and tries < 100:
         try:
-            check_call(['pmount', device], stderr=STDOUT)
+            check_call(['pmount', '--umask=000', device], stderr=STDOUT)
         except CalledProcessError:
             tries += 1
         else:
@@ -182,3 +182,4 @@ def mount(device):
         time.sleep(0.01)
 
     return drive_mounted
+
