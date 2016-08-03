@@ -200,14 +200,18 @@ class FileWriter(AsyncIOThread):
         :param line:
             Line to write to file.
         """
+        if self.base_directory.startswith('/media'):
+            drive = True
+        else:
+            drive = False
         try:
-            if self.drive_mounted:
+            if drive:
                 self.usb_activity = True
             if line[-1] == '\n':
                 self._f.write(line)
             else:
                 self._f.write(line + '\n')
-            if self.drive_mounted:
+            if drive:
                 self.usb_activity = False
         except (IOError, OSError):
             self._logger.error("Could not write to log file")
