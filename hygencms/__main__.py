@@ -63,7 +63,7 @@ def main():
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     handlers = [sh, fh]
-    # add sh to logger
+    # add handlers to logger
     for h in handlers:
         h.setFormatter(formatter)
         logger.addHandler(h)

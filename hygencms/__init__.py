@@ -14,4 +14,3 @@ The HyGenCMS module runs as multiple threads, one for each input source.
 """
 
 __version__ = '0.1.0'
-
