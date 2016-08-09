@@ -398,22 +398,6 @@ def print_data(clients):
     print('-' * 80)
 
 
-def revive(threads, logger):
-    """
-    Check to make sure each thread is running, and log about any which
-    have stopped.
-
-    :param threads: An iterable of threads
-    :param logger: The logger to which any messages will be written
-    :return: None
-    """
-    for thread in threads:
-        if not thread.is_alive():
-            logger.error("%s not running. Exiting"
-                         % str(thread))
-            raise RuntimeError("%s died." % str(thread))
-
-
 def update_watchdog():
     """
     Write to the watchdog file, keeping the system from being
@@ -490,12 +474,3 @@ def power_off():
     """
     subprocess.call(["poweroff"])
 
-
-if __name__ == "__main__":
-    sh = logging.StreamHandler()
-    sh.setFormatter(
-        logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-
-    configuration = get_configuration()
-    main(configuration, [sh], daemon=False)
