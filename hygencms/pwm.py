@@ -362,3 +362,19 @@ def stop(key):
     os.close(pin.enable_fd)
     os.close(pin.duty_fd)
     os.close(pin.polarity_fd)
+
+
+def cleanup():
+    """
+    Stop all running PWMs
+
+    :return: None
+
+    :exception ValueError:
+        Passed through from stop
+    :exception RuntimeError:
+        Passed through from stop
+    """
+    for key, pin in pins.items():
+        if pin.initialized:
+            stop(key)
