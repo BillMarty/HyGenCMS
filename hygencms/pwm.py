@@ -250,7 +250,7 @@ def set_frequency(pin_name, freq):
         pin.period_ns = period_ns
 
         # Calculate updated duty cycle
-        duty_ns = (pin.duty / 100.) * period_ns
+        duty_ns = int((pin.duty / 100.) * period_ns)
 
         os.lseek(pin.duty_fd, 0, os.SEEK_SET)
         n1 = os.write(pin.duty_fd,
