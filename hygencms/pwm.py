@@ -25,6 +25,7 @@ Pa_bb, where ``a = header number`` and ``bb = pin number``.
 
 
 import glob
+import os
 import os.path as path
 import time
 import platform
@@ -38,9 +39,10 @@ class PwmPin:
                  chip, addr, index,
                  name=None,
                  description=None,
-                 period_path=None,
-                 duty_path=None,
-                 polarity_path=None,
+                 period_fd=None,
+                 duty_fd=None,
+                 polarity_fd=None,
+                 enable_fd=None,
                  duty=50.0,
                  freq=100000):
         self.chip = chip
@@ -48,9 +50,10 @@ class PwmPin:
         self.index = index
         self.name = name
         self.description = description
-        self.period_path = period_path
-        self.duty_path = duty_path
-        self.polarity_path = polarity_path
+        self.period_fd = period_fd
+        self.duty_fd = duty_fd
+        self.polarity_fd = polarity_fd
+        self.enable_fd = enable_fd
         self.period_ns = 0
         self.duty = duty
         self.freq = freq
@@ -172,9 +175,10 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
             and path.exists(polarity_path):
         raise RuntimeError("Missing sysfs files")
 
-    pin.period_path = period_path
-    pin.duty_path = duty_cycle_path
-    pin.polarity_path = polarity_path
+    pin.period_fd = os.open(period_path, os.O_RDWR)
+    pin.duty_fd = os.open(duty_cycle_path, os.O_RDWR)
+    pin.polarity_fd = os.open(polarity_path, os.O_RDWR)
+    pin.enable_fd = os.open(enable_path, os.O_RDWR)
     pin.duty = 0
     pin.freq = 0
 
@@ -185,10 +189,10 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
     tries = 0
     while not enabled and tries < 100:
         time.sleep(0.01)
-        try:
-            with open(enable_path, 'w') as f:
-                f.write('1')
-        except OSError:
+        os.lseek(pin.enable_fd, 0, os.SEEK_SET)
+        n = os.write(pin.enable_fd, bytes('1'))
+
+        if n <= 0:
             tries += 1
         else:
             enabled = True
@@ -223,16 +227,51 @@ def set_frequency(pin_name, freq):
 
     if pin.freq == freq:
         return  # nothing to do
+    pin.freq = freq
 
     period_ns = int(1e9 / freq)
-    try:
-        with open(pin.period_path, 'w') as f:
-            f.write(str(period_ns))
-    except OSError as e:
-        print("Error writing to {:s}: {:s}".format(pin.period_path, str(e)))
-    pin.period_ns = period_ns
-    pin.freq = freq
-    set_duty_cycle(pin_name, pin.duty)  # stay constant after changing period
+
+    # If we're shortening the period, update the
+    # duty cycle first, to avoid ever setting the
+    # period to a value < duty cycle (which raises
+    # an error in the kernel)
+    if period_ns < pin.period_ns:
+        pin.period_ns = period_ns
+
+        # Calculate updated duty cycle
+        duty_ns = (pin.duty / 100.) * period_ns
+
+        os.lseek(pin.duty_fd, 0, os.SEEK_SET)
+        n1 = os.write(pin.duty_fd, bytes("{:lu}".format(duty_ns)))
+
+        os.lseek(pin.period_fd, 0, os.SEEK_SET)
+        n2 = os.write(pin.period_fd, bytes("{:lu}".format(period_ns)))
+
+    # if we're lengthening the period, update the
+    # period first, in order to avoid ever setting
+    # the duty cycle to a value > period (which raises
+    # an error in the kernel)
+    elif period_ns > pin.period_ns:
+        pin.period_ns = period_ns
+
+        os.lseek(pin.period_fd, 0, os.SEEK_SET)
+        n1 = os.write(pin.period_fd, bytes("{:lu}".format(period_ns)))
+
+        # Calculate updated duty cycle
+        duty_ns = (pin.duty / 100.) * period_ns
+
+        os.lseek(pin.duty_fd, 0, os.SEEK_SET)
+        n2 = os.write(pin.duty_fd, bytes("{:lu}".format(duty_ns)))
+    else:
+        return
+
+    # If we had an error writing to the files
+    if n1 < 0 or n2 < 0:
+        raise RuntimeError("Could not update frequency")
+    elif n1 + n2 == 0:
+        raise RuntimeError("Wrote a total of 0 bytes - failure")
+
+    return
 
 
 def set_duty_cycle(key, duty):
@@ -259,10 +298,48 @@ def set_duty_cycle(key, duty):
     if not 0 <= duty <= 100:
         raise ValueError("Duty cycle must be between 0 and 100 percent")
 
-    duty_cycle = int(pin.period_ns * (duty / 100))
-    try:
-        with open(pin.duty_path, 'w') as f:
-            f.write(str(duty_cycle))
-    except OSError as e:
-        print("Error writing to {:s}: {:s}".format(pin.duty_path, str(e)))
+    duty_ns = int(pin.period_ns * (duty / 100))
+
+    # Write to file
+    os.lseek(pin.duty_fd, 0, os.SEEK_SET)
+    n = os.write(pin.duty_fd, bytes("{:lu}".format(duty_ns)))
+
+    if n <= 0:
+        print("Error writing to {:s}".format(pin.duty_path))
     pin.duty = duty
+
+
+def stop(key):
+    """
+    Stop a PWM from running.
+
+    :param key: The pin name
+    :return: None
+
+    :exception ValueError:
+        Raised if the pin name entered is invalid.
+    :exception RuntimeError:
+        If there is an error stopping the pin or the
+        pin has not been initialized.
+    """
+    try:
+        pin = pins[key]
+    except KeyError:
+        raise ValueError("Unimplemented key")
+
+    if not pin.initialized:
+        raise RuntimeError("{:s} has not been initialized".format(key))
+
+    # Write 0 to the enable file descriptor
+    os.lseek(pin.enable_fd, 0, os.SEEK_SET)
+    n = os.write(pin.enable_fd, bytes('0'))
+
+    # n will be the number of bytes written, or -1 for error
+    if n <= 0:
+        raise RuntimeError("Could not stop PWM.")
+
+    # Close file descriptors
+    os.close(pin.period_fd)
+    os.close(pin.enable_fd)
+    os.close(pin.duty_fd)
+    os.close(pin.polarity_fd)

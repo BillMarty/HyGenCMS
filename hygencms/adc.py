@@ -20,16 +20,16 @@ from recordclass import recordclass
 
 adc_setup = False
 
-AdcPin = recordclass('AdcPin', ['pin', 'id', 'path'])
+AdcPin = recordclass('AdcPin', ['pin', 'id', 'path', 'fd'])
 
 pins = {
-    'P9_33': AdcPin('P9_33', 4, None),
-    'P9_35': AdcPin('P9_35', 6, None),
-    'P9_36': AdcPin('P9_36', 5, None),
-    'P9_37': AdcPin('P9_37', 2, None),
-    'P9_38': AdcPin('P9_38', 3, None),
-    'P9_39': AdcPin('P9_39', 0, None),
-    'P9_40': AdcPin('P9_40', 1, None),
+    'P9_33': AdcPin('P9_33', 4, None, None),
+    'P9_35': AdcPin('P9_35', 6, None, None),
+    'P9_36': AdcPin('P9_36', 5, None, None),
+    'P9_37': AdcPin('P9_37', 2, None, None),
+    'P9_38': AdcPin('P9_38', 3, None, None),
+    'P9_39': AdcPin('P9_39', 0, None, None),
+    'P9_40': AdcPin('P9_40', 1, None, None),
 }
 
 SLOTS = '/sys/devices/platform/bone_capemgr/slots'
@@ -71,6 +71,10 @@ def setup():
             if not os.path.exists(path):
                 return False
             pin.path = path
+            fd = os.open(pin.path, os.O_RDONLY)
+            # Check that it opened successfully
+            if fd >= 0:
+                pin.fd = fd
 
     return adc_setup
 
@@ -92,17 +96,20 @@ def read_raw(pin):
         raise RuntimeError("ADC must be setup before use")
 
     pin = pins[pin]
-    if not os.path.exists(pin.path):
-        raise RuntimeError("Sysfs file for {:s} disappeared".format(pin))
 
-    try:
-        with open(pin.path, 'r') as f:
-            value = int(f.read())
-    except IOError:
-        raise RuntimeError("Could not read sysfs file for {:s}"
-                           .format(pin))
-    except ValueError:
-        raise RuntimeError("Invalid non-integer value from sysfs file")
+    os.lseek(pin.fd, 0, os.SEEK_SET)
+    value = int(os.read(pin.fd, 4))
+    # if not os.path.exists(pin.path):
+    #     raise RuntimeError("Sysfs file for {:s} disappeared".format(pin))
+
+    # try:
+    #     with open(pin.path, 'r') as f:
+    #         value = int(f.read())
+    # except IOError:
+    #     raise RuntimeError("Could not read sysfs file for {:s}"
+    #                        .format(pin))
+    # except ValueError:
+    #     raise RuntimeError("Invalid non-integer value from sysfs file")
 
     assert (0 <= value <= 4095)
     return value
@@ -120,3 +127,28 @@ def read_volts(pin):
     """
     count = read_raw(pin)
     return count * (1.8 / 4095)
+
+
+def cleanup(key=None):
+    """
+    Cleanup either a single pin or the entire ADC.
+
+    :return: None
+
+    :exception ValueError:
+        raised if an invalid key is passed in.
+
+    :exception RuntimeError:
+        raised if there is an error closing.
+    """
+    if key:
+        try:
+            pin = pins[key]
+        except KeyError:
+            raise ValueError("Invalid key passed in")
+        else:
+            os.close(pin.fd)
+    else:
+        for pin in pins.values():
+            if pin.fd:
+                os.close(pin.fd)
