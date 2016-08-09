@@ -23,12 +23,11 @@ Every pin name argument uses the notation on the BeagleBone Black:
 Pa_bb, where ``a = header number`` and ``bb = pin number``.
 """
 
-
 import glob
 import os
 import os.path as path
-import time
 import platform
+import time
 
 from .bbio_common import setup_io, universal_cape_present
 
@@ -198,7 +197,7 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
     while not enabled and tries < 100:
         time.sleep(0.01)
         os.lseek(pin.enable_fd, 0, os.SEEK_SET)
-        n = os.write(pin.enable_fd, bytes('1'))
+        n = os.write(pin.enable_fd, bytes('1', encoding='utf-8'))
 
         if n <= 0:
             tries += 1
@@ -250,10 +249,12 @@ def set_frequency(pin_name, freq):
         duty_ns = (pin.duty / 100.) * period_ns
 
         os.lseek(pin.duty_fd, 0, os.SEEK_SET)
-        n1 = os.write(pin.duty_fd, bytes("{:lu}".format(duty_ns)))
+        n1 = os.write(pin.duty_fd,
+                      bytes("{:lu}".format(duty_ns), encoding='utf-8'))
 
         os.lseek(pin.period_fd, 0, os.SEEK_SET)
-        n2 = os.write(pin.period_fd, bytes("{:lu}".format(period_ns)))
+        n2 = os.write(pin.period_fd,
+                      bytes("{:lu}".format(period_ns), encoding='utf-8'))
 
     # if we're lengthening the period, update the
     # period first, in order to avoid ever setting
@@ -263,13 +264,15 @@ def set_frequency(pin_name, freq):
         pin.period_ns = period_ns
 
         os.lseek(pin.period_fd, 0, os.SEEK_SET)
-        n1 = os.write(pin.period_fd, bytes("{:lu}".format(period_ns)))
+        n1 = os.write(pin.period_fd,
+                      bytes("{:lu}".format(period_ns), encoding='utf-8'))
 
         # Calculate updated duty cycle
         duty_ns = (pin.duty / 100.) * period_ns
 
         os.lseek(pin.duty_fd, 0, os.SEEK_SET)
-        n2 = os.write(pin.duty_fd, bytes("{:lu}".format(duty_ns)))
+        n2 = os.write(pin.duty_fd,
+                      bytes("{:lu}".format(duty_ns), encoding='utf-8'))
     else:
         return
 
