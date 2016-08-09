@@ -4,8 +4,8 @@ Linux setup
 A Beaglebone image will be used to flash every BeagleBone. This image is
 pre-configured. However, this README will document the steps required to
 recreate the image, for the sake of future maintainers. The current at
-the time of this document is Debian 8.5, with the kernel
-``4.4.15-bone11``.
+the time of this document is Debian 8.5, 2016-08-07, with the kernel
+``4.4.16-ti-r38``.
 
 Preparing MicroSD card
 ----------------------
@@ -50,11 +50,11 @@ user to the sudo (administrators) group.
 
     adduser hygen
     # Enter password for the hygen account. Currently Power16
-    adduser hygen sudo
+    adduser hygen admin
 
 ``sudo``, short for substitute user, allows a user to run commands as a
 different user. The default user to run commands is ``root``, the master
-administrator account on Linux. We want to ensure that the sudo group
+administrator account on Linux. We want to ensure that the admin group
 can use the sudo command. We're going to disable login as root for
 security, so it's crucial that we can still use other accounts to
 perform administrative tasks.
@@ -69,7 +69,7 @@ We want to make sure that this file has the following line:
 ::
 
     # Allow members of group sudo to execute any command
-    %sudo   ALL=(ALL:ALL)
+    %admin   ALL=(ALL) ALL
 
 If the line is commented out, uncomment it. Then we want to test that
 the ``hygen`` user can in fact use sudo to execute commands as root. Log
@@ -140,6 +140,7 @@ now we'll assign it a static IP for continuing setup.
     address 10.50.0.x
     gateway 10.50.0.1
     netmask 255.255.255.0
+    dns-nameservers 8.8.8.8 8.8.4.4
 
 Replace *x* with the chosen IP address. This will configure the
 BeagleBone for use on Planetary Power's ethernet. Reboot the system to
@@ -154,6 +155,7 @@ Test the network connection again.
 .. code:: bash
 
     ping 8.8.8.8
+    ping google.com
 
 This should now show ping responses. If not, the network is not properly
 configured, and that must be solved before continuing.
@@ -309,6 +311,16 @@ device tree overlays in that repository are already installed in kernel
     cd beaglebone-universal-io
     sudo make install_target  # This installs the utility but not the DTOs
 
+Setup universal cape loading on boot
+------------------------------------
+
+In order to use the conig-pin utility, a universal cape must be loaded.
+The next step will load the universal cape on boot. With your editor of
+choice, open ``/boot/uEnv.txt`` as root. Uncomment the line below
+"Beaglebone Black: HDMI (Audio/Video) disabled". This line should say
+something like ``dtb=am335x-boneblack-emmc-overlay.dtb``.
+
+
 Setup USB Mounting
 ----------------------
 
@@ -318,6 +330,26 @@ Setup USB Mounting
 .. code:: bash
 
     sudo apt-get install pmount
+
+Pinmux script
+-------------
+
+There's a very handy script to show a nicely-formatted list of pins and
+their current state in the pin-mux included on the image. However, it's
+inconveniently located at ``/opt/scripts/device/bone/show-pins.pl``.
+Let's create a link in ``/usr/local/bin/show-pins`` to make it easy to
+use:
+
+.. code:: bash
+	
+	sudo vi /usr/local/bin/show-pins
+	
+	# In file:
+	#!/bin/bash
+	perl /opt/scripts/device/bone/show-pins.pl | sort
+
+	# Save and make it executable
+	sudo chmod +x /usr/local/bin/show-pins
 
 Hygen Software
 --------------
@@ -333,8 +365,7 @@ cloning from our private GitHub repository.
     sudo apt-get install git
     git clone https://github.com/BillMarty/HyGenCMS.git
 
-We need to change the file mode to make the primary program file
-executable.
+We then can install the executable.
 
 .. code:: bash
 
