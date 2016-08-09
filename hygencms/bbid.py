@@ -27,6 +27,14 @@ MAC_ID0, MAC_ID1 = None, None
 
 
 def _get_ids():
+    """
+    Assign values to the globals MAC_ID0 and MAC_ID1.
+
+    Implementation copied from http://stackoverflow.com/q/29856644
+    under the MIT license.
+
+    :return: None
+    """
     global MAC_ID0, MAC_ID1
     file_handler = open("/dev/mem", "r+b")
     mem = mmap(file_handler.fileno(),
