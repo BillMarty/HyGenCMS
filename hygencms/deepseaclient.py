@@ -52,7 +52,6 @@ class DeepSeaClient(AsyncIOThread):
         self._data_store.update({m[self.ADDRESS]: None
                                  for m in self._input_list})
         self._last_updated = {m[self.ADDRESS]: 0 for m in self._input_list}
-        self._last_written = {m[self.ADDRESS]: 0 for m in self._input_list}
         self._logger.info("Started deepsea client")
 
     def __del__(self):
@@ -270,14 +269,11 @@ class DeepSeaClient(AsyncIOThread):
         :rtype: string
         """
         values = []
-        now = monotonic()
         for m in self._input_list:
             key = m[self.ADDRESS]
             val = self._data_store[key]
-            updated = self._last_updated[key]
-            if updated > self._last_written[key] and val is not None:
+            if val is not None:
                 values.append(str(val))
-                self._last_written[key] = now
             else:
                 values.append('')
         return ','.join(values)
