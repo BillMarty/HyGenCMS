@@ -27,6 +27,7 @@ import glob
 import os
 import os.path as path
 import platform
+import subprocess
 import time
 
 from .bbio_common import setup_io, universal_cape_present
@@ -135,6 +136,9 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
 
     if not universal_cape_present():
         setup_io()
+
+    # Mux the pin
+    subprocess.call(['config-pin', pin_name, 'pwm'])
 
     if not universal_cape_present():
         raise ValueError("Could not setup IO pins")
