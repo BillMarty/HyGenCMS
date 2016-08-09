@@ -282,4 +282,5 @@ class FileWriter(AsyncIOThread):
             return open(os.devnull, 'w')  # return a null file
         else:
             self._logger.info("Opened new file at %s" % f.name)
+            f.write(self._csv_header)
             return f
