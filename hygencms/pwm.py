@@ -30,6 +30,8 @@ import os.path as path
 import time
 import platform
 
+from .bbio_common import setup_io, universal_cape_present
+
 if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
     raise EnvironmentError('Requires Linux >=4.1.0')
 
@@ -131,6 +133,12 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
         pin = pins[pin_name]
     except KeyError:
         raise ValueError("PWM pin not implemented")
+
+    if not universal_cape_present():
+        setup_io()
+
+    if not universal_cape_present():
+        raise ValueError("Could not setup IO pins")
 
     chip_path = path.join(ocp_path,
                           pin.chip + '.epwmss')
