@@ -313,7 +313,7 @@ def set_duty_cycle(key, duty):
 
     # Write to file
     os.lseek(pin.duty_fd, 0, os.SEEK_SET)
-    n = os.write(pin.duty_fd, bytes("{:d}".format(duty_ns)))
+    n = os.write(pin.duty_fd, bytes("{:d}".format(duty_ns), encoding='utf-8'))
 
     if n <= 0:
         print("Error writing to {:s}".format(pin.duty_path))
