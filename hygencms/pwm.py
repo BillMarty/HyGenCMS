@@ -250,11 +250,11 @@ def set_frequency(pin_name, freq):
 
         os.lseek(pin.duty_fd, 0, os.SEEK_SET)
         n1 = os.write(pin.duty_fd,
-                      bytes("{:lu}".format(duty_ns), encoding='utf-8'))
+                      bytes("{:d}".format(duty_ns), encoding='utf-8'))
 
         os.lseek(pin.period_fd, 0, os.SEEK_SET)
         n2 = os.write(pin.period_fd,
-                      bytes("{:lu}".format(period_ns), encoding='utf-8'))
+                      bytes("{:d}".format(period_ns), encoding='utf-8'))
 
     # if we're lengthening the period, update the
     # period first, in order to avoid ever setting
@@ -265,14 +265,14 @@ def set_frequency(pin_name, freq):
 
         os.lseek(pin.period_fd, 0, os.SEEK_SET)
         n1 = os.write(pin.period_fd,
-                      bytes("{:lu}".format(period_ns), encoding='utf-8'))
+                      bytes("{:d}".format(period_ns), encoding='utf-8'))
 
         # Calculate updated duty cycle
         duty_ns = (pin.duty / 100.) * period_ns
 
         os.lseek(pin.duty_fd, 0, os.SEEK_SET)
         n2 = os.write(pin.duty_fd,
-                      bytes("{:lu}".format(duty_ns), encoding='utf-8'))
+                      bytes("{:d}".format(duty_ns), encoding='utf-8'))
     else:
         return
 
@@ -313,7 +313,7 @@ def set_duty_cycle(key, duty):
 
     # Write to file
     os.lseek(pin.duty_fd, 0, os.SEEK_SET)
-    n = os.write(pin.duty_fd, bytes("{:lu}".format(duty_ns)))
+    n = os.write(pin.duty_fd, bytes("{:d}".format(duty_ns)))
 
     if n <= 0:
         print("Error writing to {:s}".format(pin.duty_path))
@@ -343,7 +343,7 @@ def stop(key):
 
     # Write 0 to the enable file descriptor
     os.lseek(pin.enable_fd, 0, os.SEEK_SET)
-    n = os.write(pin.enable_fd, bytes('0'))
+    n = os.write(pin.enable_fd, bytes('0', encoding='utf-8'))
 
     # n will be the number of bytes written, or -1 for error
     if n <= 0:
