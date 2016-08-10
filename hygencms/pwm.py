@@ -195,7 +195,10 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
 
     # Initialize period and duty values
     pin.period_ns = int(os.read(pin.period_fd, 16))
-    pin.duty = int(os.read(pin.duty_fd, 16)) / pin.period_ns
+    if pin.period_ns != 0:
+        pin.duty = int(os.read(pin.duty_fd, 16)) / pin.period_ns
+    else:
+        pin.duty = 0
 
     pin.initialized = True
 
