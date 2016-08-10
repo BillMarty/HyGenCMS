@@ -42,11 +42,16 @@ class WoodwardControl(AsyncIOThread):
         self.set_tunings(wconfig['Kp'],
                          wconfig['Ki'],
                          wconfig['Kd'])
+        try:
+            self.slew = wconfig['slew']  # Units of % duty cycle / sec
+        except KeyError:  # If not included in configuration
+            self.slew = 100.0  # Effectively no limit, since this is the entire range
 
         # Mode switch: step or pid
         self.mode = 'pid'
 
-        # Initialize the property for output and PWM
+        # Initialize the property for ideal output, output and PWM
+        self._ideal_output = 0.0
         self._output = 0.0
         pwm.start(self._pin, 0.0, 100000)
 
@@ -217,22 +222,34 @@ class WoodwardControl(AsyncIOThread):
             d_pv = (self.process_variable - self.last_input)
 
             # Compute output
-            output = (self.kp * error +
-                      self.integral_term -
-                      self.kd * d_pv)
-            if output > self.out_max:
-                output = self.out_max
-            elif output < self.out_min:
-                output = self.out_min
+            ideal_output = (self.kp * error +
+                            self.integral_term -
+                            self.kd * d_pv)
+            if ideal_output > self.out_max:
+                ideal_output = self.out_max
+            elif ideal_output < self.out_min:
+                ideal_output = self.out_min
 
             # Save variables for the next time
             self.last_time = now
             self.last_input = self.process_variable
 
             # Return the calculated value
-            return output
         else:
-            return self.output
+            ideal_output = self._ideal_output
+
+        output = self.output
+        if ideal_output == output:
+            return output
+        elif ideal_output > output + (self.slew * time_change):
+            self._ideal_output = ideal_output
+            return output + self.slew * time_change
+        elif ideal_output < output - (self.slew * time_change):
+            self._ideal_output = ideal_output
+            return output - self.slew * time_change
+        else:
+            self._ideal_output = ideal_output
+            return ideal_output
 
     def run(self):
         """
