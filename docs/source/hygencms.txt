@@ -1,125 +1,171 @@
+=========
 HyGen CMS
 =========
 
 The HyGen Communication Management System, or CMS, is controlled by
 this Python package, running on a BeagleBone Black or BeagleBone Black
-clone such as the one manufactured by Arrow. It is intended to function
-on the Linux kernel version 4.1+, as 4.1 introduced a number of changes
+clone such as the one manufactured by Arrow. It serves several functions
+in the HyGen hybrid generator. First, it logs data from the DeepSea,
+Beckett BMS, and analog inputs. Second, it sets the RPM setpoint for the
+Woodward engine speed controller. This software is intended to function
+on the Linux kernel versions 4.1+, as 4.1 introduced breaking changes
 to the kernel interface file structure, and supports the Arrow
 BeagleBone Black Industrial on the same image as other BeagleBone Black
 devices.
 
-Dependencies
+Installation
 ------------
 
-This software relies on a number of other pieces of software. The most
-prominent among them is Python. While an effort has been made to keep
-the software compatible between Python 2 and Python 3, it is
-recommended to use Python 3, as it is perfectly stable, and is the
-platform being used for development.
+The HyGen CMS software is meant to run on Debian 8, Jessie, with Linux
+kernel 4.1+. The installation of Linux to reach a working system is
+covered in detail in `Linux Setup <linuxsetup.html>`_. On a working
+Linux system with Python 3, install the CMS software with the following
+commands::
 
-Within Python, there are several dependencies, which are best installed
-with ``pip``. These are listed in the ``dependencies.txt`` file in the
-top level of this repository.
+    cd HyGenCMS
+    sudo python3 setup.py install
 
-Apart from these tools, the program relies on several shell commands to
-be installed and present in the root PATH:
+This will install the ``hygencms`` command to ``/usr/local/bin``, where
+it can be run from the command line. All necessary dependencies listed
+in ``requirements.txt`` are automatically installed by the Python
+packaging system.
+
+This software is developed in the Python programming language. While an
+effort has been made to keep it compatible between Python 2 and Python
+3, it is recommended to use Python 3, as it is perfectly stable, and is
+the platform being used for continued development.
+
+Apart from Python libraries, HyGenCMS relies on several shell commands
+to be installed and present in the root PATH:
 
 - ``pmount``
 - ``pumount``
 - ``lsblk``
 - ``mount``
+- ``config-pin``
+
+Some of these commands should be included on every Debian build.
+Detailed instructions for installing the rest are given in the 
+`Linux Setup <linuxsetup.html>`_ section.
 
 Program Flow
 ------------
 
+This section will review the code flow of the program, at a high level.
+Code-level detail will not be included, but the basic passage of data
+will be outlined.
 
+The primary entry-point to the HyGen CMS software is the ``main``
+function, contained in ``hygencms/__main__.py``. This function is
+called by the ``hygencms`` command in the ``PATH``. It parses
+command line arguments and reads the configuration file, then calls
+the ``main`` function inside ``hygencms/main.py`` with the correct
+configuration arguments.
+
+After the ``main`` function starts, it starts multiple threads, one
+for each data source or sink: the DeepSea, BMS, Analog inputs, log
+files, and Woodward each have their own thread. Each thread then is
+responsible for reading or writing its own data. Connections between
+the main thread and IO threads are made in three places. Each input
+thread has a ``csv_line`` method, which returns a string of comma
+separated values for that time increment. If the program is not
+running in daemon mode, the ``print_data`` method is used to print
+data for that time increment to the screen. The final method of
+communication between threads is that the many of the threads store
+the data they gather directly in a central dictionary, and the main
+thread sometimes pulls data directly from the dictionary.
+
+The main thread (and some of the other threads) are structured as an 
+event loop - it keeps a record of when it ought to next run each group
+of tasks, then checks at each loop whethere it is now time to run each
+group. At each loop, it sleeps for a short time. This keeps the other
+threads from starving.
 
 Module contents
 ---------------
 
 .. automodule:: hygencms
-    :members:
+   :members:
 
 Submodules
 ----------
 
-hygencms.adc module
--------------------
+ADC module
+==========
 
 .. automodule:: hygencms.adc
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-hygencms.asyncio module
------------------------
+asyncio module
+==============
 
 .. automodule:: hygencms.asyncio
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-hygencms.config module
-----------------------
+config module
+=============
 
 .. automodule:: hygencms.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-hygencms.gpio module
---------------------
+GPIO module
+===========
 
 .. automodule:: hygencms.gpio
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-hygencms.groveledbar module
----------------------------
+Grove LED Bar module
+====================
 
 .. automodule:: hygencms.groveledbar
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-hygencms.hygen_logger module
-----------------------------
+Configuration file
+============================
 
 .. automodule:: hygencms.hygen_logger
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-hygencms.main module
---------------------
+main module
+===========
 
 .. automodule:: hygencms.main
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 hygencms.pins module
---------------------
+====================
 
 .. automodule:: hygencms.pins
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-hygencms.pwm module
--------------------
+pwm module
+==========
 
 .. automodule:: hygencms.pwm
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 hygencms.utils module
----------------------
+=====================
 
 .. automodule:: hygencms.utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
