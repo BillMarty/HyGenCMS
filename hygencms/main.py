@@ -50,6 +50,7 @@ from hygencms.deepseaclient import DeepSeaClient
 from . import gpio
 from . import pins
 from . import utils
+from .bbio_common import setup_io
 from .config import get_configuration
 from .groveledbar import GroveLedBar
 
@@ -85,6 +86,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
     # Keep an exit code variable so we can exit nicely
     exit_code = 0
+
+    ############################################
+    # Setup IO pins
+    ############################################
+    setup_io()
 
     ############################################
     # Async Data Sources
