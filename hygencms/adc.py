@@ -20,7 +20,16 @@ from recordclass import recordclass
 
 adc_setup = False
 
-AdcPin = recordclass('AdcPin', ['pin', 'id', 'path', 'fd'])
+
+class AdcPin(recordclass('AdcPin', ['pin', 'id', 'path', 'fd'])):
+    """
+    Provide a namedtuple-like store for ADC pin information.
+
+    :param pin:  The pin header and number
+    :param id:  The ADC ID of that pin
+    :param path:  The path to the sysfs file of the ADC count
+    :param fd:  The file descriptor referring to the sysfs file
+    """
 
 pins = {
     'P9_33': AdcPin('P9_33', 4, None, None),
@@ -81,7 +90,7 @@ def setup():
 
 def read_raw(pin):
     """
-    Read the ADC count straight from the Sysfs file, as a count
+    Read the ADC count straight from the sysfs file, as a count
 
     :param pin:
         Pin name to read

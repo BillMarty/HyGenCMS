@@ -12,12 +12,14 @@ from threading import Thread
 
 class AsyncIOThread(Thread):
     """
-    Super-class for all the threads which read from a source.
+    Super-class for all the threads which run parallel to the main
+    thread and do input or output, and logging.
     """
 
     def __init__(self, handlers):
         """
         Constructor
+
         :param handlers:
             List of log handlers to use
         """
@@ -45,6 +47,11 @@ class AsyncIOThread(Thread):
     #####################################
 
     def cancel(self):
+        """
+        Cancel the thread, and log its stopping to the logger.
+
+        :return: None
+        """
         self.cancelled = True
         self._logger.info("Stopping " + str(self) + "...")
 
