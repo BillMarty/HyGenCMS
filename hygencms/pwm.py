@@ -186,6 +186,9 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
             and path.exists(polarity_path):
         raise RuntimeError("Missing sysfs files")
 
+    # Sleep a bit to let files appear for opening
+    time.sleep(0.2)
+
     pin.period_fd = os.open(period_path, os.O_RDWR)
     pin.duty_fd = os.open(duty_cycle_path, os.O_RDWR)
     pin.polarity_fd = os.open(polarity_path, os.O_RDWR)
