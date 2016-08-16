@@ -19,37 +19,37 @@ config-pin overlay BB-ADC
 config-pin P8_07 in
 
 # P8_08	7	gpio2[3]	Disk Activity LED
-config-pin P8_08 out
+config-pin P8_08 lo
 
 # P8_09	7	gpio2[5]	USB switch
 config-pin P8_09 in
 
 # P8_10	7	gpio2[4]	Safe to remove LED
-config-pin P8_10 out
+config-pin P8_10 lo
 
 # P8_11	7	gpio1[13]	Hold 12V (keep powered on after losing 24V)
-config-pin P8_11 out
+config-pin P8_11 lo
 
 # P8_12	7	gpio1[12]	PID LED
-config-pin P8_12 out
+config-pin P8_12 lo
 
 # P8_13	7	gpio0[23]	Switch: move logs to USB
 config-pin P8_13 in
 
 # P8_14	7	gpio0[26]	Spare LED
-config-pin P8_14 out
+config-pin P8_14 lo
 
 # P8_15	7	gpio1[15]	Aux START (signal to the DeepSea to stop the motor)
-config-pin P8_15 out
+config-pin P8_15 lo
 
 # P8_16	7	gpio1[14]	CMS Warn
-config-pin P8_16 out
+config-pin P8_16 lo
 
 # P8_17	7	gpio0[27]	Aux STOP
-config-pin P8_17 out
+config-pin P8_17 lo
 
 # P8_18	7	gpio2[1]	CMS Fault
-config-pin P8_18 out
+config-pin P8_18 lo
 
 # P8_19	7	gpio0[22]	OFF Switch
 config-pin P8_19 in
@@ -99,7 +99,7 @@ config-pin P8_19 in
 config-pin P9_11 uart
 
 # P9_12	7	gpio1[28]	Battery gauge clk signal
-config-pin P9_12 out
+config-pin P9_12 lo
 
 # P9_13	6	uart4_txd_mux2	BMS serial tx line
 config-pin P9_13 uart
@@ -108,7 +108,7 @@ config-pin P9_13 uart
 # default
 
 # P9_15	7	gpio1[16]	Battery gauge data signal
-config-pin P9_15 out
+config-pin P9_15 lo
 
 # P9_16
 # default
@@ -123,20 +123,20 @@ config-pin P9_18 spi
 # P9_19
 # P9_20
 
-# P9_21	0	spi0_d0	Arduino SPI data out
+# P9_21	0	spi0_d0	Arduino SPI data lo
 config-pin P9_21 spi
 
 # P9_22	0	spi0_sclk	Arduino SPI clock
 config-pin P9_22 spi
 
 # P9_23	7	gpio1[17]	Fuel gauge clk signal
-config-pin P9_23 out
+config-pin P9_23 lo
 
 # P9_24	0	uart1_txd	DeepSea serial tx line
 config-pin P9_24 uart
 
 # P9_25	7	gpio3[21]	Fuel gauge data signal
-config-pin P9_25 out
+config-pin P9_25 lo
 
 # P9_26	0	uart1_rxd	DeepSea serial rx line
 config-pin P9_26 uart
