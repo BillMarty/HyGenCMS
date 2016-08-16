@@ -149,7 +149,7 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
         raise RuntimeError("Could not find PWM subsystem")
 
     try:
-        addr_path = glob.glob(chip_path + '/' + pin.addr + '.*')[0]
+        addr_path = glob.glob(path.join(chip_path, pin.addr) + '.*')[0]
     except IndexError:
         raise RuntimeError("Could not find PWM address")
 
@@ -181,23 +181,22 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
     duty_cycle_path = path.join(pwm_dir, 'duty_cycle')
     polarity_path = path.join(pwm_dir, 'polarity')
     enable_path = path.join(pwm_dir, 'enable')
-    if not path.exists(period_path) \
-            and path.exists(duty_cycle_path) \
-            and path.exists(enable_path) \
-            and path.exists(polarity_path):
-        raise RuntimeError("Missing sysfs files")
 
-    # Try up to 10 times to open files
-    for i in range(10):
-        try:
-            pin.period_fd = os.open(period_path, os.O_RDWR)
-            pin.duty_fd = os.open(duty_cycle_path, os.O_RDWR)
-            pin.polarity_fd = os.open(polarity_path, os.O_RDWR)
-            pin.enable_fd = os.open(enable_path, os.O_RDWR)
-        except FileNotFoundError:
-            time.sleep(0.2)
-        else:
+    for i in range(100):
+        if (path.exists(period_path)
+            and path.exists(duty_cycle_path)
+            and path.exists(enable_path)
+                and path.exists(polarity_path)):
             break
+        elif i == 99:
+            raise FileNotFoundError("Files did not exist")
+        else:
+            time.sleep(0.01)
+
+    pin.period_fd = os.open(period_path, os.O_RDWR)
+    pin.duty_fd = os.open(duty_cycle_path, os.O_RDWR)
+    pin.polarity_fd = os.open(polarity_path, os.O_RDWR)
+    pin.enable_fd = os.open(enable_path, os.O_RDWR)
 
     pin.duty = 0
     pin.freq = 0
