@@ -169,6 +169,7 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
         raise RuntimeError("Could not find export file")
     else:
         export_file.write(str(pin.index))
+        export_file.close()
 
     # Try to open the directory
     pwm_dir = path.join(
