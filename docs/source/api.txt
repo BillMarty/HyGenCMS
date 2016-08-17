@@ -80,6 +80,10 @@ hygencms.woodwardcontrol
 Hardware Use Modules
 --------------------
 
+These modules are userspace drivers to make the hardware
+functionality of the Beaglebone Black accessible to Python
+programs.
+
 hygencms.adc
 ^^^^^^^^^^^^
 

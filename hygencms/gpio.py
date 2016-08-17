@@ -135,7 +135,7 @@ def read(pin):
         A GPIO pin.
 
     :return:
-        :const:`True` or :const:`False`
+        :const:`gpio.HIGH` or :const:`gpio.LOW`
     """
     normalized_pin = normalize_pin(pin)
     try:

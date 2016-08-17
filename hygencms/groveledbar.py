@@ -45,6 +45,9 @@ class GroveLedBar:
     def set_auto_refresh(self, enable):
         """
         Enable auto-refreshing on changes.
+        
+        :param enable:
+            Whether to enable the auto-refreshing
         """
         self._auto_refresh = bool(enable)
 
@@ -111,7 +114,7 @@ class GroveLedBar:
 
 def main():
     """
-    Testing routine
+    A testing routine
     """
     bar = GroveLedBar("P9_12", "P9_15")
 
