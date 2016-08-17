@@ -386,12 +386,14 @@ comment which tells the shell how to run this file we've marked as
 executable. The second line actually calls the script.
 
 .. code:: bash
+
 	#!/bin/bash
 	sudo perl /opt/scripts/device/bone/show-pins.pl | sort
 
 After creating and saving the file, make it executable and reboot.
 
 .. code:: bash
+
 	# Save and make it executable
 	sudo chmod +x /usr/local/bin/show-pins
 

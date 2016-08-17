@@ -5,7 +5,7 @@ The HyGen CMS software uses several open source projects. This
 page keeps track of each, and what license it is used under.
 A simple summary of the licenses listed here (with the exception
 of the Python license) can be found
-`here <http://choosealicense.com/appendix/`_. None of these
+`here <http://choosealicense.com/appendix/>`_. None of these
 licenses imposes any burden, beyond including the license and
 notice of copyright along with any distribution of the code.
 Our own code can be maintained under our "all rights reserved"

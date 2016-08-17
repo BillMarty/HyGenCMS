@@ -1,6 +1,6 @@
-=========
+====================================
 HyGen CMS Software API Documentation
-=========
+====================================
 
 *The following are the API documentation strings taken from the source
 code.*
