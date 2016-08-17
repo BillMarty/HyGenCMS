@@ -1,8 +1,12 @@
-import subprocess
-from subprocess import check_call, CalledProcessError, STDOUT, check_output
-import time
-import os.path as path
+"""
+This module provides tools for dealing with mounted and plugged in USB drives.
+"""
+
 import os
+import os.path as path
+import subprocess
+import time
+from subprocess import check_call, CalledProcessError, STDOUT, check_output
 
 
 def mount_plugged():
@@ -182,4 +186,3 @@ def mount(device):
         time.sleep(0.01)
 
     return drive_mounted
-

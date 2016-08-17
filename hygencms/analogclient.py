@@ -1,9 +1,10 @@
 import sys
 import time
 
-from hygencms import adc, utils
-from hygencms.asyncio import AsyncIOThread
 from monotonic import monotonic
+
+from . import adc, utils
+from .asyncio import AsyncIOThread
 
 
 class AnalogClient(AsyncIOThread):
@@ -62,7 +63,10 @@ class AnalogClient(AsyncIOThread):
             Configuration map to check
 
         :return:
-            :const:`True` or an exception
+            :const:`True`
+
+        :exception ValueError:
+            raised if the configuration map is invalid
         """
         required_config = ['measurements', 'frequency', 'averages']
         for val in required_config:

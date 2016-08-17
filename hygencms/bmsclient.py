@@ -1,7 +1,8 @@
 import serial
-from hygencms import utils
-from hygencms.asyncio import AsyncIOThread
-from hygencms.utils import PY3
+
+from . import utils
+from .asyncio import AsyncIOThread
+from .utils import PY3
 
 
 class BmsClient(AsyncIOThread):
@@ -172,7 +173,8 @@ class BmsClient(AsyncIOThread):
 
     def get_data(self):
         """
-        Get the charge and current
+        Get the charge and current.
+
         :return: a tuple of (charge, current)
         """
         # If we have a last string

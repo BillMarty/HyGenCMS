@@ -4,9 +4,9 @@ import time
 from datetime import datetime
 from os import path
 
-from hygencms import gpio, pins, utils
-from hygencms import usbdrive
-from hygencms.asyncio import AsyncIOThread
+from . import gpio, pins, utils
+from . import usbdrive
+from .asyncio import AsyncIOThread
 
 
 class FileWriter(AsyncIOThread):
@@ -89,7 +89,7 @@ class FileWriter(AsyncIOThread):
 
     @property
     def safe_to_remove(self):
-        """Safe to remove LED"""
+        """Property for Safe to remove LED"""
         return self._safe_to_remove
 
     @safe_to_remove.setter
@@ -108,7 +108,7 @@ class FileWriter(AsyncIOThread):
 
     @property
     def usb_activity(self):
-        """USB Activity LED"""
+        """Property for USB Activity LED"""
         return self._usb_activity
 
     @usb_activity.setter
@@ -142,12 +142,13 @@ class FileWriter(AsyncIOThread):
     @staticmethod
     def check_config(config):
         """
-        Check that the configuration map is complete. Throw a
-        ValueError if any configuration values are missing from
-        the dictionary.
+        Check that the configuration map is complete.
 
         :param config:
             The configuration map for the FileWriter
+
+        :exception ValueError:
+            Raises if the configuration map is invalid.
         """
         required_config = ['ldir']
         for val in required_config:

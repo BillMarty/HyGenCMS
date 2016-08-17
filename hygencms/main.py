@@ -38,22 +38,21 @@ import subprocess
 import sys
 import time
 
-import hygencms.analogclient
-import hygencms.asyncio
-import hygencms.bmsclient
-import hygencms.filewriter
-import hygencms.woodwardcontrol
 import monotonic
 import serial
-from hygencms import usbdrive
-from hygencms.deepseaclient import DeepSeaClient
 
 from . import gpio
 from . import pins
+from . import usbdrive
 from . import utils
+from .analogclient import AnalogClient
 from .bbio_common import setup_io
+from .bmsclient import BmsClient
 from .config import get_configuration
+from .deepseaclient import DeepSeaClient
+from .filewriter import FileWriter
 from .groveledbar import GroveLedBar
+from .woodwardcontrol import WoodwardControl
 
 #################################################
 # Conditional import for Python 2/3 compatibility
@@ -96,7 +95,6 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     ############################################
     # Async Data Sources
     ############################################
-    deepsea = None
     if 'deepsea' in config['enabled']:
         try:
             deepsea = DeepSeaClient(config['deepsea'], handlers, data_store)
@@ -118,7 +116,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     analog = None
     if 'analog' in config['enabled']:
         try:
-            analog = hygencms.analogclient.AnalogClient(config['analog'], handlers, data_store)
+            analog = AnalogClient(config['analog'], handlers, data_store)
         except ValueError:
             exc_type, exc_value = sys.exc_info()[:2]
             logger.error("Configuration error from AnalogClient: %s: %s"
@@ -132,10 +130,9 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             clients.append(analog)
             threads.append(analog)
 
-    bms = None
     if 'bms' in config['enabled']:
         try:
-            bms = hygencms.bmsclient.BmsClient(config['bms'], handlers)
+            bms = BmsClient(config['bms'], handlers)
         except serial.SerialException as e:
             logger.error("SerialException({0}) opening BmsClient: {1}"
                          .format(e.errno, e.strerror))
@@ -155,7 +152,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     woodward = None
     if 'woodward' in config['enabled']:
         try:
-            woodward = hygencms.woodwardcontrol.WoodwardControl(
+            woodward = WoodwardControl(
                 config['woodward'], handlers
             )
         # ValueError can be from a missing value in the config map
@@ -181,7 +178,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         csv_header = "linuxtime," + ','.join(headers)
         log_queue = queue.Queue()
         try:
-            filewriter = hygencms.filewriter.FileWriter(
+            filewriter = FileWriter(
                 config['filewriter'], handlers, log_queue, csv_header
             )
         except ValueError as e:
@@ -274,7 +271,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 try:
                     # Virtual LED 1
                     # From DeepSea GenComm manual, 10.57
-                    pid_enable = data_store[191*256 + 0]
+                    pid_enable = data_store[191 * 256 + 0]
                     if not woodward.in_auto and pid_enable:
                         woodward.integral_term = 0.0
                         woodward.set_auto(True)
@@ -490,4 +487,3 @@ def power_off():
     :return: :const:`None`
     """
     subprocess.call(["poweroff"])
-

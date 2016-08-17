@@ -1,8 +1,9 @@
 import time
 
-from hygencms import pwm, utils
-from hygencms.asyncio import AsyncIOThread
 from monotonic import monotonic
+
+from . import pwm, utils
+from .asyncio import AsyncIOThread
 
 
 class WoodwardControl(AsyncIOThread):

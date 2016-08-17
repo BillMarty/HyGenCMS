@@ -2,13 +2,14 @@ import sys
 import time
 
 import serial
-from hygencms.asyncio import AsyncIOThread
 from modbus_tk import defines as defines
 from modbus_tk.exceptions import ModbusInvalidResponseError, ModbusError
 from modbus_tk.modbus_rtu import RtuMaster
 from modbus_tk.modbus_tcp import TcpMaster
 from monotonic import monotonic
 from serial import SerialException
+
+from .asyncio import AsyncIOThread
 
 
 class DeepSeaClient(AsyncIOThread):

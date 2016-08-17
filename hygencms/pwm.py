@@ -30,8 +30,8 @@ import platform
 import subprocess
 import time
 
-from .pins import normalize_pin
 from .bbio_common import setup_io, universal_cape_present
+from .pins import normalize_pin
 
 if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
     raise EnvironmentError('Requires Linux >=4.1.0')
@@ -186,7 +186,7 @@ def start(key, duty_cycle=50.0, frequency=100000):
         if (path.exists(period_path)
             and path.exists(duty_cycle_path)
             and path.exists(enable_path)
-                and path.exists(polarity_path)):
+            and path.exists(polarity_path)):
             break
         elif i == 99:
             raise FileNotFoundError("Files did not exist")

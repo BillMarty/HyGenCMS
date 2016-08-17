@@ -75,5 +75,6 @@ def _get_ids():
     for i, byte in enumerate(mac_id1_bytes):
         MAC_ID1 |= ((byte & 0xff) << (i * 8))
 
+
 # Get the IDs
 _get_ids()

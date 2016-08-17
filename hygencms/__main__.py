@@ -18,8 +18,8 @@ import signal
 
 from daemon import pidfile, DaemonContext
 
-from hygencms.config import get_configuration
-from hygencms.main import main as main_entry
+from .config import get_configuration
+from .main import main as main_entry
 
 
 def main():

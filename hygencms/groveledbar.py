@@ -25,6 +25,7 @@ class GroveLedBar:
     Modeled very closely off the my9221 and groveledbar drivers on UPM
     https://github.com/Pillar1989/upm/blob/BBGW/src/my9221
     """
+
     def __init__(self, data_pin, clock_pin):
         """
         :param data_pin:
@@ -92,7 +93,7 @@ class GroveLedBar:
         for i in range(4):
             gpio.write(self._data_pin, 1)
             gpio.write(self._data_pin, 0)
-        # same here
+            # same here
 
     def send_16_bit_block(self, data):
         """

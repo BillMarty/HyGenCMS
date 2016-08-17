@@ -18,8 +18,9 @@ All gpio functions accept pin titles as their argument, of the form
 'P9_08'.
 """
 
-from .pins import normalize_pin
 import platform
+
+from .pins import normalize_pin
 
 if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
     raise EnvironmentError('Requires Linux >=4.1.0')
