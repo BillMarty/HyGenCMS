@@ -12,7 +12,7 @@ Preparing MicroSD card
 ----------------------
 
 The image should be obtained from `this
-site <https://debian.beagleboard.org/images/rcn-ee.net/rootfs/bb.org/testing/>`__,
+site <http://rcn-ee.net/rootfs/bb.org/testing/>`__,
 which is the repository holding the latest builds of Debian 8, Jessie.
 Choose the image under ``[date]/console/bone-debian-[...].img.xz``. The
 image is downloaded as a ``.img.xz`` file, and can be uncompressed with
