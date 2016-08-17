@@ -92,13 +92,13 @@ def setup():
 
 def read_raw(pin):
     """
-    Read the ADC count straight from the sysfs file, as a count
+    Read the 12-bit ADC count straight from the sysfs file, as an int.
 
     :param pin:
         Pin name to read
 
     :return:
-        12-bit count.
+        12-bit count as an int
     """
     pin = normalize_pin(pin)
     if pin not in pins:

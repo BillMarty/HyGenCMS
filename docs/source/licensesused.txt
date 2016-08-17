@@ -9,7 +9,7 @@ of the Python license) can be found
 licenses imposes any burden, beyond including the license and
 notice of copyright along with any distribution of the code.
 Our own code can be maintained under our "all rights reserved"
-license.
+control.
 
 - pyserial: BSD license
 - python: python license (specific to python, very permissive)

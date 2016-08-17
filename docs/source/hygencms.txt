@@ -31,8 +31,8 @@ in ``requirements.txt`` are automatically installed by the Python
 packaging system.
 
 This software is developed in the Python programming language. While an
-effort has been made to keep it compatible between Python 2 and Python
-3, it is recommended to use Python 3, as it is perfectly stable, and is
+effort has been made to maintain compatibility between Python 2 and Python
+3, Python 3 is the recommended platform, as it is stable, and is
 the platform being used for continued development.
 
 Apart from Python libraries, HyGenCMS relies on several shell commands
@@ -75,7 +75,7 @@ communication between threads is that the many of the threads store
 the data they gather directly in a central dictionary, and the main
 thread sometimes pulls data directly from the dictionary.
 
-The main thread (and some of the other threads) are structured as an 
+The main thread (and some of the other threads) is structured as an
 event loop - it keeps a record of when it ought to next run each group
 of tasks, then checks at each loop whethere it is now time to run each
 group. At each loop, it sleeps for a short time. This keeps the other
@@ -162,7 +162,7 @@ pwm module
    :undoc-members:
    :show-inheritance:
 
-hygencms.utils module
+utils module
 =====================
 
 .. automodule:: hygencms.utils

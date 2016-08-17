@@ -44,6 +44,11 @@ It will be structured as a nested dictionary of the following form::
             "ww_sig": "P9_21", # PWM signal to the Woodward
         },
     }
+
+This file provides two ways of getting a configuration map. The default
+is to read the map out of a file - by default, ``hygen_logger.py``.
+Alternately, the configuration map can be built by entering in values
+manually.
 """
 ###############################
 # Python imports
