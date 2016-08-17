@@ -33,7 +33,7 @@ def _get_ids():
     Implementation copied from http://stackoverflow.com/q/29856644
     under the MIT license.
 
-    :return: None
+    :return: :const:`None`
     """
     global MAC_ID0, MAC_ID1
     file_handler = open("/dev/mem", "r+b")

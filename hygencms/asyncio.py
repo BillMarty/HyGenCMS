@@ -53,7 +53,7 @@ class AsyncIOThread(Thread):
         """
         Cancel the thread, and log its stopping to the logger.
 
-        :return: None
+        :return: :const:`None`
         """
         self.cancelled = True
         self._logger.info("Stopping " + str(self) + "...")
