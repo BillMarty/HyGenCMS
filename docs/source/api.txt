@@ -78,7 +78,7 @@ hygencms.filewriter
 hygencms.woodwardcontrol
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: hygencms.filewriter
+.. automodule:: hygencms.woodwardcontrol
    :members:
    :undoc-members:
    :show-inheritance:
