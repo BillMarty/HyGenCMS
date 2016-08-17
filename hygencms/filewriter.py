@@ -172,6 +172,7 @@ class FileWriter(AsyncIOThread):
 
                     self.base_directory = self.mount_drive
                     self._f = self.new_logfile()
+                    self._write_line(self._csv_header)
                     self.mount_drive = None
 
                 elif self.eject_drive:
@@ -181,10 +182,12 @@ class FileWriter(AsyncIOThread):
 
                     self.base_directory = self.fallback_directory
                     self._f = self.new_logfile()
+                    self._write_line(self._csv_header)
                     self.eject_drive = False
 
                 elif hour != prev_hour:
                     self._f = self.new_logfile()
+                    self._write_line(self._csv_header)
                     prev_hour = hour
 
                 # Print out lines
@@ -282,5 +285,4 @@ class FileWriter(AsyncIOThread):
             return open(os.devnull, 'w')  # return a null file
         else:
             self._logger.info("Opened new file at %s" % f.name)
-            f.write(self._csv_header)
             return f
