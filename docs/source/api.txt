@@ -5,18 +5,11 @@ HyGen CMS Software API Documentation
 *The following are the API documentation strings taken from the source
 code.*
 
-
-Module contents
----------------
-
 .. automodule:: hygencms
    :members:
 
-Submodules
-----------
-
 main module
-===========
+-----------
 
 .. automodule:: hygencms.main
    :members:
@@ -25,7 +18,7 @@ main module
 
 
 Data Input Threads
-==================
+------------------
 
 hygencms.asyncio
 ^^^^^^^^^^^^^^^^
@@ -64,7 +57,7 @@ hygencms.deepseaclient
 
 
 Output Threads
-==============
+--------------
 
 hygencms.filewriter
 ^^^^^^^^^^^^^^^^^^^
@@ -85,7 +78,7 @@ hygencms.woodwardcontrol
 
 
 Hardware Use Modules
-====================
+--------------------
 
 hygencms.adc
 ^^^^^^^^^^^^
@@ -160,7 +153,7 @@ hygencms.usbdrive
 
 
 General Utilities
-=================
+-----------------
 
 hygencms.config
 ^^^^^^^^^^^^^^^
