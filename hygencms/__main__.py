@@ -47,7 +47,7 @@ def main():
 
     # create logger
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     # create stream handler to stderr and set level to debug
     sh = logging.StreamHandler()  # default is sys.stderr
@@ -56,7 +56,7 @@ def main():
     # Create file handler
     fh = logging.FileHandler(
         '/home/hygen/logs/errors.log')
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(logging.INFO)
 
     # create formatter
     formatter = logging.Formatter(
