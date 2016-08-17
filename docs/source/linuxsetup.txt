@@ -7,6 +7,7 @@ recreate the image, for the sake of future maintainers. The current at
 the time of this document is Debian 8.5, 2016-08-07, with the kernel
 ``4.4.16-ti-r38``.
 
+
 Preparing MicroSD card
 ----------------------
 
@@ -38,6 +39,7 @@ involve the following settings:
 
 Open the Putty session, plug in the BeagleBone, login as root (no
 password) and begin the configuration process.
+
 
 Add User
 --------
@@ -84,6 +86,7 @@ It should prompt for hygen's password, then print ``root``. This
 confirms that sudo has been enabled. Next we will setup the network
 (remember to stay logged in as hygen).
 
+
 Network Setup
 -------------
 
@@ -107,6 +110,12 @@ following command.
 .. code:: bash
 
     sudo chmod +s $(which ping)
+
+.. note::
+
+   If ping returned ``connect: Network is unreachable``, skip down to
+   interface configuration section; you may need to return to this
+   section if the ``Operation not permitted`` arises later.
 
 Now test our change by trying ``ping 8.8.8.8`` again. Don't worry if it
 gives an error, we'll configure the network in a second. Just ensure
@@ -133,7 +142,7 @@ Static_IPs.xlsx as of 2016-07-26). If it is going out
 to a site, we'll eventually want to turn the IP back to DHCP, but for
 now we'll assign it a static IP for continuing setup.
 
-::
+.. code:: bash
 
     auto eth0
     iface eth0 inet static
@@ -159,6 +168,7 @@ Test the network connection again.
 
 This should now show ping responses. If not, the network is not properly
 configured, and that must be solved before continuing.
+
 
 Setup SSH
 ---------
@@ -212,6 +222,7 @@ Suggested banner:
              __/ | __/ |                        __/ | __/ |          
             |___/ |___/                        |___/ |___/           
 
+
 Update System Packages
 ----------------------
 
@@ -228,6 +239,19 @@ autoclean any packages we haven't asked for.
     sudo apt-get upgrade
     sudo apt-get clean
     sudo apt-get autoclean
+
+On Linux systems, each program provides a manual page which describes
+its functionality and how to use the program. These manpages, as they
+are called, are an invaluable resource in using a Linux system.
+Unfortunately, the console version of Linux we installed does not
+include the ``man`` command. Add it using the following commands:
+
+.. code:: bash
+
+    sudo apt-get install man-db manpages manpages-dev
+    # Try the man command
+    man lsblk  # We'll use this next
+
 
 Grow Root Partition
 -------------------
@@ -274,6 +298,7 @@ Now check to make sure we've succeeded in using the full disk using
 ``df`` ought to report that ``/dev/mmcblk0p1`` is 3.7G now, with about
 25% usage.
 
+
 Install Necessary Libraries
 ---------------------------
 
@@ -306,10 +331,12 @@ device tree overlays in that repository are already installed in kernel
 
     cd ~
     wget https://github.com/cdsteinkuehler/beaglebone-universal-io/archive/master.zip
+    sudo apt-get install unzip  # Not included in default install
     unzip master.zip
     rm master.zip
-    cd beaglebone-universal-io
+    cd beaglebone-universal-io-master
     sudo make install_target  # This installs the utility but not the DTOs
+
 
 Setup universal cape loading on boot
 ------------------------------------
@@ -319,6 +346,13 @@ The next step will load the universal cape on boot. With your editor of
 choice, open ``/boot/uEnv.txt`` as root. Uncomment the line below
 "Beaglebone Black: HDMI (Audio/Video) disabled". This line should say
 something like ``dtb=am335x-boneblack-emmc-overlay.dtb``.
+
+.. warning::
+
+   Syntax errors in the ``uEnv.txt`` file can make the system
+   unbootable. Double check any changes before rebooting to keep from
+   bricking your machine. If the machine *is* bricked, follow the
+   instructions in :ref:`bricked` to restore to a bootable state.
 
 
 Setup USB Mounting
@@ -331,46 +365,62 @@ Setup USB Mounting
 
     sudo apt-get install pmount
 
+
 Pinmux script
 -------------
 
 There's a very handy script to show a nicely-formatted list of pins and
 their current state in the pin-mux included on the image. However, it's
 inconveniently located at ``/opt/scripts/device/bone/show-pins.pl``.
-Let's create a link in ``/usr/local/bin/show-pins`` to make it easy to
-use:
+Rather than typing ``sudo perl /opt/scripts/device/bone/show-pins.pl``
+every time, let's create a link to make it easy to use. To do this, we
+will create a small script file at ``/usr/local/bin/show-pins`` and
+make it executable.
 
 .. code:: bash
 	
-	sudo vi /usr/local/bin/show-pins
-	
-	# In file:
-	#!/bin/bash
-	perl /opt/scripts/device/bone/show-pins.pl | sort
+	sudo nano /usr/local/bin/show-pins
 
+Edit the file to contain the following two lines. The first line is a
+comment which tells the shell how to run this file we've marked as
+executable. The second line actually calls the script.
+
+.. code:: bash
+	#!/bin/bash
+	sudo perl /opt/scripts/device/bone/show-pins.pl | sort
+
+After creating and saving the file, make it executable and reboot.
+
+.. code:: bash
 	# Save and make it executable
 	sudo chmod +x /usr/local/bin/show-pins
+
+    # Reboot one more time to apply all our settings
+    sudo reboot
+
 
 Hygen Software
 --------------
 
-It's finally time to add our software to the mix. *Note to self: the way
-we add our software may change if we install our software to some native
-linux directory rather than in hygen's home directory.* We'll do this by
+It's finally time to add our software to the mix. We'll do this by
 cloning from our private GitHub repository.
+
+.. note::
+    The way
+    we add our software may change if we install our software to some native
+    Linux directory rather than in hygen's home directory.
 
 .. code:: bash
 
     cd ~
     sudo apt-get install git
     git clone https://github.com/BillMarty/HyGenCMS.git
+    # Manually install doctools, as it hangs if installed automatically
+    sudo pip3 install doctools
 
-We then can install the executable.
+We then can install the executable. For instructions on this part, see
+:ref:`hygencms-installation`.
 
-.. code:: bash
-
-    cd ~/HyGenCMS
-    chmod +x cms
 
 Auto-starting Service
 ---------------------
@@ -384,13 +434,113 @@ for managing the other processes, and can ensure they continue to run.
 We will use this functionality to restart our Python program if it
 crashes.
 
-The HyGenCMS repository contains two ``.service`` files which provide
-systemd services. We just need to load them up. This can be done using
-the ``systemctl`` command. If the paths to the repository are different
-than mine, we'll need to modify those in the .service files.
+The HyGenCMS repository contains a ``.service`` file which provides
+a ``systemd`` service. We just need to load it into the systemd. This
+can be done using the ``systemctl`` command. If the paths to the
+repository are different than mine, we'll need to modify those in the
+``.service`` files.
 
 .. code:: bash
 
     cd
-    sudo systemctl enable ~/HygenCMS/linux_setup/configure_outputs.service
     sudo systemctl enable ~/HyGenCMS/linux_setup/hygencms.service
+
+
+Change Network Interface to DHCP
+--------------------------------
+
+
+
+
+.. _flash-emmc:
+
+Flash Internal eMMC
+-------------------
+
+Once we've setup the microSD card to contain the system as we want it
+to be for the HyGen, we'd like to simply duplicate it to each BBB.
+Luckily, this is easy to do. There is a script included with the Debian
+image which can flash the internal eMMC from the microSD card.
+
+.. code:: bash
+
+    cd /opt/scripts/tools/eMMC/
+    sudo ./init-eMMC-flasher-v3.sh
+
+This script while take a little while to run. When it finishes, power
+off the system, remove the microSD card, and power back on.
+
+
+Make Flasher Image
+------------------
+
+The image can be made into a specialized flasher image, which does not
+boot into a full Linux system, but simply flashes itself onto the
+internal eMMC. To do this, boot from the internal eMMC and run the
+script ``beaglebone-black-make-microSD-flasher-from-eMMC.sh``.
+
+.. code:: bash
+
+    cd /opt/scripts/tools/eMMC
+    sudo ./beaglebone-black-make-microSD-flasher-eMMC.sh
+
+
+.. _bricked:
+
+Fixing a Bricked System
+-----------------------
+
+If the system is not booting, there are several causes which could be
+to blame. The most likely, easiest to fix problem is an error in the
+``/boot/uEnv.txt`` file. The easiest fix is if we're currently booting
+off the microSD and the on-board flash contains a bootable Linux
+system. In this case, simply power off the board, then unplug the
+microSD card and power the system on. If this works, skip ahead to
+:ref:`bricked-booted`.
+
+If there isn't a bootable system on the internal eMMC, it might be easier
+to just start over this guide. If you want to try to recover your work,
+burn a new microSD card, boot from it, then follow the instructions
+from :ref:`flash-emmc` to get a bootable system on the internal eMMC,
+then continue from :ref:`bricked-booted` below.
+
+
+.. _bricked-booted:
+
+Once booted
+===========
+
+Once we've booted from the internal eMMC, we can mount the microSD
+card to revert the changes we made to ``uEnv.txt`` that bricked it.
+The first step is to mount the drive. We will list the device files in
+``/dev`` before and after inserting the microSD card in order to
+confirm the name of the SD card.
+
+.. code:: bash
+
+    ls /dev | grep mmc
+    # Insert microSD
+    !! # This Bash shortcut repeats last-used command
+
+The microSD will appear in only the second list. It will likely be
+``/dev/mmcblk0``. We'll mount the first partition on a directory in
+``/media``.
+
+.. code:: bash
+
+    cd /media
+    sudo mkdir uSD
+    sudo mount /dev/mmcblk0p1 uSD
+    cd uSD
+    ls
+
+Now the root filesystem of the microSD is mounted at uSD. You can now
+use your editor of choice to edit (as root) the ``uEnv.txt`` file. I
+use ``vi``.
+
+.. code:: bash
+
+    sudo vi /media/uSD/boot/uEnv.txt
+    # Undo any changes that bricked the device
+
+Now reboot, and hopefully the system is unbricked.

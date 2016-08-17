@@ -4,7 +4,10 @@
 # Written by Matthew West <mwest@planetarypower.com>, July 2016
 
 """
-Provide subclasses of thread, which can be used to do asynchronous IO.
+This module provides a subclass of thread, AsyncIOThread, which adds
+logging and the ability to cancel the thread. Ordinary threads continue
+until "completion", but this class enables the run to have a loop which
+continues until the thread is cancelled.
 """
 import logging
 from threading import Thread
@@ -54,5 +57,3 @@ class AsyncIOThread(Thread):
         """
         self.cancelled = True
         self._logger.info("Stopping " + str(self) + "...")
-
-

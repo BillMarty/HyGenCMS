@@ -18,6 +18,8 @@ import os
 
 from recordclass import recordclass
 
+from .pins import normalize_pin
+
 adc_setup = False
 
 
@@ -90,14 +92,15 @@ def setup():
 
 def read_raw(pin):
     """
-    Read the ADC count straight from the sysfs file, as a count
+    Read the 12-bit ADC count straight from the sysfs file, as an int.
 
     :param pin:
         Pin name to read
 
     :return:
-        12-bit count.
+        12-bit count as an int
     """
+    pin = normalize_pin(pin)
     if pin not in pins:
         raise ValueError("%s is not an analog input pin" % pin)
 
@@ -151,6 +154,7 @@ def cleanup(key=None):
         raised if there is an error closing.
     """
     if key:
+        key = normalize_pin(key)
         try:
             pin = pins[key]
         except KeyError:

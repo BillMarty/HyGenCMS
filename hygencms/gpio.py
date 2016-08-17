@@ -18,7 +18,7 @@ All gpio functions accept pin titles as their argument, of the form
 'P9_08'.
 """
 
-import re
+from .pins import normalize_pin
 import platform
 
 if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
@@ -99,11 +99,6 @@ OUTPUT = 0
 _base_path = '/sys/class/gpio/gpio{:d}/value'
 for p in pins:
     pins[p]['path'] = _base_path.format(pins[p]['id'])
-
-
-def normalize_pin(pin):
-    """Return a standardized format of a pin number"""
-    return re.sub(r'[Pp]([89]).*([0-9]{2})', r'P\1_\2', pin)
 
 
 def write(pin, value):

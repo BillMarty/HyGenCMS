@@ -9,16 +9,16 @@ This module is the main loop for HyGenCMS software.
 The primary functions of the main loop are as follows:
 
 - Start all necessary threads to read data asynchronously from the
-    DeepSea, BMS, and analog input pins
+DeepSea, BMS, and analog input pins
 - Start the thread to write data to a USB memory stick or fallback
-    location on local disk.
+location on local disk.
 - Start the thread to control the Woodward's RPM setpoint based on
-    the Analog trunk current value.
+the Analog trunk current value.
 - Pass through analog current value to the RPM setpoint controller
-    thread.
+thread.
 - Enable and disable the RPM setpoint controller.
 - Compile and pass through csv lines of data to the file writer
-    thread.
+thread.
 - Update fuel and battery gauges based on values from the DeepSea.
 - Read the "USB eject" switch and pass through to the file writer.
 - Update the tunings of the RPM setpoint controller.
@@ -404,7 +404,8 @@ def stop_threads(threads):
 
 def print_data(clients):
     """
-    Print the data for all the data source clients
+    Print the data for all the threads which get data.
+
     :param clients: A list of clients with a print_data function
     :return: None
     """
@@ -472,7 +473,7 @@ def check_kill_switch():
     Check whether we are to poweroff now. Only return when the switch
     has been set for two iterations.
 
-    :return: Whether to poweroff.
+    :return: Boolean, whether to poweroff.
     """
     global kill_now, kill_last
     value = gpio.read(pins.OFF_SWITCH)

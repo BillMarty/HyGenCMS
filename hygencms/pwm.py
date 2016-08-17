@@ -30,6 +30,7 @@ import platform
 import subprocess
 import time
 
+from .pins import normalize_pin
 from .bbio_common import setup_io, universal_cape_present
 
 if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
@@ -116,11 +117,11 @@ pins = {
 ocp_path = '/sys/devices/platform/ocp'
 
 
-def start(pin_name, duty_cycle=50.0, frequency=100000):
+def start(key, duty_cycle=50.0, frequency=100000):
     """
     Start a PWM pin.
 
-    :param pin_name: The pin name
+    :param key: The pin name
     :param duty_cycle: Initial duty cycle
     :param frequency: Initial frequency
 
@@ -129,8 +130,9 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
     :exception RunTimeError:
         Raised if unable to start the PWM pin.
     """
+    key = normalize_pin(key)
     try:
-        pin = pins[pin_name]
+        pin = pins[key]
     except KeyError:
         raise ValueError("PWM pin not implemented")
 
@@ -138,7 +140,7 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
         setup_io()
 
     # Mux the pin
-    subprocess.call(['config-pin', pin_name, 'pwm'])
+    subprocess.call(['config-pin', key, 'pwm'])
 
     if not universal_cape_present():
         raise ValueError("Could not setup IO pins")
@@ -223,17 +225,17 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
 
     if tries >= 100:
         pin.initialized = False
-        raise RuntimeError("Couldn't enable {:s}".format(pin_name))
+        raise RuntimeError("Couldn't enable {:s}".format(key))
 
-    set_frequency(pin_name, frequency)
-    set_duty_cycle(pin_name, duty_cycle)
+    set_frequency(key, frequency)
+    set_duty_cycle(key, duty_cycle)
 
 
-def set_frequency(pin_name, freq):
+def set_frequency(key, freq):
     """
     Set the frequency for a PWM pin.
 
-    :param pin_name: The pin name
+    :param key: The pin name
     :param freq: Frequency in Hz
 
     :exception ValueError:
@@ -241,8 +243,9 @@ def set_frequency(pin_name, freq):
     :exception RuntimeError:
         Raised if the pin has not been initialized first.
     """
+    key = normalize_pin(key)
     try:
-        pin = pins[pin_name]
+        pin = pins[key]
     except KeyError:
         raise ValueError("Unimplemented key")
 
@@ -315,6 +318,7 @@ def set_duty_cycle(key, duty):
     :exception RuntimeError:
         Raised if the pin has not been initialized first.
     """
+    key = normalize_pin(key)
     try:
         pin = pins[key]
     except KeyError:
@@ -350,6 +354,7 @@ def stop(key):
         If there is an error stopping the pin or the
         pin has not been initialized.
     """
+    key = normalize_pin(key)
     try:
         pin = pins[key]
     except KeyError:

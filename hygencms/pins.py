@@ -11,6 +11,8 @@ It should be kept synchronized with the SBC_IO.xlsx spreadsheet in the
 Last updated: 2016-08-16
 """
 
+import re
+
 modes = {
     # Pin   Mode	CPU Name	Function		P9	Mode	CPU Name	Function
     # Unmodifiable
@@ -277,3 +279,8 @@ SIG_300V = "P9_39"  # Note: on V3 CMS Schematic, this is 300V_SIG
 # DGND = P9_44
 # DGND = P9_45
 # DGND = P9_46
+
+
+def normalize_pin(pin):
+    """Return a standardized format of a pin number"""
+    return re.sub(r'[Pp]([89]).*([0-9]{2})', r'P\1_\2', pin)
