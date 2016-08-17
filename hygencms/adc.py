@@ -6,7 +6,8 @@
 """
 The ADC module uses the Sysfs interface provided by the Linux kernel and
 drivers to control and read from the analog inputs to the BeagleBone.
-See `here <http://processors.wiki.ti.com/index.php/Linux_Core_ADC_User's_Guide>`_
+See the
+`Users Guide <http://processors.wiki.ti.com/index.php/Linux_Core_ADC_User's_Guide>`_
 for more details.
 
 This module presumes that
