@@ -15,54 +15,6 @@ Module contents
 Submodules
 ----------
 
-ADC module
-==========
-
-.. automodule:: hygencms.adc
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-asyncio module
-==============
-
-.. automodule:: hygencms.asyncio
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-config module
-=============
-
-.. automodule:: hygencms.config
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-GPIO module
-===========
-
-.. automodule:: hygencms.gpio
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Grove LED Bar module
-====================
-
-.. automodule:: hygencms.groveledbar
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Configuration file
-============================
-
-.. automodule:: hygencms.hygen_logger
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 main module
 ===========
 
@@ -71,42 +23,167 @@ main module
    :undoc-members:
    :show-inheritance:
 
-hygencms.pins module
+
+Data Input Threads
+==================
+
+hygencms.asyncio
+^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.asyncio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.analogclient
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.analogclient
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.bmsclient
+^^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.bmsclient
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.deepseaclient
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.deepseaclient
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Output Threads
+==============
+
+hygencms.filewriter
+^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.filewriter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.woodwardcontrol
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.filewriter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Hardware Use Modules
 ====================
 
-.. automodule:: hygencms.pins
+hygencms.adc
+^^^^^^^^^^^^
+
+.. automodule:: hygencms.adc
    :members:
    :undoc-members:
    :show-inheritance:
 
-pwm module
-==========
 
-.. automodule:: hygencms.pwm
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-utils module
-=====================
-
-.. automodule:: hygencms.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-bbid module
-===========
+hygencms.bbid
+^^^^^^^^^^^^^
 
 .. automodule:: hygencms.bbid
    :members:
    :undoc-members:
    :show-inheritance:
 
-bbio_common module
-==================
+
+hygencms.bbio_common
+^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: hygencms.bbio_common
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.gpio
+^^^^^^^^^^^^^
+
+.. automodule:: hygencms.gpio
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.groveledbar
+^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.groveledbar
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.pins
+^^^^^^^^^^^^^
+
+.. automodule:: hygencms.pins
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.pwm
+^^^^^^^^^^^^
+
+.. automodule:: hygencms.pwm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.usbdrive
+^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.usbdrive
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+General Utilities
+=================
+
+hygencms.config
+^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.hygen_logger
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.hygen_logger
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+hygencms.utils
+^^^^^^^^^^^^^^
+
+.. automodule:: hygencms.utils
    :members:
    :undoc-members:
    :show-inheritance:

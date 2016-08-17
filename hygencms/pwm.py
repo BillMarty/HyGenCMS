@@ -346,7 +346,7 @@ def stop(key):
     Stop a PWM from running.
 
     :param key: The pin name
-    :return: None
+    :return: :const:`None`
 
     :exception ValueError:
         Raised if the pin name entered is invalid.
@@ -382,7 +382,7 @@ def cleanup():
     """
     Stop all running PWMs
 
-    :return: None
+    :return: :const:`None`
 
     :exception ValueError:
         Passed through from stop

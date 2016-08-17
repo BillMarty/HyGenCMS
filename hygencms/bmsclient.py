@@ -189,7 +189,7 @@ class BmsClient(AsyncIOThread):
         Print the charge and current as we currently have it, in
         human-readable format.
 
-        :return: None
+        :return: :const:`None`
         """
         # Short circuit if we haven't started reading data yet
         if self.last_string_status == "":

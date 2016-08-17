@@ -135,7 +135,7 @@ def read_volts(pin):
         Pin name to read
 
     :return:
-        voltage.
+        voltage in volts, as a float
     """
     count = read_raw(pin)
     return count * (1.8 / 4095)
@@ -145,7 +145,7 @@ def cleanup(key=None):
     """
     Cleanup either a single pin or the entire ADC.
 
-    :return: None
+    :return: :const:`None`
 
     :exception ValueError:
         raised if an invalid key is passed in.

@@ -395,7 +395,7 @@ def stop_threads(threads):
     Stop each thread in the list, preparatory to shutdown
 
     :param threads: A list of AsyncIOThread objects to shutdown
-    :return: None
+    :return: :const:`None`
     """
     for thread in threads:
         thread.cancel()
@@ -407,7 +407,7 @@ def print_data(clients):
     Print the data for all the threads which get data.
 
     :param clients: A list of clients with a print_data function
-    :return: None
+    :return: :const:`None`
     """
     for client in clients:
         client.print_data()
@@ -420,7 +420,7 @@ def update_watchdog():
     restarted. If we don't write to the watchdog for 60 seconds, the
     system will be restarted.
 
-    :return: None
+    :return: :const:`None`
     """
     with open("/dev/watchdog", 'w') as f:
         f.write('\n')
@@ -433,7 +433,7 @@ def update_gauges(fuel_gauge, battery_gauge):
 
     :param fuel_gauge: GroveLedBar object, the fuel gauge
     :param battery_gauge: GroveLedBar object, the battery gauge
-    :return: None
+    :return: :const:`None`
     """
     # Update interface gauges
     # See DeepSea_Modbus_manualGenComm.docx, 10.6
@@ -486,7 +486,7 @@ def power_off():
     """
     Shut down the system immediately.
 
-    :return: None
+    :return: :const:`None`
     """
     subprocess.call(["poweroff"])
 
