@@ -510,7 +510,7 @@ then continue from :ref:`bricked-booted` below.
 .. _bricked-booted:
 
 Once booted
-===========
+^^^^^^^^^^^
 
 Once we've booted from the internal eMMC, we can mount the microSD
 card to revert the changes we made to ``uEnv.txt`` that bricked it.
