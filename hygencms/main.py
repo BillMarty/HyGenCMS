@@ -52,6 +52,7 @@ from .config import get_configuration
 from .deepseaclient import DeepSeaClient
 from .filewriter import FileWriter
 from .groveledbar import GroveLedBar
+from .utils import static_vars
 from .woodwardcontrol import WoodwardControl
 
 #################################################
@@ -73,7 +74,28 @@ data_store = {pins.GEN_CUR: None}
 
 def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False):
     """
-    Enter a main loop, polling values from sources enabled in config
+    Enter a main loop, polling values from sources enabled in config.
+
+    :param config:
+        The master configuration map, containing a list of enabled data
+        sources, global configuration values, and configuration maps
+        specific to each enabled thread.
+
+    :param handlers:
+        An iterable of log handlers, which will be added to each logger
+        throughout the program.
+
+    :param daemon:
+        A Boolean of whether to run the program as a daemon or in the
+        foreground.
+
+    :param watchdog:
+        A Boolean of whether to use the hardware watchdog timer on the
+        BeagleBone Black.
+
+    :param power_off_enabled:
+        A Boolean of whether to watch the power-off relay and power off
+        the BeagleBone if it is set.
     """
     logger = logging.getLogger(__name__)
     for h in handlers:
@@ -462,10 +484,7 @@ def update_gauges(fuel_gauge, battery_gauge):
         battery_gauge.set_bar_level(battery_charge)
 
 
-kill_last = False
-kill_now = False
-
-
+@static_vars(last=False, now=False)
 def check_kill_switch():
     """
     Check whether we are to poweroff now. Only return when the switch
@@ -473,11 +492,10 @@ def check_kill_switch():
 
     :return: Boolean, whether to poweroff.
     """
-    global kill_now, kill_last
     value = gpio.read(pins.OFF_SWITCH)
-    kill_last = kill_now
-    kill_now = value == gpio.HIGH  # TODO not sure whether this should be high or low
-    return kill_now and kill_last
+    check_kill_switch.last = check_kill_switch.now
+    check_kill_switch.now = value == gpio.HIGH  # TODO not sure whether this should be high or low
+    return check_kill_switch.last and check_kill_switch.now
 
 
 def power_off():

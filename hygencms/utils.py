@@ -69,6 +69,27 @@ def ignore(*exceptions):
         pass
 
 
+def static_vars(**kwargs):
+    """
+    A decorator to fake static function-level variables. Code
+    is directly copied from http://stackoverflow.com/a/279586
+
+    :param kwargs:
+        Keyword arguments, with key = variable name, val = initial
+        value
+
+    :return:
+        Decorated function
+    """
+
+    def decorate(func):
+        for k in kwargs:
+            setattr(func, k, kwargs[k])
+        return func
+
+    return decorate
+
+
 def log_exception(logger, e):
     """
     Log an exception, complete with the stack trace.
