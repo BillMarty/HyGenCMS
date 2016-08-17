@@ -308,8 +308,9 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
                 # Check the eject button to see whether it's held
                 if gpio.read(pins.USB_SW) == gpio.LOW and not ejecting:
-                    filewriter.eject_drive = True
-                    ejecting = True
+                    if usbdrive.mounted():
+                        filewriter.eject_drive = True
+                        ejecting = True
 
                 # Schedule next run
                 next_run[0.5] = now + 0.5
