@@ -1,6 +1,6 @@
-=========
-HyGen CMS
-=========
+=============
+Intro
+=============
 
 The HyGen Communication Management System, or CMS, is controlled by
 this Python package, running on a BeagleBone Black or BeagleBone Black
@@ -12,6 +12,8 @@ on the Linux kernel versions 4.1+, as 4.1 introduced breaking changes
 to the kernel interface file structure, and supports the Arrow
 BeagleBone Black Industrial on the same image as other BeagleBone Black
 devices.
+
+.. _hygencms-installation:
 
 Installation
 ------------
@@ -45,7 +47,7 @@ to be installed and present in the root PATH:
 - ``config-pin``
 
 Some of these commands should be included on every Debian build.
-Detailed instructions for installing the rest are given in the 
+Detailed instructions for installing the rest are given in the
 `Linux Setup <linuxsetup.html>`_ section.
 
 Program Flow
@@ -80,108 +82,3 @@ event loop - it keeps a record of when it ought to next run each group
 of tasks, then checks at each loop whethere it is now time to run each
 group. At each loop, it sleeps for a short time. This keeps the other
 threads from starving.
-
-Module contents
----------------
-
-.. automodule:: hygencms
-   :members:
-
-Submodules
-----------
-
-ADC module
-==========
-
-.. automodule:: hygencms.adc
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-asyncio module
-==============
-
-.. automodule:: hygencms.asyncio
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-config module
-=============
-
-.. automodule:: hygencms.config
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-GPIO module
-===========
-
-.. automodule:: hygencms.gpio
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Grove LED Bar module
-====================
-
-.. automodule:: hygencms.groveledbar
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Configuration file
-============================
-
-.. automodule:: hygencms.hygen_logger
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-main module
-===========
-
-.. automodule:: hygencms.main
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-hygencms.pins module
-====================
-
-.. automodule:: hygencms.pins
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pwm module
-==========
-
-.. automodule:: hygencms.pwm
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-utils module
-=====================
-
-.. automodule:: hygencms.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-bbid module
-===========
-
-.. automodule:: hygencms.bbid
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-bbio_common module
-==================
-
-.. automodule:: hygencms.bbio_common
-   :members:
-   :undoc-members:
-   :show-inheritance:
