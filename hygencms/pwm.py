@@ -30,6 +30,7 @@ import platform
 import subprocess
 import time
 
+from .pins import normalize_pin
 from .bbio_common import setup_io, universal_cape_present
 
 if not platform.uname()[0] == 'Linux' and platform.release() >= '4.1.0':
@@ -129,6 +130,7 @@ def start(pin_name, duty_cycle=50.0, frequency=100000):
     :exception RunTimeError:
         Raised if unable to start the PWM pin.
     """
+    pin_name = normalize_pin(pin_name)
     try:
         pin = pins[pin_name]
     except KeyError:
@@ -241,6 +243,7 @@ def set_frequency(pin_name, freq):
     :exception RuntimeError:
         Raised if the pin has not been initialized first.
     """
+    pin_name = normalize_pin(pin_name)
     try:
         pin = pins[pin_name]
     except KeyError:
@@ -315,6 +318,7 @@ def set_duty_cycle(key, duty):
     :exception RuntimeError:
         Raised if the pin has not been initialized first.
     """
+    key = normalize_pin(key)
     try:
         pin = pins[key]
     except KeyError:
@@ -350,6 +354,7 @@ def stop(key):
         If there is an error stopping the pin or the
         pin has not been initialized.
     """
+    key = normalize_pin(key)
     try:
         pin = pins[key]
     except KeyError:

@@ -18,6 +18,8 @@ import os
 
 from recordclass import recordclass
 
+from .pins import normalize_pin
+
 adc_setup = False
 
 
@@ -98,6 +100,7 @@ def read_raw(pin):
     :return:
         12-bit count.
     """
+    pin = normalize_pin(pin)
     if pin not in pins:
         raise ValueError("%s is not an analog input pin" % pin)
 
@@ -151,6 +154,7 @@ def cleanup(key=None):
         raised if there is an error closing.
     """
     if key:
+        key = normalize_pin(key)
         try:
             pin = pins[key]
         except KeyError:
