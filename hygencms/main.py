@@ -273,14 +273,12 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 # Connect the analog current in to the woodward process
                 if woodward and not woodward.cancelled:
                     try:
-                        cur = data_store["P9_40"]
+                        cur = data_store[pins.GEN_CUR]
                         if cur is not None:
                             woodward.process_variable = cur
-                    except UnboundLocalError:
-                        pass
                     except KeyError:
                         logger.critical('Generator current is not being measured.')
-                        woodward.cancel()
+                        exit('Generator current is not being measured.')
 
                 # Schedule next run
                 next_run[0.1] = now + 0.1
@@ -358,7 +356,6 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     # mounted, we'll mount the new location.
                     elif mounted != plugged:
                         filewriter.eject_drive = True
-                        ejecting = True
 
                 # If we're ejecting and the drive is gone, turn off light
                 if ejecting and not plugged:
