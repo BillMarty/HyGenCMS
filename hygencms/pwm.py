@@ -160,22 +160,24 @@ def start(key, duty_cycle=50.0, frequency=100000):
     except IndexError:
         raise RuntimeError("Could not find any PWM chip")
 
-    # Export the correct pin
-    export_path = path.join(
-        pwm_path,
-        'export',
-    )
-    try:
-        with open(export_path, 'w') as export_file:
-            export_file.write(str(pin.index))
-    except IOError:
-        raise RuntimeError("Could not find export file")
-
-    # Try to open the directory
+    # Build the directory path
     pwm_dir = path.join(
         pwm_path,
         'pwm' + str(pin.index)
     )
+
+    # If the directory does not exist, export the PWM
+    if not path.isdir(pwm_dir):
+        # Export the correct pin
+        export_path = path.join(
+            pwm_path,
+            'export',
+        )
+        try:
+            with open(export_path, 'w') as export_file:
+                export_file.write(str(pin.index))
+        except IOError:
+            raise RuntimeError("Could not find export file")
 
     period_path = path.join(pwm_dir, 'period')
     duty_cycle_path = path.join(pwm_dir, 'duty_cycle')
@@ -183,13 +185,13 @@ def start(key, duty_cycle=50.0, frequency=100000):
     enable_path = path.join(pwm_dir, 'enable')
 
     for i in range(100):
-        if (path.exists(period_path)
-            and path.exists(duty_cycle_path)
-            and path.exists(enable_path)
-            and path.exists(polarity_path)):
-            break
-        elif i == 99:
+        if i == 99:
             raise FileNotFoundError("Files did not exist")
+        elif (path.exists(period_path)
+              and path.exists(duty_cycle_path)
+              and path.exists(enable_path)
+              and path.exists(polarity_path)):
+            break
         else:
             time.sleep(0.01)
 
