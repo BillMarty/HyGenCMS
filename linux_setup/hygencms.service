@@ -1,6 +1,5 @@
 [Unit]
 Description=Hygen Communication Management System service
-Requires=configure_outputs.service
 
 [Service]
 Type=simple
@@ -13,4 +12,3 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-Alias=hygenlogger.service
