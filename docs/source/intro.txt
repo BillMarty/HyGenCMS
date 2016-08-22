@@ -1,6 +1,6 @@
-=============
+=====
 Intro
-=============
+=====
 
 The HyGen Communication Management System, or CMS, is controlled by
 this Python package, running on a BeagleBone Black or BeagleBone Black
@@ -12,6 +12,28 @@ on the Linux kernel versions 4.1+, as 4.1 introduced breaking changes
 to the kernel interface file structure, and supports the Arrow
 BeagleBone Black Industrial on the same image as other BeagleBone Black
 devices.
+
+Detailed Behavior Specification
+-------------------------------
+
+This section will describe the behavior of the software, as observed
+from its side-effects. Error logging is not included in this
+description.
+
+* Communicate with the DeepSea via Modbus RTU over RS-232.
+* Set the battery gauge level based on the DeepSea measured voltage.
+* Set the fuel gauge level based on the DeepSea measured fuel level.
+* Tell the DeepSea about a CMS fault or CMS warning through ModBus
+registers.
+* Control a PWM signal to the Woodward engine controller, controlled by
+PID control to set analog trunk current to 25A.
+* Hold 12V power high to prevent being powered off unexpectedly.
+* Record data from DeepSea, BMS, and analog inputs to CSV file on USB
+drive.
+* Set USB LED to on during writes to USB drive.
+* On button-press, eject the USB drive.
+* Turn on an LED to indicate safe to remove USB drive.
+
 
 .. _hygencms-installation:
 
@@ -77,8 +99,8 @@ communication between threads is that the many of the threads store
 the data they gather directly in a central dictionary, and the main
 thread sometimes pulls data directly from the dictionary.
 
-The main thread (and some of the other threads) is structured as an
-event loop - it keeps a record of when it ought to next run each group
+The main thread is structured as an
+event loop. It keeps a record of when it ought to next run each group
 of tasks, then checks at each loop whethere it is now time to run each
 group. At each loop, it sleeps for a short time. This keeps the other
 threads from starving.

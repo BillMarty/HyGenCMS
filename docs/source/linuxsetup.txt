@@ -223,6 +223,7 @@ Suggested banner:
             |___/ |___/                        |___/ |___/           
 
 
+
 Update System Packages
 ----------------------
 
@@ -356,7 +357,7 @@ something like ``dtb=am335x-boneblack-emmc-overlay.dtb``.
 
 
 Setup USB Mounting
-----------------------
+------------------
 
 ``pmount``, the tool we use to mount and unmount usb drives in userspace,
  is not installed, so we need to add that.
@@ -379,7 +380,7 @@ make it executable.
 
 .. code:: bash
 	
-	sudo nano /usr/local/bin/show-pins
+    sudo nano /usr/local/bin/show-pins
 
 Edit the file to contain the following two lines. The first line is a
 comment which tells the shell how to run this file we've marked as
@@ -387,14 +388,14 @@ executable. The second line actually calls the script.
 
 .. code:: bash
 
-	#!/bin/bash
+    #!/bin/bash
 	sudo perl /opt/scripts/device/bone/show-pins.pl | sort
 
 After creating and saving the file, make it executable and reboot.
 
 .. code:: bash
 
-	# Save and make it executable
+    # Save and make it executable
 	sudo chmod +x /usr/local/bin/show-pins
 
     # Reboot one more time to apply all our settings
