@@ -1,3 +1,28 @@
+"""
+This module implements a simple closed-loop PID controller. The output
+of the control loop is the duty cycle of a PWM pin, specified in
+``wconfig['pin']``. The input is the ``process_variable`` member
+variable of the ``WoodwardControl`` class. This member variable is set
+externally. The tuning parameters of the PID loop are set based on the
+configuration map passed into the constructor. Tunings can also be
+adjusted on the fly, using the ``set_tunings`` function. The PID loop
+also implements slew-rate limiting, which caps the maximum rate of
+change for the output variable (in units of percent). This rate is set
+by the configuration map in the constructor.
+
+The ``WoodwardControl`` class also implements the ``csv_line`` and
+``csv_header`` functions, which enable it to be used as a "data source"
+in the main program loop. It returns five pieces of data: setpoint,
+Kp, Ki, Kd, and current output percent.
+
+As used in the HyGen, the output of this class, the PWM, is filtered
+with a low-pass RC filter to make it a true analog value. This signal
+then acts as the remote RPM setpoint for the Woodward engine
+controller. Its input is set in the main program loop (``main.py``),
+using the analog current input. It controls the RPM setpoint to
+maintain the current at 25A.
+"""
+
 import time
 
 from monotonic import monotonic
@@ -35,6 +60,7 @@ class WoodwardControl(AsyncIOThread):
         self.out_min = 0.0
         self.out_max = 100.0
         self.last_time = 0  # ensure that we run on the first time
+        self._last_compute_time = 0
         self.process_variable = self.setpoint  # Start by assuming we are there
         self.last_input = self.process_variable  # Initialize
         self.integral_term = 0.0  # Start with no integral windup
@@ -46,7 +72,7 @@ class WoodwardControl(AsyncIOThread):
         try:
             self.slew = wconfig['slew']  # Units of % duty cycle / sec
         except KeyError:  # If not included in configuration
-            self.slew = 100.0  # Effectively no limit, since this is the entire range
+            self.slew = 100.0  # Effectively no limit, since range = 100
 
         # Mode switch: step or pid
         self.mode = 'pid'
@@ -239,15 +265,18 @@ class WoodwardControl(AsyncIOThread):
         else:
             ideal_output = self._ideal_output
 
+        # Slew-rate limiting
+        dt = now - self._last_compute_time
+        self._last_compute_time = now
         output = self.output
         if ideal_output == output:
             return output
-        elif ideal_output > output + (self.slew * time_change):
+        elif ideal_output > output + (self.slew * dt):
             self._ideal_output = ideal_output
-            return output + self.slew * time_change
-        elif ideal_output < output - (self.slew * time_change):
+            return output + self.slew * dt
+        elif ideal_output < output - (self.slew * dt):
             self._ideal_output = ideal_output
-            return output - self.slew * time_change
+            return output - self.slew * dt
         else:
             self._ideal_output = ideal_output
             return ideal_output

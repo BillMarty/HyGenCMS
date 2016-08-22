@@ -39,6 +39,7 @@
         'Kp': 0.0,
         'Ki': 0.5,
         'Kd': 0.0,
+        'slew': 100,  # In percent per second max change
         'setpoint': 25.0,  # Amps
         'period': 1.0,
     },
