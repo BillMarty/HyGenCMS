@@ -29,8 +29,6 @@
         # serial port settings
         'baudrate': 9600,
         'dev': '/dev/ttyO4',
-        # File name for ASCII stream to be saved
-        'sfilename': '/home/hygen/logs/bmsstream.log',
     },
 
     # Control signal to Woodward

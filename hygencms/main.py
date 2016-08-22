@@ -157,9 +157,10 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             clients.append(analog)
             threads.append(analog)
 
+    bms_queue = queue.Queue()
     if 'bms' in config['enabled']:
         try:
-            bms = BmsClient(config['bms'], handlers)
+            bms = BmsClient(config['bms'], handlers, bms_queue)
         except serial.SerialException as e:
             logger.error("SerialException({0}) opening BmsClient: {1}"
                          .format(e.errno, e.strerror))
@@ -206,8 +207,8 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         log_queue = queue.Queue()
         try:
             filewriter = FileWriter(
-                config['filewriter'], handlers, log_queue, csv_header
-            )
+                config['filewriter'], handlers, log_queue, bms_queue,
+                csv_header)
         except ValueError as e:
             logger.error("FileWriter did not start with message \"{0}\""
                          .format(str(e)))

@@ -23,7 +23,7 @@ class FileWriter(AsyncIOThread):
     # Location to store log files if a USB is not available
     fallback_directory = '/home/hygen'
 
-    def __init__(self, config, handlers, log_queue, csv_header):
+    def __init__(self, config, handlers, log_queue, bms_queue, csv_header):
         """
         Initialize a filewriter which writes to file whatever is put
         on its queue.
@@ -40,6 +40,9 @@ class FileWriter(AsyncIOThread):
 
         :param log_queue:
             The queue to pull csv lines off
+
+        :param bms_queue:
+            The queue from which to pull bms stream lines.
 
         :param csv_header:
             The header to put at the top of each file
@@ -58,7 +61,8 @@ class FileWriter(AsyncIOThread):
         self.check_config(config)
 
         self.relative_directory = config['ldir']  # Relative directory on USB
-        self._queue = log_queue
+        self._log_queue = log_queue
+        self._bms_queue = bms_queue
         self._csv_header = csv_header
 
         # Set the base directory to use
@@ -69,7 +73,8 @@ class FileWriter(AsyncIOThread):
             self.base_directory = self.fallback_directory
 
         # Open file
-        self._f = open(os.devnull, 'w')
+        self._log_file = open(os.devnull, 'w')
+        self._bms_file = open(os.devnull, 'w')
 
         # Private variables behind properties
         self._safe_to_remove = None
@@ -134,8 +139,10 @@ class FileWriter(AsyncIOThread):
         Close the file object on object deletion.
         """
         try:
-            if self._f:
-                self._f.close()
+            if self._log_file:
+                self._log_file.close()
+            if self._bms_file:
+                self._bms_file.close()
         except IOError:
             pass
 
@@ -168,51 +175,69 @@ class FileWriter(AsyncIOThread):
             try:
                 hour = datetime.now().hour
                 if self.mount_drive:
-                    self._f.close()
+                    self._log_file.close()
+                    self._bms_file.close()
                     usbdrive.mount(self.mount_drive)
 
                     self.base_directory = self.mount_drive
-                    self._f = self.new_logfile()
-                    self._write_line(self._csv_header)
+                    self._log_file = self.new_logfile()
+                    self._bms_file = self.new_bmsfile()
+                    self._write_line(self._log_file, self._csv_header)
                     self.mount_drive = None
 
                 elif self.eject_drive:
-                    self._f.close()
+                    self._log_file.close()
+                    self._bms_file.close()
                     usbdrive.unmount_mounted()
                     self.safe_to_remove = True
 
                     self.base_directory = self.fallback_directory
-                    self._f = self.new_logfile()
-                    self._write_line(self._csv_header)
+                    self._log_file = self.new_logfile()
+                    self._bms_file = self.new_bmsfile()
+                    self._write_line(self._log_file, self._csv_header)
                     self.eject_drive = False
 
                 elif hour != prev_hour:
-                    self._f = self.new_logfile()
-                    self._write_line(self._csv_header)
+                    self._log_file.close()
+                    self._log_file = self.new_logfile()
+                    self._write_line(self._log_file, self._csv_header)
+
+                    self._bms_file.close()
+                    self._bms_file = self.new_bmsfile()
+
                     prev_hour = hour
 
                 # Print out lines
-                more_items = True
-                while more_items:
+                more_log_items = True
+                while more_log_items:
                     try:
-                        line = self._queue.get(False)
+                        line = self._log_queue.get(False)
                     except queue.Empty:
-                        more_items = False
+                        more_log_items = False
                     else:
-                        self._write_line(line)
+                        self._write_line(self._log_file, line)
+
+                more_bms_items = True
+                while more_bms_items:
+                    try:
+                        line = self._bms_queue.get(False)
+                    except queue.Empty:
+                        more_bms_items = False
+                    else:
+                        self._write_line(self._bms_file, line)
 
                 time.sleep(0.1)
             except Exception as e:
                 utils.log_exception(self._logger, e)
 
-    def _write_line(self, line):
+    def _write_line(self, file, line):
         """
         Write a line to the currently open file, ending in a single new-line.
 
         :param line:
             Line to write to file.
         """
-        if self._f.name.startswith('/media'):
+        if file.name.startswith('/media'):
             drive = True
         else:
             drive = False
@@ -220,9 +245,9 @@ class FileWriter(AsyncIOThread):
             if drive:
                 self.usb_activity = True
             if line[-1] == '\n':
-                self._f.write(line)
+                file.write(line)
             else:
-                self._f.write(line + '\n')
+                file.write(line + '\n')
             if drive:
                 self.usb_activity = False
         except (IOError, OSError):
@@ -285,5 +310,40 @@ class FileWriter(AsyncIOThread):
             self._logger.critical("Failed to open log file: %s" % file_path)
             return open(os.devnull, 'w')  # return a null file
         else:
-            self._logger.info("Opened new file at %s" % f.name)
+            self._logger.info("Opened new log file at %s" % f.name)
+            return f
+
+    def new_bmsfile(self):
+        """
+        Open a new file for the BMS stream for the current hour. If
+        opening the file fails, returns the null file.
+
+        :return:
+            A writeable file object from open(), either a BMS file or
+            the null file.
+        """
+        directory = self.get_directory()
+        if not path.isdir(directory):
+            return open(os.devnull)  # If the directory doesn't exist, fail
+
+        # Find unique file name for this hour
+        now = datetime.now()
+        base_file_name = now.strftime("%Y-%m-%d_%H")
+        i = 0
+        while path.exists(path.join(directory,
+                                    base_file_name + "_bms%d.csv" % i)):
+            i += 1
+
+        file_path = os.path.join(
+            directory,
+            base_file_name + "_bms%d.csv" % i)
+
+        # Try opening the file, else open the null file
+        try:
+            f = open(file_path, 'w')
+        except IOError:
+            self._logger.critical("Failed to open bms file: %s" % file_path)
+            return open(os.devnull, 'w')  # return a null file
+        else:
+            self._logger.info("Opened new BMS file at %s" % f.name)
             return f

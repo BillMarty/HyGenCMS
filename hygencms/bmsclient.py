@@ -1,9 +1,22 @@
-import serial
+"""
+This module provides utilities for dealing with the Becket BMS. The
+BmsClient class can run as a thread to get Bms data. The BmsModule
+and BmsStatus classes parse the module and status messages, reflecting
+the current state of the BMS in their member variables and properties.
+"""
+
 import time
+
+import serial
 
 from . import utils
 from .asyncio import AsyncIOThread
 from .utils import PY3
+
+if PY3:
+    import queue
+else:
+    import Queue as queue
 
 
 class BmsModule:
@@ -343,7 +356,7 @@ class BmsClient(AsyncIOThread):
     and return or print it.
     """
 
-    def __init__(self, bconfig, handlers):
+    def __init__(self, bconfig, handlers, bms_queue):
         """
         Initialize the bms client from the configuration values.
 
@@ -352,6 +365,9 @@ class BmsClient(AsyncIOThread):
 
         :param handlers:
             List of log handlers.
+
+        :param bms_queue:
+            A queue to put the lines from the BMS.
 
         :exception IOError:
             In case the serial port does not open successfully
@@ -370,7 +386,6 @@ class BmsClient(AsyncIOThread):
         BmsClient.check_config(bconfig)
         dev = bconfig['dev']
         baud = bconfig['baudrate']
-        sfilename = bconfig['sfilename']
 
         # Open serial port
         try:
@@ -383,18 +398,15 @@ class BmsClient(AsyncIOThread):
                                   .format(e.errno, e.strerror))
             raise
 
-        # Open file - IOError could be thrown
-        self._f = open(sfilename, 'a')
-
         # Setup status class
         self.status = BmsStatus()
 
+        self.queue = bms_queue
         self._logger.info("Started BmsClient")
 
     def __del__(self):
         self._ser.close()
         del self._ser
-        self._f.close()
 
     @staticmethod
     def check_config(bconfig):
@@ -412,7 +424,7 @@ class BmsClient(AsyncIOThread):
             Will be raised when configuration map missing required configuration options.
         """
 
-        required_config = ['dev', 'baudrate', 'sfilename']
+        required_config = ['dev', 'baudrate']
         for val in required_config:
             if val not in bconfig:
                 raise ValueError("Missing " + val + ", required for BMS")
@@ -451,10 +463,10 @@ class BmsClient(AsyncIOThread):
                     continue
 
                 try:
-                    self._f.write(str(time.strftime("%Y-%m-%d %H:%M:%S"))
-                                  + ',' + str(line))
-                except IOError:
-                    pass  # Ignore IOErrors
+                    self.queue.put(str(time.strftime("%Y-%m-%d %H:%M:%S"))
+                                   + ',' + str(line))
+                except queue.Full:
+                    pass  # Ignore
 
                 self.status.update(line)
 

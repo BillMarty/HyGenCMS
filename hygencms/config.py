@@ -37,7 +37,6 @@ It will be structured as a nested dictionary of the following form::
         "bms": {
             "dev": "/dev/ttyO2", # Linux device file for serial
             "baudrate": 9600, # baud rate to read in
-            "sfilename": "bmsstream.txt", # A file to store the stream of data verbatim
         },
 
         "woodward": {
