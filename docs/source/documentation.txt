@@ -1,0 +1,45 @@
+=============
+Documentation
+=============
+
+The documentation for this project uses the
+`Sphinx <http://www.sphinx-doc.org/en/stable/>`_ documentation
+generator to produce readable and nicely-formatted documentation. The
+fact that the documentation is nicely formatted in HTML does introduce
+the risk that the documentation being referenced is out of date from
+the source documentation. However, Sphinx does autobuild documentation
+from the source code's documentation strings, so its documentation is
+more likely to match the current version of the code.
+
+Sphinx uses the reStructuredText markup language to format
+documentation. This flexible format allows for easy generation of HTML
+complete with code blocks, headings, bold and italic fonts, web links,
+and relative links. The Sphinx project's own documentation is quite
+good, so this page will not seek to replace it, but simply summarize
+the steps required to build an up-to-date version of the HyGenCMS
+documentation.
+
+When generating documentation, Sphinx imports each module, in order to
+have access to the docstrings contained. Therefore the documentation is
+best compiled on a BeagleBone Black board with the HyGen configuration
+already done. In order to build the documentation, we'll also have to
+install Sphinx itself in order to build.
+
+.. code:: bash
+
+    sudo pip3 install Sphinx sphinx_rtd_theme
+
+Then in the ``HyGenCMS/docs`` folder, run ``make html`` to make the
+Sphinx documentation. Of course, the ``docs/build`` directory is
+ignored in git, so we have to use another method to get the
+documentation up to the Dropbox folder. The easiest is a USB drive.
+
+.. code:: bash
+
+    # Plug in USB drive
+    pmount sda1  # Probably /dev/sda1 is the USB
+    cp -R ~/HyGenCMS/docs/build/html /media/sda1
+    pumount sda1
+
+You can now unplug the USB drive, and the documentation will be in the
+``html`` folder on the drive.

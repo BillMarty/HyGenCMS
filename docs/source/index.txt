@@ -14,7 +14,7 @@ Contents:
    intro
    linuxsetup
    licensesused
-   cornercases
+   documentation
    api
 
 
