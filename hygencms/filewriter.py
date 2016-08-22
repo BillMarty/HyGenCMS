@@ -216,6 +216,7 @@ class FileWriter(AsyncIOThread):
                     self._log_file.close()
                     self._log_file = self.new_logfile()
                     self._write_line(self._log_file, self._csv_header)
+                    self._header_changed = False
 
                 # Print out lines
                 self.print_from_queue(self._log_file, self._log_queue)
