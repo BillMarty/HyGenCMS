@@ -342,13 +342,21 @@ device tree overlays in that repository are already installed in kernel
 Setup universal cape loading on boot
 ------------------------------------
 
-In order to use the conig-pin utility, a universal cape must be loaded.
+The ``config-pin`` utility is part of the ``beaglebone-universal-io``
+project, the current way of using BeagleBone capes. For a thorough
+explanation of what capes are and how the BeagleBone IO stack works,
+this `blog post <http://www.righto.com/2016/08/the-beaglebones-io-pins-inside-software.html>`_
+provides an excellent explanation.
+
+Now that you've read that, you know that what the universal cape does
+is inform the kernel where all the pieces of hardware on the BBB are,
+and how to load up the necessary drivers. We'll want to make sure one
+of these handy universal capes is loaded.
+
 The next step will load the universal cape on boot. With your editor of
 choice, open ``/boot/uEnv.txt`` as root. Uncomment the line below
 "Beaglebone Black: HDMI (Audio/Video) disabled". This line should say
-something like ``dtb=am335x-boneblack-emmc-overlay.dtb``.
-
-We'll also autoload the ``univ-emmc`` cape on boot. To do this,
+something like ``dtb=am335x-boneblack-emmc-overlay.dtb``. Also
 uncomment the line just below ``##Example 4.1.x`` which enables
 extra parts. Add ``univ-emmc`` to that line, as follows below::
 
@@ -447,7 +455,9 @@ The HyGenCMS repository contains a ``.service`` file which provides
 a ``systemd`` service. We just need to load it into the systemd. This
 can be done using the ``systemctl`` command. If the paths to the
 repository are different than mine, we'll need to modify those in the
-``.service`` files.
+``.service`` files. Note that the path to ``hygencms.service`` must be
+an absolute path for this command, not a relative command to the
+current directory.
 
 .. code:: bash
 
