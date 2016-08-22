@@ -118,6 +118,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     # Setup IO pins
     ############################################
     setup_io()
+    time.sleep(1)
 
     ############################################
     # Async Data Sources

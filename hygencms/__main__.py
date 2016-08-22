@@ -21,6 +21,8 @@ from daemon import pidfile, DaemonContext
 from .config import get_configuration
 from .main import main as main_entry
 
+debug = False
+
 
 def main():
     # Parse arguments
@@ -52,20 +54,27 @@ def main():
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
 
+    handlers = []
+
     # create stream handler to stderr and set level to debug
     sh = logging.StreamHandler()  # default is sys.stderr
     sh.setLevel(logging.INFO)
+    handlers.append(sh)
 
-    # Create file handler
-    fh = logging.FileHandler(
-        '/home/hygen/logs/errors.log')
-    fh.setLevel(logging.INFO)
+    # Only use errors log if we're debugging
+    # We don't want to use up our write cycles in production.
+    fh = None
+    if debug:
+        # Create file handler
+        fh = logging.FileHandler(
+            '/home/hygen/logs/errors.log')
+        fh.setLevel(logging.INFO)
+        handlers.append(fh)
 
     # create formatter
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    handlers = [sh, fh]
     # add handlers to logger
     for h in handlers:
         h.setFormatter(formatter)
@@ -73,14 +82,21 @@ def main():
 
     if args.daemon:
         # Setup daemon context
-        context = DaemonContext(
-            working_directory='/',
-            pidfile=pidfile.PIDLockFile('/var/run/hygencms.pid'),
-            files_preserve=[
-                fh.stream,
-            ],
-            umask=0o002,
-        )
+        if fh:
+            context = DaemonContext(
+                working_directory='/',
+                pidfile=pidfile.PIDLockFile('/var/run/hygencms.pid'),
+                files_preserve=[
+                    fh.stream,
+                ],
+                umask=0o002,
+            )
+        else:
+            context = DaemonContext(
+                working_directory='/',
+                pidfile=pidfile.PIDLockFile('/var/run/hygencms.pid'),
+                umask=0o002,
+            )
 
         # Handle signals
         context.signal_map = {signal.SIGTERM: 'terminate',  # program cleanup
