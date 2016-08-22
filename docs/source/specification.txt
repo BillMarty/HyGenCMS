@@ -1,0 +1,60 @@
+.. _specification:
+
+=============
+Specification
+=============
+
+This page will describe the intended behavior of the software,
+especially its side-effects. Error logging is not included in this
+description, as it is primarily used for debugging.
+
+The software will communicate with the DeepSea via Modbus RTU over
+RS-232. This takes place over the UART1, via header pins ``P9_24``
+and ``P9_26``. The Modbus baudrate and slave ID are set in the
+``hygen_logger.py`` file. Which files to read from the DeepSea is
+configurable at runtime, by inserting a USB drive with an appropriate
+configuration CSV file on it.
+
+The software will set the battery gauge level based on the DeepSea
+measured voltage. This takes place using GPIO over pins ``P9_12`` and
+``P9_15``. The communication protocol used is described in the data
+sheet for the ``MY9221`` and implemented in ``groveledbar.py``.
+
+The software will set the fuel gauge level based on the DeepSea
+measured fuel level. This takes place using GPIO over pins ``P9_23``
+and ``P9_25``. The communication protocol used is the same as for the
+battery gauge.
+
+The software will tell the DeepSea about a CMS fault or CMS warning
+through ModBus registers. These flags will be set into Page 193, offset
+0 (warning) and offset 1 (fault). These are labeled "Remote control
+sources" in the DeepSea Modbus manual GenComm.
+
+The software will control a PWM signal to the Woodward engine
+controller, using a slew-rate limited PID control to set analog trunk
+current to 25A. The analog signal is read by the system ADC on pin
+``P9_39``. The PWM output is on pin ``P9_29``. The tuning parameters
+for the PID controller are read in from the ``hygen_logger.py``
+configuration file.
+
+The software will hold its 12V power high to prevent being powered off
+unexpectedly. This will be done through a relay, connected to GPIO pin
+``P8_11``.
+
+The software will power off when directed to power off from the
+DeepSea. This will take the form of a virtual output: Page 191, offset
+1. When this virtual output is high, the CMS system will power off.
+
+The software will record data from DeepSea, BMS, and analog inputs to
+CSV files on a USB drive. The data which is recorded will be determined
+by the configuration files ``hygen_logger.py`` and ``mdf.csv``. During
+normal operation, the software will create one CSV file per hour on the
+USB drive.
+
+The software will illuminate the USB LED during writes to USB drive.
+This will take place through GPIO output, on pin ``P8_10``.
+
+The software will unmount the USB drive when the USB button is pressed.
+This switch is on pin ``P8_09``. The USB LED activity will be
+illuminated when the disk has been ejected and it is safe to remove the
+USB drive.
