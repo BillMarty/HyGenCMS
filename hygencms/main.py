@@ -46,6 +46,7 @@ from . import pins
 from . import usbdrive
 from . import utils
 from .analogclient import AnalogClient
+from .bbid import MAC_ID0
 from .bbio_common import setup_io
 from .bmsclient import BmsClient
 from .config import get_configuration
@@ -204,7 +205,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             logger.error("CSV header returned by clients is blank")
 
         headers.append("output_woodward")
-        csv_header = "linuxtime," + ','.join(headers)
+        csv_header = "linuxtime," + ','.join(headers) + ',id={:x}'.format(MAC_ID0)
         log_queue = queue.Queue()
         try:
             filewriter = FileWriter(
