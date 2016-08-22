@@ -37,6 +37,9 @@ def main():
     parser.add_argument(
         '-p', '--poweroff', action='store_const', dest='poweroff', const=True,
         default=False, help='Trigger poweroff on GPIO P8_19 input')
+    parser.add_argument(
+        '-t', '--time', action='store_const', dest='time', const=True,
+        default=False, help='Set system time from DeepSea')
     args = parser.parse_args()
 
     # Handle --config
@@ -86,10 +89,10 @@ def main():
                               }
         with context:
             main_entry(config, handlers, daemon=True, watchdog=args.watchdog,
-                       power_off_enabled=args.poweroff)
+                       power_off_enabled=args.poweroff, time_from_deepsea=args.time)
     else:
         main_entry(config, handlers, daemon=False, watchdog=args.watchdog,
-                   power_off_enabled=args.poweroff)
+                   power_off_enabled=args.poweroff, time_from_deepsea=args.time)
 
 
 if __name__ == '__main__':

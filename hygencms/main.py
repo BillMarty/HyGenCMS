@@ -72,7 +72,8 @@ else:
 data_store = {pins.GEN_CUR: None}
 
 
-def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False):
+def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False,
+         time_from_deepsea=False):
     """
     Enter a main loop, polling values from sources enabled in config.
 
@@ -96,6 +97,10 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     :param power_off_enabled:
         A Boolean of whether to watch the power-off relay and power off
         the BeagleBone if it is set.
+
+    :param time_from_deepsea:
+        A Boolean of whether to set the Linux system time from the
+        DeepSea time.
     """
     logger = logging.getLogger(__name__)
     for h in handlers:
@@ -244,6 +249,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         5.0: 0,
         10.0: 0,
         60.0: 0,
+        3600.0: 0,
     }
 
     going = True
@@ -386,6 +392,16 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 # Schedule next run
                 next_run[60.0] = now + 60.0
 
+            ###########################
+            # Once every hour
+            ###########################
+            if now >= next_run[3600.0]:
+                if time_from_deepsea:
+                    set_linux_time()
+
+                # Schedule next run
+                next_run[3600.0] = now + 3600.0
+
             time.sleep(0.01)
 
         except KeyboardInterrupt:
@@ -494,6 +510,18 @@ def check_kill_switch():
     check_kill_switch.last = check_kill_switch.now
     check_kill_switch.now = value == gpio.HIGH  # TODO not sure whether this should be high or low
     return check_kill_switch.last and check_kill_switch.now
+
+
+def set_linux_time():
+    """
+    Set the Linux time from the DeepSea time.
+
+    :return: :const:`None`
+    """
+    t = data_store[DeepSeaClient.TIME]
+    if t is not None:
+        s = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(t))
+        subprocess.call(['timedatectl', 'set-time', s])
 
 
 def power_off():
