@@ -357,8 +357,13 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     mounted = usbdrive.mounted()
                     if mounted is None and not ejecting:
                         filewriter.mount_drive = plugged
+
+                    elif ejecting:
+                        # if we're already ejecting, don't do anything
+                        pass
+
                     # If the USB changes locations without realizing it
-                    # (sometimes happens at startup), eject "mounted"
+                    # (sometimes happens at engine startup), eject "mounted"
                     # drive (not actually working) and once we've un-
                     # mounted, we'll mount the new location.
                     elif mounted != plugged:
