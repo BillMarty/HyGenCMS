@@ -32,7 +32,6 @@ setup(
         'Intended Audience :: Planetary Power',
 
         # Versions of python supported
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
 
