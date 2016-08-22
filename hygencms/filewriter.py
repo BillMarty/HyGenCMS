@@ -64,6 +64,7 @@ class FileWriter(AsyncIOThread):
         self._log_queue = log_queue
         self._bms_queue = bms_queue
         self._csv_header = csv_header
+        self._header_changed = False
 
         # Set the base directory to use
         mounted_directory = usbdrive.mount_point()
@@ -207,28 +208,41 @@ class FileWriter(AsyncIOThread):
 
                     prev_hour = hour
 
-                # Print out lines
-                more_log_items = True
-                while more_log_items:
-                    try:
-                        line = self._log_queue.get(False)
-                    except queue.Empty:
-                        more_log_items = False
-                    else:
-                        self._write_line(self._log_file, line)
+                elif self._header_changed:
+                    # Print all the lines we have in the queue
+                    self.print_from_queue(self._log_file, self._log_queue)
 
-                more_bms_items = True
-                while more_bms_items:
-                    try:
-                        line = self._bms_queue.get(False)
-                    except queue.Empty:
-                        more_bms_items = False
-                    else:
-                        self._write_line(self._bms_file, line)
+                    # Close file and get new one (with new CSV header)
+                    self._log_file.close()
+                    self._log_file = self.new_logfile()
+                    self._write_line(self._log_file, self._csv_header)
+
+                # Print out lines
+                self.print_from_queue(self._log_file, self._log_queue)
+                self.print_from_queue(self._bms_file, self._bms_queue)
 
                 time.sleep(0.1)
             except Exception as e:
                 utils.log_exception(self._logger, e)
+
+    def print_from_queue(self, file, q):
+        """
+        Write all the lines from a queue to file.
+
+        :param file:
+            File to write.
+
+        :param q:
+            Queue to source lines.
+        """
+        more = True
+        while more:
+            try:
+                line = q.get(False)
+            except queue.Empty:
+                more = False
+            else:
+                self._write_line(file, line)
 
     def _write_line(self, file, line):
         """
@@ -347,3 +361,13 @@ class FileWriter(AsyncIOThread):
         else:
             self._logger.info("Opened new BMS file at %s" % f.name)
             return f
+
+    def update_csv_header(self, csv_header):
+        """
+        Update the CSV header used for logfiles. Open new logfiles.
+
+        :param csv_header:
+        :return:
+        """
+        self._csv_header = csv_header
+        self._header_changed = True

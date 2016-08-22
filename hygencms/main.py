@@ -33,6 +33,7 @@ The primary functions of the main loop are as follows:
 # Import required libraries
 ###############################
 import logging
+from os import path
 import socket
 import subprocess
 import sys
@@ -124,6 +125,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     ############################################
     # Async Data Sources
     ############################################
+    deepsea = None
     if 'deepsea' in config['enabled']:
         try:
             deepsea = DeepSeaClient(config['deepsea'], handlers, data_store)
@@ -197,15 +199,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
     filewriter = None
     if 'filewriter' in config['enabled']:
-        headers = []
-        for c in clients:
-            headers.append(c.csv_header())
-
-        if len(headers) == 0:
-            logger.error("CSV header returned by clients is blank")
-
-        headers.append("output_woodward")
-        csv_header = "linuxtime," + ','.join(headers) + ',id={:x}'.format(MAC_ID0)
+        csv_header = build_csv_header(clients, logger)
         log_queue = queue.Queue()
         try:
             filewriter = FileWriter(
@@ -258,6 +252,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     going = True
     shutdown = False
     ejecting = False
+    potential_new_measurement_list = False
     while going:
         # noinspection PyBroadException
         try:
@@ -359,6 +354,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     mounted = usbdrive.mounted()
                     if mounted is None and not ejecting:
                         filewriter.mount_drive = plugged
+                        potential_new_measurement_list = True
 
                     elif ejecting:
                         # if we're already ejecting, don't do anything
@@ -388,6 +384,22 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     logger.error("Missing analog or woodward")
                     going = False
                     exit_code = 1
+
+                # Read in a "measurements.csv" file from the drive and apply
+                # it to DeepSea.
+                if potential_new_measurement_list:
+                    drive = usbdrive.mount_point()
+                    if drive:
+                        potential_new_measurement_list = False
+                        filename = path.join(drive, "measurements.csv")
+                        if path.exists(filename):
+                            logger.info("Reading new measurement list")
+                            mlist = deepsea.read_measurement_description(filename)
+                            if set(mlist) != set(deepsea.input_list):
+                                deepsea.new_input_list = mlist
+                                csv_header = build_csv_header(clients, logger)
+                                filewriter.update_csv_header(csv_header)
+
                 # Schedule next run
                 next_run[10.0] = now + 10.0
 
@@ -430,6 +442,17 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     if shutdown and power_off_enabled:
         power_off()
     exit(exit_code)
+
+
+def build_csv_header(clients, logger):
+    headers = []
+    for c in clients:
+        headers.append(c.csv_header())
+    if len(headers) == 0:
+        logger.error("CSV header returned by clients is blank")
+    headers.append("output_woodward")
+    csv_header = "linuxtime," + ','.join(headers) + ',id={:x}'.format(MAC_ID0)
+    return csv_header
 
 
 def stop_threads(threads):
@@ -506,18 +529,21 @@ def update_gauges(fuel_gauge, battery_gauge):
         battery_gauge.set_bar_level(battery_charge)
 
 
-@static_vars(last=False, now=False)
 def check_kill_switch():
     """
-    Check whether we are to poweroff now. Only return when the switch
-    has been set for two iterations.
+    Check whether we are to poweroff now.
 
     :return: Boolean, whether to poweroff.
     """
-    value = gpio.read(pins.OFF_SWITCH)
-    check_kill_switch.last = check_kill_switch.now
-    check_kill_switch.now = value == gpio.HIGH  # TODO not sure whether this should be high or low
-    return check_kill_switch.last and check_kill_switch.now
+    try:
+        val = data_store[DeepSeaClient.VIRTUAL_LED_2]
+    except KeyError:
+        val = None
+
+    if val:
+        return True
+    else:
+        return False
 
 
 def set_linux_time():

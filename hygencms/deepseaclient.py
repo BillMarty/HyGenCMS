@@ -55,10 +55,16 @@ class DeepSeaClient(AsyncIOThread):
         self._last_updated = {m[self.ADDRESS]: 0 for m in self._input_list}
         self._logger.info("Started deepsea client")
 
+        self.new_input_list = None
+
     def __del__(self):
         if self._client:
             self._client.close()
             del self._client
+
+    @property
+    def input_list(self):
+        return self._input_list
 
     def run(self):
         """
@@ -69,7 +75,12 @@ class DeepSeaClient(AsyncIOThread):
             try:
                 for m in self._input_list:
                     key = m[self.ADDRESS]
-                    t, last_time = monotonic(), self._last_updated[key]
+
+                    try:
+                        t, last_time = monotonic(), self._last_updated[key]
+                    except KeyError:  # On change of measurement list
+                        t, last_time = monotonic(), 0
+
                     if len(m) > self.PERIOD:
                         period = m[self.PERIOD]
                     else:
@@ -85,6 +96,11 @@ class DeepSeaClient(AsyncIOThread):
                 exc_type, exc_value = sys.exc_info()[:2]
                 self._logger.error("%s raised in DeepSea thread: %s"
                                    % (str(exc_type), str(exc_value)))
+
+            # Update input list if we have a new one.
+            if self.new_input_list:
+                self._input_list = self.add_mandatory_measurements(self.new_input_list)
+                self.new_input_list = None
 
     @staticmethod
     def add_mandatory_measurements(measurement_list):
@@ -153,23 +169,32 @@ class DeepSeaClient(AsyncIOThread):
             The filename from which to read the CSV
 
         :return:
-            a list of lists, containing the measurement list
+            a list of tuples, containing the measurement list
         """
         with open(filename) as mdf:
             lines = mdf.readlines()
             measurement_list = []
             for line in lines[2:]:
                 fields = line.split(',')
-                m = [
-                    fields[0],  # name
-                    fields[1],  # units
-                    int(fields[2]),  # address
-                    int(fields[3]),  # length
-                    float(fields[4]),  # gain
-                    float(fields[5]),  # offset
-                ]
                 if len(fields) > 6:
-                    m.append(float(fields[6]))  # period
+                    m = (
+                        fields[0],  # name
+                        fields[1],  # units
+                        int(fields[2]),  # address
+                        int(fields[3]),  # length
+                        float(fields[4]),  # gain
+                        float(fields[5]),  # offset
+                        float(fields[6]),  # period
+                    )
+                else:
+                    m = (
+                        fields[0],  # name
+                        fields[1],  # units
+                        int(fields[2]),  # address
+                        int(fields[3]),  # length
+                        float(fields[4]),  # gain
+                        float(fields[5]),  # offset
+                    )
                 measurement_list.append(m)
         return measurement_list
 
@@ -232,7 +257,11 @@ class DeepSeaClient(AsyncIOThread):
         """
         for m in self._input_list:
             name = m[self.NAME]
-            val = self._data_store[m[self.ADDRESS]]
+            try:
+                val = self._data_store[m[self.ADDRESS]]
+            except KeyError:  # Happens on change in measurement list
+                val = None
+
             if val is None:
                 display = "%20s %10s %10s" % (name, "ERR", m[self.UNITS])
             elif m[self.UNITS] == "sec":
@@ -254,7 +283,11 @@ class DeepSeaClient(AsyncIOThread):
         :rtype: string
         """
         names = []
-        for m in self._input_list:
+        if self.new_input_list:
+            inputs = self.new_input_list
+        else:
+            inputs = self._input_list
+        for m in inputs:
             names.append(m[self.NAME])
         return ','.join(names)
 
@@ -272,7 +305,10 @@ class DeepSeaClient(AsyncIOThread):
         values = []
         for m in self._input_list:
             key = m[self.ADDRESS]
-            val = self._data_store[key]
+            try:
+                val = self._data_store[key]
+            except KeyError:  # Happens on change of measurement list
+                val = None
             if val is not None:
                 values.append(str(val))
             else:
@@ -438,6 +474,7 @@ class DeepSeaClient(AsyncIOThread):
     BATTERY_LEVEL = 1223  # section 10.6, address 199
     RPM = 1030  # section 10.6, address 6
     VIRTUAL_LED_1 = 191 * 256 + 0  # section 10.57, address 0
+    VIRTUAL_LED_2 = 191 * 256 + 1  # section 10.57, address 1
 
     # Addresses which are required
     MANDATORY_ADDRESSES = {
@@ -446,13 +483,15 @@ class DeepSeaClient(AsyncIOThread):
         BATTERY_LEVEL,
         RPM,
         VIRTUAL_LED_1,
+        VIRTUAL_LED_2,
     }
 
     # Templates to use if mandatory values are missing.
     MANDATORY_TEMPLATES = {
-        TIME: ["DeepSea Time", "sec", TIME, 2, 1, 0],
-        FUEL_LEVEL: ["Fuel level", '%', FUEL_LEVEL, 1, 1, 0, 60],
-        BATTERY_LEVEL: ["battery level", 'V', BATTERY_LEVEL, 1, 1.0, 0.0, 1.0],
-        RPM: ["Engine speed", 'RPM', RPM, 1, 1.0, 0.0, 0.1],
-        VIRTUAL_LED_1: ["Enable RPM Control", 'boolean', VIRTUAL_LED_1, 1, 1, 0, 1.0],
+        TIME: ("DeepSea Time", "sec", TIME, 2, 1, 0),
+        FUEL_LEVEL: ("Fuel level", '%', FUEL_LEVEL, 1, 1, 0, 60),
+        BATTERY_LEVEL: ("battery level", 'V', BATTERY_LEVEL, 1, 1.0, 0.0, 1.0),
+        RPM: ("Engine speed", 'RPM', RPM, 1, 1.0, 0.0, 0.1),
+        VIRTUAL_LED_1: ("Enable RPM Control", 'boolean', VIRTUAL_LED_1, 1, 1, 0, 1.0),
+        VIRTUAL_LED_2: ("Shutdown", 'boolean', VIRTUAL_LED_2, 1, 1, 0, 1),
     }
