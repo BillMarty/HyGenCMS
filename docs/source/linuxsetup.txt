@@ -448,10 +448,52 @@ repository are different than mine, we'll need to modify those in the
     sudo systemctl enable ~/HyGenCMS/linux_setup/hygencms.service
 
 
-Change Network Interface to DHCP
---------------------------------
+Change Setup Values Back to Production Values
+---------------------------------------------
 
+There are some configuration options which worked well to setup the
+system, which need to be changed for the shipping HyGen. Specifically,
+the clock syncs by default to NTP time servers. While this works well
+when we're connected to the internet, our shipping HyGen will set the
+system clock based on the DeepSea's time. To disable NTC syncing, we
+need to disable two systemd services.
 
+.. code:: bash
+
+    sudo systemctl disable ntp
+    # Located at /etc/init.d/ntp
+    sudo timedatectl set-ntp false
+
+If you ever want to reenable these services, just use the ``enable``
+command to reverse it.
+
+.. code:: bash
+
+    sudo systemctl enable ntp
+    sudo timedatectl set-ntp true
+
+The second change we'll want to make before finalizing our Linux image
+has to do with the ethernet network. While it is convenient to set the
+BeagleBones with static IP addresses when they are in the office, when
+they are in the real world, they will need to use DHCP to connect to
+most networks. Therefore, we'll change the ``/etc/network/interfaces``
+file back to what it was originally:
+
+.. code:: bash
+
+    sudo nano /etc/network/interfaces
+    # Edit the lines to the following:
+
+    # The primary network interface
+    auto eth0
+    iface eth0 inet dhcp
+
+On restart, these new changes will take effect.
+
+.. note
+    this will make it more difficult to connect to the BBB using SSH,
+    so this step should only be done when everything on the image is
+    finalized.
 
 
 .. _flash-emmc:
