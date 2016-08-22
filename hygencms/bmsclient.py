@@ -1,8 +1,338 @@
 import serial
+import time
 
 from . import utils
 from .asyncio import AsyncIOThread
 from .utils import PY3
+
+
+class BmsModule:
+    """
+    This class holds the information contained in a Module status report
+    from the Beckett BMS.
+    """
+    def __init__(self, module_id, line=None):
+        self.id = module_id
+        self.state = None
+        self.soc = None
+        self.min_cell_temp = None
+        self.avg_cell_temp = None
+        self.max_cell_temp = None
+        self.module_voltage = None
+        self.min_cell_voltage = None
+        self.avg_cell_voltage = None
+        self.max_cell_voltage = None
+        self.current = None
+        self.alarm_and_status = 0
+        self.max_front_power_connector_temp = None
+
+        if line:
+            self.update(line)
+
+    ############################################
+    # Properties
+    ############################################
+
+    @property
+    def temperature_warning(self):
+        return self.alarm_and_status & (1 << 0)
+    
+    @property
+    def temperature_fault(self):
+        return self.alarm_and_status & (1 << 1)
+    
+    @property
+    def high_current_warning(self):
+        return self.alarm_and_status & (1 << 2)
+    
+    @property
+    def high_current_fault(self):
+        return self.alarm_and_status & (1 << 3)
+
+    @property
+    def high_voltage_warning(self):
+        return self.alarm_and_status & (1 << 4)
+
+    @property
+    def high_voltage_fault(self):
+        return self.alarm_and_status & (1 << 5)
+
+    @property
+    def low_voltage_warning(self):
+        return self.alarm_and_status & (1 << 6)
+
+    @property
+    def low_voltage_fault(self):
+        return self.alarm_and_status & (1 << 7)
+
+    @property
+    def cell_low_voltage_fault(self):
+        return self.alarm_and_status & (1 << 8)
+
+    @property
+    def charge_low_warning(self):
+        return self.alarm_and_status & (1 << 12)
+
+    @property
+    def communication_error(self):
+        return self.alarm_and_status & (1 << 13)
+
+    @property
+    def communication_fault(self):
+        return self.alarm_and_status & (1 << 14)
+
+    @property
+    def under_volt_disable(self):
+        return self.alarm_and_status & (1 << 16)
+
+    @property
+    def over_volt_disable(self):
+        return self.alarm_and_status & (1 << 17)
+    
+    @property
+    def cell_0_balancing(self):
+        return self.alarm_and_status & (1 << 24)
+
+    @property
+    def cell_1_balancing(self):
+        return self.alarm_and_status & (1 << 25)
+
+    @property
+    def cell_2_balancing(self):
+        return self.alarm_and_status & (1 << 26)
+
+    @property
+    def cell_3_balancing(self):
+        return self.alarm_and_status & (1 << 27)
+
+    @property
+    def cell_4_balancing(self):
+        return self.alarm_and_status & (1 << 28)
+
+    @property
+    def cell_5_balancing(self):
+        return self.alarm_and_status & (1 << 29)
+
+    @property
+    def cell_6_balancing(self):
+        return self.alarm_and_status & (1 << 30)
+
+    ############################################
+    # Methods
+    ############################################
+
+    def update(self, line):
+        """
+        Takes a module status string.
+
+        :param line:
+            Periodic Module status report. Type ``str``
+
+        :return:
+            :const:`None`
+
+        :exception ValueError:
+            If the line is not valid.
+        """
+        if type(line) not in [str, bytes]:
+            raise ValueError("Passed the wrong type for line")
+
+        line = str(line)
+
+        if len(line) < 127:
+            raise ValueError("Line is too short")
+
+        if line[4] != 'M':
+            raise ValueError("Line is not a module status report")
+
+        if int(line[17:19]) != self.id:
+            raise ValueError("Line does not have same ID as this module")
+
+        self.state = line[20]
+        self.soc = int(line[22:25])
+        self.min_cell_temp = int(line[26:29])
+        self.avg_cell_temp = int(line[30:33])
+        self.max_cell_temp = int(line[34:37])
+        self.module_voltage = int(line[38:44]) / 1000.0
+        self.min_cell_voltage = int(line[45:51]) / 1000.0
+        self.avg_cell_voltage = int(line[52:58]) / 1000.0
+        self.max_cell_voltage = int(line[59:65]) / 1000.0
+        self.current = int(line[66:71]) / 10.0
+        self.alarm_and_status = int(line[72:80], base=16)
+        self.max_front_power_connector_temp = int(line[109:112])
+
+
+class BmsStatus:
+    """
+    This class holds the information contained in a "periodic string status
+    report" (ES-0092 - Serial Bus Communication Protocol Overview, 7.1).
+
+    It provides methods to parse strings, and properties to access all the
+    data.
+    """
+    def __init__(self, line=None):
+        self.message_id = None
+        self.state = None
+        self.soc = None
+        self.temperature = None
+        self.voltage = None
+        self.current = None
+        self.alarm_and_status = 0
+        self.watt_hours_to_full_discharge = None
+        self.watt_hours_to_full_charge = None
+        self.min_cell_voltage = None
+        self.max_cell_voltage = None
+        self.front_power_connector_temperature = None
+
+        self.modules = {}
+
+        if line:
+            self.update(line)
+
+    ###############################################
+    # Alarms and Warnings
+    ###############################################
+    @property
+    def temperature_warning(self):
+        return self.alarm_and_status & (1 << 0)
+
+    @property
+    def temperature_fault(self):
+        return self.alarm_and_status & (1 << 1)
+
+    @property
+    def high_current_warning(self):
+        return self.alarm_and_status & (1 << 2)
+
+    @property
+    def high_current_fault(self):
+        return self.alarm_and_status & (1 << 3)
+
+    @property
+    def high_voltage_warning(self):
+        return self.alarm_and_status & (1 << 4)
+
+    @property
+    def high_voltage_fault(self):
+        return self.alarm_and_status & (1 << 5)
+
+    @property
+    def low_voltage_warning(self):
+        return self.alarm_and_status & (1 << 6)
+
+    @property
+    def low_voltage_fault(self):
+        return self.alarm_and_status & (1 << 7)
+
+    @property
+    def cell_low_voltage_nonrecoverable_fault(self):
+        return self.alarm_and_status & (1 << 8)
+
+    @property
+    def charge_low_warning(self):
+        return self.alarm_and_status & (1 << 12)
+
+    @property
+    def module_communication_error(self):
+        return self.alarm_and_status & (1 << 13)
+
+    @property
+    def module_communication_fault(self):
+        return self.alarm_and_status & (1 << 14)
+
+    @property
+    def bms_selfcheck_warning(self):
+        return self.alarm_and_status & (1 << 15)
+
+    @property
+    def under_volt_disable(self):
+        return self.alarm_and_status & (1 << 16)
+
+    @property
+    def over_volt_disable(self):
+        return self.alarm_and_status & (1 << 17)
+
+    @property
+    def string_contactor_or_fet_on(self):
+        return self.alarm_and_status & (1 << 31)
+
+    ######################################
+    # Methods
+    ######################################
+
+    def update(self, line):
+        """
+        Update the components of the status with a new line
+        from the BMS serial.
+
+        :param line:
+            The periodic string or module status report or from the BMS.
+            Type ``bytes`` or ``str``.
+
+        :return:
+            :const:`None`
+
+        :exception ValueError:
+            If the argument is the wrong type, or too short.
+        """
+        if type(line) not in [str, bytes]:
+            raise ValueError("Passed the wrong type for line")
+
+        line = str(line)
+
+        if len(line) < 127:
+            raise ValueError("Line is too short")
+
+        if line[4] == 'S':
+            self._update_status(line)
+        elif line[4] == 'M':
+            self._update_module(line)
+        else:
+            raise ValueError("Not one of update status or update module")
+
+    def _update_status(self, line):
+        """
+        Update the components of the top-level status with a "module
+        status report" from the BMS.
+
+        :param line:
+            The periodic string line. Type ``str``
+
+        :return:
+            :const:`None`
+        """
+        self.state = line[17]
+        self.soc = int(line[19:22])
+        self.temperature = int(line[23:26])
+        self.voltage = int(line[27:33]) / 1000.0
+        self.current = int(line[34:39]) / 10.0
+        self.alarm_and_status = int(line[40:48], base=16)
+        self.watt_hours_to_full_discharge = int(line[77:83])
+        self.watt_hours_to_full_charge = int(line[84:90])
+        self.min_cell_voltage = int(line[91:97]) / 1000.0
+        self.max_cell_voltage = int(line[98:104]) / 1000.0
+        self.front_power_connector_temperature = int(line[105:107])
+
+    def _update_module(self, line):
+        """
+        Update the module with a module status report from the BMS.
+
+        :param line:
+            The periodic module status report. Type ``str``
+
+        :return:
+            :const:`None`
+
+        :exception ValueError:
+            If the wrong type is used, or an invalid line.
+        """
+        module_id = int(line[17:19])
+        try:
+            module = self.modules[module_id]
+            module.update(line)
+        except KeyError:
+            module = BmsModule(module_id, line)
+            self.modules[module_id] = module
 
 
 class BmsClient(AsyncIOThread):
@@ -56,13 +386,8 @@ class BmsClient(AsyncIOThread):
         # Open file - IOError could be thrown
         self._f = open(sfilename, 'a')
 
-        # Setup global last line variables
-        self.last_string_status = ""
-        self.last_module_status = ""
-
-        # Setup flags for fresh values
-        self._last_string_fresh = False
-        self._last_module_fresh = False
+        # Setup status class
+        self.status = BmsStatus()
 
         self._logger.info("Started BmsClient")
 
@@ -126,18 +451,12 @@ class BmsClient(AsyncIOThread):
                     continue
 
                 try:
-                    self._f.write(str(line))
+                    self._f.write(str(time.strftime("%Y-%m-%d %H:%M:%S"))
+                                  + ',' + str(line))
                 except IOError:
                     pass  # Ignore IOErrors
 
-                if len(line) <= 4:
-                    pass
-                elif line[4] == 'S':
-                    self.last_string_status = line
-                    self._last_string_fresh = True
-                elif line[4] == 'M':
-                    self.last_module_status = line
-                    self._last_module_fresh = True
+                self.status.update(line)
 
     @staticmethod
     def fletcher16(data):
@@ -171,21 +490,6 @@ class BmsClient(AsyncIOThread):
     # Methods called from Main thread
     #########################################
 
-    def get_data(self):
-        """
-        Get the charge and current.
-
-        :return: a tuple of (charge, current)
-        """
-        # If we have a last string
-        if self.last_string_status and self._last_string_fresh:
-            charge = int(self.last_string_status[19:22])
-            cur = int(self.last_string_status[34:39])
-            self._last_string_fresh = False
-            return charge, cur
-        else:
-            return None, None
-
     def print_data(self):
         """
         Print the charge and current as we currently have it, in
@@ -193,11 +497,8 @@ class BmsClient(AsyncIOThread):
 
         :return: :const:`None`
         """
-        # Short circuit if we haven't started reading data yet
-        if self.last_string_status == "":
-            return
-
-        charge, cur = self.get_data()
+        charge = self.status.soc
+        cur = self.status.current
         if charge is not None:
             print("%20s %10d %10s" % ("State of Charge", charge, "%"))
         else:
@@ -215,17 +516,17 @@ class BmsClient(AsyncIOThread):
 
         No newline or trailing comma.
         """
-        return "SoC (%),Current (A)"
+        return "SoC (%),BMS Voltage,Current (A)"
 
     def csv_line(self):
         """
         Return the CSV data in the form ``"%f,%f"%(charge, cur)``
         """
         # Short circuit if we haven't started reading data yet
-        if self.last_string_status == "":
-            return ","
-        charge, cur = self.get_data()
-        if charge is not None and cur is not None:
-            return "%d,%d" % (charge, cur)
+        charge = self.status.soc
+        voltage = self.status.voltage
+        cur = self.status.current
+        if charge is not None and voltage is not None and cur is not None:
+            return "%d,%f,%d" % (charge, voltage, cur)
         else:
-            return ","
+            return ",,"
