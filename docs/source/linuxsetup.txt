@@ -348,6 +348,12 @@ choice, open ``/boot/uEnv.txt`` as root. Uncomment the line below
 "Beaglebone Black: HDMI (Audio/Video) disabled". This line should say
 something like ``dtb=am335x-boneblack-emmc-overlay.dtb``.
 
+We'll also autoload the ``univ-emmc`` cape on boot. To do this,
+uncomment the line just below ``##Example 4.1.x`` which enables
+extra parts. Add ``univ-emmc`` to that line, as follows below::
+
+    cape_enable=bone_capemgr.enable_partno=univ-emmc
+
 .. warning::
 
    Syntax errors in the ``uEnv.txt`` file can make the system
