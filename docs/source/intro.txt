@@ -24,16 +24,15 @@ description.
 * Set the battery gauge level based on the DeepSea measured voltage.
 * Set the fuel gauge level based on the DeepSea measured fuel level.
 * Tell the DeepSea about a CMS fault or CMS warning through ModBus
-registers.
+  registers.
 * Control a PWM signal to the Woodward engine controller, controlled by
-PID control to set analog trunk current to 25A.
+  PID control to set analog trunk current to 25A.
 * Hold 12V power high to prevent being powered off unexpectedly.
 * Record data from DeepSea, BMS, and analog inputs to CSV file on USB
-drive.
+  drive.
 * Set USB LED to on during writes to USB drive.
 * On button-press, eject the USB drive.
 * Turn on an LED to indicate safe to remove USB drive.
-
 
 .. _hygencms-installation:
 
