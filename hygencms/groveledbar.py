@@ -14,9 +14,9 @@ import time
 from . import gpio
 
 LEDS_PER_INSTANCE = 12
-HIGH = 0xff
+HIGH = 0x77
 LOW = 0x00
-RED = 0xcc
+RED = 0x44
 
 
 class GroveLedBar:
