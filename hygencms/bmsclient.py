@@ -24,6 +24,7 @@ class BmsModule:
     This class holds the information contained in a Module status report
     from the Beckett BMS.
     """
+
     def __init__(self, module_id, line=None):
         self.id = module_id
         self.state = None
@@ -42,6 +43,19 @@ class BmsModule:
         if line:
             self.update(line)
 
+    def __str__(self):
+        return ("BMS Module {:d}\n".format(self.id)
+                + "cur: {:5.1f}\n".format(self.current)
+                + "SoC: {:5d}%\n".format(self.soc)
+                + "     {:5s} {:5s} {:5s}\n".format('min', 'avg', 'max')
+                + "temp {:5d} {:5d} {:5d}\n".format(self.min_cell_temp,
+                                                    self.avg_cell_temp,
+                                                    self.max_cell_temp)
+                + "volt {:5.3f} {:5.3f} {:5.3f}\n".format(self.min_cell_voltage,
+                                                          self.avg_cell_voltage,
+                                                          self.max_cell_voltage)
+                )
+
     ############################################
     # Properties
     ############################################
@@ -49,15 +63,15 @@ class BmsModule:
     @property
     def temperature_warning(self):
         return bool(self.alarm_and_status & (1 << 0))
-    
+
     @property
     def temperature_fault(self):
         return bool(self.alarm_and_status & (1 << 1))
-    
+
     @property
     def high_current_warning(self):
         return bool(self.alarm_and_status & (1 << 2))
-    
+
     @property
     def high_current_fault(self):
         return bool(self.alarm_and_status & (1 << 3))
@@ -101,7 +115,7 @@ class BmsModule:
     @property
     def over_volt_disable(self):
         return bool(self.alarm_and_status & (1 << 17))
-    
+
     @property
     def cell_0_balancing(self):
         return bool(self.alarm_and_status & (1 << 24))
@@ -152,7 +166,7 @@ class BmsModule:
 
         line = str(line)
 
-        if len(line) < 127:
+        if len(line) < 125:
             raise ValueError("Line is too short")
 
         if line[4] != 'M':
@@ -183,8 +197,8 @@ class BmsStatus:
     It provides methods to parse strings, and properties to access all the
     data.
     """
+
     def __init__(self, line=None):
-        self.message_id = None
         self.state = None
         self.soc = None
         self.temperature = None
@@ -201,6 +215,20 @@ class BmsStatus:
 
         if line:
             self.update(line)
+
+    def __str__(self):
+        s = ("BMS Status\n"
+             + "volt: {:5.3f}\n".format(self.voltage)
+             + "cur:  {:5.1f}\n".format(self.current)
+             + "SoC:  {:5d}%\n".format(self.soc)
+             + "Temp: {:5d} degC\n".format(self.temperature)
+             + "     {:5s} {:5s}\n".format('min', 'max')
+             + "volt {:5.3f} {:5.3f}\n".format(self.min_cell_voltage,
+                                               self.max_cell_voltage)
+             + "modules:\n"
+             )
+        module_strings = [str(m) for m in self.modules.values()]
+        return s + '\n'.join(module_strings)
 
     ###############################################
     # Alarms and Warnings
@@ -293,7 +321,7 @@ class BmsStatus:
 
         line = str(line)
 
-        if len(line) < 127:
+        if len(line) < 125:
             raise ValueError("Line is too short")
 
         if line[4] == 'S':
