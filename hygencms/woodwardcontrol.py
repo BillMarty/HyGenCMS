@@ -10,6 +10,10 @@ also implements slew-rate limiting, which caps the maximum rate of
 change for the output variable (in units of percent). This rate is set
 by the configuration map in the constructor.
 
+The PID loop was developed along the lines sketched out by a series of
+blog posts which can be found
+`here <http://brettbeauregard.com/blog/2011/04/improving-the-beginners-pid-introduction/>`_.
+
 The ``WoodwardControl`` class also implements the ``csv_line`` and
 ``csv_header`` functions, which enable it to be used as a "data source"
 in the main program loop. It returns five pieces of data: setpoint,
