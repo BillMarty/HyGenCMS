@@ -38,7 +38,7 @@ modes = {
     'P8_10': 'lo',
 
     # P8_11	7	gpio1[13]	Hold 12V (keep powered on after losing 24V)
-    'P8_11': 'lo',
+    'P8_11': 'hi',
 
     # P8_12	7	gpio1[12]	PID LED
     'P8_12': 'lo',
