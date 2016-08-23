@@ -171,12 +171,16 @@ class DeepSeaClient(AsyncIOThread):
         :return:
             a list of tuples, containing the measurement list
         """
-        with open(filename) as mdf:
-            lines = mdf.readlines()
+        with open(filename) as f:
+            lines = f.readlines()
             measurement_list = []
             for line in lines[2:]:
                 fields = line.split(',')
-                if len(fields) > 6:
+                try:
+                    period = float(fields[6])
+                except (IndexError, ValueError):
+                    period = None
+                if period:
                     m = (
                         fields[0],  # name
                         fields[1],  # units
@@ -184,7 +188,7 @@ class DeepSeaClient(AsyncIOThread):
                         int(fields[3]),  # length
                         float(fields[4]),  # gain
                         float(fields[5]),  # offset
-                        float(fields[6]),  # period
+                        period,  # period
                     )
                 else:
                     m = (
