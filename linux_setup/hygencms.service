@@ -2,7 +2,7 @@
 Description=Hygen Communication Management System service
 
 [Service]
-Type=forking
+Type=simple
 PIDFile=/var/run/hygencms.pid
 ExecStart=/usr/local/bin/hygencms --daemon
 ExecReload=/bin/kill -HUP $MAINPID
