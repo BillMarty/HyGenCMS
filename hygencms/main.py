@@ -33,11 +33,11 @@ The primary functions of the main loop are as follows:
 # Import required libraries
 ###############################
 import logging
-from os import path
 import socket
 import subprocess
 import sys
 import time
+from os import path
 
 import monotonic
 import serial
@@ -50,11 +50,9 @@ from .analogclient import AnalogClient
 from .bbid import MAC_ID0
 from .bbio_common import setup_io
 from .bmsclient import BmsClient
-from .config import get_configuration
 from .deepseaclient import DeepSeaClient
 from .filewriter import FileWriter
 from .groveledbar import GroveLedBar
-from .utils import static_vars
 from .woodwardcontrol import WoodwardControl
 
 #################################################
@@ -215,7 +213,6 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     else:
         threads.append(filewriter)
 
-
     # Check whether we have some input
     if len(clients) == 0:
         logger.error("No clients started successfully. Exiting.")
@@ -325,14 +322,14 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 if not daemon:
                     print_data(clients)
 
-                # Read in the config file to update the tuning coefficients
-                try:
-                    wc = get_configuration()['woodward']
-                except IOError:
-                    pass
-                else:
-                    woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
-                    woodward.setpoint = wc['setpoint']
+                # # Read in the config file to update the tuning coefficients
+                # try:
+                #     wc = get_configuration()['woodward']
+                # except IOError:
+                #     pass
+                # else:
+                #     woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
+                #     woodward.setpoint = wc['setpoint']
 
                 if check_kill_switch():
                     going = False
