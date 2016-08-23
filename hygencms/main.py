@@ -580,8 +580,8 @@ def blink_leds(fuel_gauge, batt_gauge):
         batt_gauge.set_bar_level(i)
         gpio.write(pins.USB_LED, i % 2)
         gpio.write(pins.SPARE_LED, i % 2)
-        gpio.write(pins.DISK_ACT_LED, i % 2 + 1)
-        gpio.write(pins.PID_LED, i % 2 + 1)
+        gpio.write(pins.DISK_ACT_LED, (i + 1) % 2)
+        gpio.write(pins.PID_LED, (i + 1) % 2)
         time.sleep(0.1)
     # Turn them all off
     gpio.write(pins.USB_LED, 0)
