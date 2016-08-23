@@ -48,87 +48,87 @@ class BmsModule:
 
     @property
     def temperature_warning(self):
-        return self.alarm_and_status & (1 << 0)
+        return bool(self.alarm_and_status & (1 << 0))
     
     @property
     def temperature_fault(self):
-        return self.alarm_and_status & (1 << 1)
+        return bool(self.alarm_and_status & (1 << 1))
     
     @property
     def high_current_warning(self):
-        return self.alarm_and_status & (1 << 2)
+        return bool(self.alarm_and_status & (1 << 2))
     
     @property
     def high_current_fault(self):
-        return self.alarm_and_status & (1 << 3)
+        return bool(self.alarm_and_status & (1 << 3))
 
     @property
     def high_voltage_warning(self):
-        return self.alarm_and_status & (1 << 4)
+        return bool(self.alarm_and_status & (1 << 4))
 
     @property
     def high_voltage_fault(self):
-        return self.alarm_and_status & (1 << 5)
+        return bool(self.alarm_and_status & (1 << 5))
 
     @property
     def low_voltage_warning(self):
-        return self.alarm_and_status & (1 << 6)
+        return bool(self.alarm_and_status & (1 << 6))
 
     @property
     def low_voltage_fault(self):
-        return self.alarm_and_status & (1 << 7)
+        return bool(self.alarm_and_status & (1 << 7))
 
     @property
     def cell_low_voltage_fault(self):
-        return self.alarm_and_status & (1 << 8)
+        return bool(self.alarm_and_status & (1 << 8))
 
     @property
     def charge_low_warning(self):
-        return self.alarm_and_status & (1 << 12)
+        return bool(self.alarm_and_status & (1 << 12))
 
     @property
     def communication_error(self):
-        return self.alarm_and_status & (1 << 13)
+        return bool(self.alarm_and_status & (1 << 13))
 
     @property
     def communication_fault(self):
-        return self.alarm_and_status & (1 << 14)
+        return bool(self.alarm_and_status & (1 << 14))
 
     @property
     def under_volt_disable(self):
-        return self.alarm_and_status & (1 << 16)
+        return bool(self.alarm_and_status & (1 << 16))
 
     @property
     def over_volt_disable(self):
-        return self.alarm_and_status & (1 << 17)
+        return bool(self.alarm_and_status & (1 << 17))
     
     @property
     def cell_0_balancing(self):
-        return self.alarm_and_status & (1 << 24)
+        return bool(self.alarm_and_status & (1 << 24))
 
     @property
     def cell_1_balancing(self):
-        return self.alarm_and_status & (1 << 25)
+        return bool(self.alarm_and_status & (1 << 25))
 
     @property
     def cell_2_balancing(self):
-        return self.alarm_and_status & (1 << 26)
+        return bool(self.alarm_and_status & (1 << 26))
 
     @property
     def cell_3_balancing(self):
-        return self.alarm_and_status & (1 << 27)
+        return bool(self.alarm_and_status & (1 << 27))
 
     @property
     def cell_4_balancing(self):
-        return self.alarm_and_status & (1 << 28)
+        return bool(self.alarm_and_status & (1 << 28))
 
     @property
     def cell_5_balancing(self):
-        return self.alarm_and_status & (1 << 29)
+        return bool(self.alarm_and_status & (1 << 29))
 
     @property
     def cell_6_balancing(self):
-        return self.alarm_and_status & (1 << 30)
+        return bool(self.alarm_and_status & (1 << 30))
 
     ############################################
     # Methods
@@ -207,67 +207,67 @@ class BmsStatus:
     ###############################################
     @property
     def temperature_warning(self):
-        return self.alarm_and_status & (1 << 0)
+        return bool(self.alarm_and_status & (1 << 0))
 
     @property
     def temperature_fault(self):
-        return self.alarm_and_status & (1 << 1)
+        return bool(self.alarm_and_status & (1 << 1))
 
     @property
     def high_current_warning(self):
-        return self.alarm_and_status & (1 << 2)
+        return bool(self.alarm_and_status & (1 << 2))
 
     @property
     def high_current_fault(self):
-        return self.alarm_and_status & (1 << 3)
+        return bool(self.alarm_and_status & (1 << 3))
 
     @property
     def high_voltage_warning(self):
-        return self.alarm_and_status & (1 << 4)
+        return bool(self.alarm_and_status & (1 << 4))
 
     @property
     def high_voltage_fault(self):
-        return self.alarm_and_status & (1 << 5)
+        return bool(self.alarm_and_status & (1 << 5))
 
     @property
     def low_voltage_warning(self):
-        return self.alarm_and_status & (1 << 6)
+        return bool(self.alarm_and_status & (1 << 6))
 
     @property
     def low_voltage_fault(self):
-        return self.alarm_and_status & (1 << 7)
+        return bool(self.alarm_and_status & (1 << 7))
 
     @property
     def cell_low_voltage_nonrecoverable_fault(self):
-        return self.alarm_and_status & (1 << 8)
+        return bool(self.alarm_and_status & (1 << 8))
 
     @property
     def charge_low_warning(self):
-        return self.alarm_and_status & (1 << 12)
+        return bool(self.alarm_and_status & (1 << 12))
 
     @property
     def module_communication_error(self):
-        return self.alarm_and_status & (1 << 13)
+        return bool(self.alarm_and_status & (1 << 13))
 
     @property
     def module_communication_fault(self):
-        return self.alarm_and_status & (1 << 14)
+        return bool(self.alarm_and_status & (1 << 14))
 
     @property
     def bms_selfcheck_warning(self):
-        return self.alarm_and_status & (1 << 15)
+        return bool(self.alarm_and_status & (1 << 15))
 
     @property
     def under_volt_disable(self):
-        return self.alarm_and_status & (1 << 16)
+        return bool(self.alarm_and_status & (1 << 16))
 
     @property
     def over_volt_disable(self):
-        return self.alarm_and_status & (1 << 17)
+        return bool(self.alarm_and_status & (1 << 17))
 
     @property
     def string_contactor_or_fet_on(self):
-        return self.alarm_and_status & (1 << 31)
+        return bool(self.alarm_and_status & (1 << 31))
 
     ######################################
     # Methods
