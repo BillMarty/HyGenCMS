@@ -37,6 +37,7 @@ defaults = {
 
     # Control signal to Woodward
     'woodward': {
+        'pin': pins.WW_PWM,
         'Kp': 0.0,
         'Ki': 0.5,
         'Kd': 0.0,

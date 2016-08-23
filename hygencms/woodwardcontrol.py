@@ -27,7 +27,6 @@ import time
 
 from monotonic import monotonic
 
-from . import pins
 from . import pwm
 from . import utils
 from .asyncio import AsyncIOThread
@@ -55,7 +54,7 @@ class WoodwardControl(AsyncIOThread):
 
         # Initialize member variables
         self.cancelled = False
-        self._pin = pins.WW_PWM
+        self._pin = wconfig['pin']
         self._sample_time = wconfig['period']
         self._direction = self.DIRECT
         self.setpoint = wconfig['setpoint']
