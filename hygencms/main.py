@@ -143,6 +143,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         clients.append(deepsea)
         threads.append(deepsea)
 
+    analog = None
     try:
         analog = AnalogClient(config['analog'], handlers, data_store)
     except ValueError:
@@ -183,6 +184,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     # Other Threads
     #######################################
     # Woodward thread
+    woodward = None
     try:
         woodward = WoodwardControl(
             config['woodward'], handlers
@@ -212,16 +214,6 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                      .format(str(e)))
     else:
         threads.append(filewriter)
-
-    # Check whether we have some input
-    if len(clients) == 0:
-        logger.error("No clients started successfully. Exiting.")
-        exit("No clients started successfully. Exiting.")  # Exits with code 1
-
-    # We must always have Woodward thread and Analog thread at a minimum
-    if not woodward or not analog:
-        logger.error("Woodward or Analog client missing")
-        exit("Woodward or Analog client did not start successfully. Exiting.")
 
     ######################################
     # LED Gauges
