@@ -125,41 +125,42 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     ############################################
     # Async Data Sources
     ############################################
-    deepsea = None
-    if 'deepsea' in config['enabled']:
-        try:
-            deepsea = DeepSeaClient(config['deepsea'], handlers, data_store)
-        except ValueError:
-            exc_type, exc_value = sys.exc_info()[:2]
-            logger.error("Error with DeepSeaClient config: %s: %s"
-                         % (str(exc_type), str(exc_value)))
-        except serial.SerialException as e:
-            logger.error("SerialException({0}) opening BmsClient: {1}"
-                         .format(e.errno, e.strerror))
-        except socket.error:
-            exc_type, exc_value = sys.exc_info()[:2]
-            logger.error("Error opening BMSClient: %s: %s"
-                         % (str(exc_type), str(exc_value)))
-        else:
-            clients.append(deepsea)
-            threads.append(deepsea)
+    try:
+        deepsea = DeepSeaClient(config['deepsea'], handlers, data_store)
+    except ValueError:
+        exc_type, exc_value = sys.exc_info()[:2]
+        logger.error("Error with DeepSeaClient config: %s: %s"
+                     % (str(exc_type), str(exc_value)))
+        exit("Could not open DeepSeaClient")
+    except serial.SerialException as e:
+        logger.error("SerialException({0}) opening BmsClient: {1}"
+                     .format(e.errno, e.strerror))
+        exit("Could not open DeepSeaClient")
+    except socket.error:
+        exc_type, exc_value = sys.exc_info()[:2]
+        logger.error("Error opening BMSClient: %s: %s"
+                     % (str(exc_type), str(exc_value)))
+        exit("Could not open DeepSeaClient")
+    else:
+        clients.append(deepsea)
+        threads.append(deepsea)
 
-    analog = None
-    if 'analog' in config['enabled']:
-        try:
-            analog = AnalogClient(config['analog'], handlers, data_store)
-        except ValueError:
-            exc_type, exc_value = sys.exc_info()[:2]
-            logger.error("Configuration error from AnalogClient: %s: %s"
-                         % (str(exc_type), str(exc_value)))
-        except RuntimeError:
-            exc_type, exc_value = sys.exc_info()[:2]
-            logger.error(
-                "Error opening the analog to digital converter: %s: %s"
-                % (str(exc_type), str(exc_value)))
-        else:
-            clients.append(analog)
-            threads.append(analog)
+    try:
+        analog = AnalogClient(config['analog'], handlers, data_store)
+    except ValueError:
+        exc_type, exc_value = sys.exc_info()[:2]
+        logger.error("Configuration error from AnalogClient: %s: %s"
+                     % (str(exc_type), str(exc_value)))
+        exit("Could not open AnalogClient")
+    except RuntimeError:
+        exc_type, exc_value = sys.exc_info()[:2]
+        logger.error(
+            "Error opening the analog to digital converter: %s: %s"
+            % (str(exc_type), str(exc_value)))
+        exit("Could not open AnalogClient")
+    else:
+        clients.append(analog)
+        threads.append(analog)
 
     bms_queue = queue.Queue()
     try:
