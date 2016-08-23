@@ -18,7 +18,7 @@ import signal
 
 from daemon import pidfile, DaemonContext
 
-from .config import get_configuration
+from .config import defaults
 from .main import main as main_entry
 
 debug = False
@@ -27,9 +27,6 @@ debug = False
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description="Start the Hygen logging daemon")
-    parser.add_argument(
-        '-c', '--config', action='store_const', dest='config', const=True,
-        default=False, help='set configuration variables from the console')
     parser.add_argument(
         '-d', '--daemon', action='store_const', dest='daemon', const=True,
         default=False, help='run the logger as a daemon')
@@ -44,11 +41,8 @@ def main():
         default=False, help='Set system time from DeepSea')
     args = parser.parse_args()
 
-    # Handle --config
-    if args.config:
-        config = get_configuration(from_console=True)
-    else:
-        config = get_configuration()
+    # Get configuration
+    config = defaults
 
     # create logger
     logger = logging.getLogger(__name__)

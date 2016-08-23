@@ -162,59 +162,58 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             threads.append(analog)
 
     bms_queue = queue.Queue()
-    if 'bms' in config['enabled']:
-        try:
-            bms = BmsClient(config['bms'], handlers, bms_queue)
-        except serial.SerialException as e:
-            logger.error("SerialException({0}) opening BmsClient: {1}"
-                         .format(e.errno, e.strerror))
-        except (OSError, IOError):
-            exc_type, exc_value = sys.exc_info()[:2]
-            logger.error("Error opening BMSClient: %s: %s"
-                         % (str(exc_type), str(exc_value)))
-        except ValueError:
-            logger.error("ValueError with BmsClient config")
-        else:
-            clients.append(bms)
-            threads.append(bms)
+    try:
+        bms = BmsClient(config['bms'], handlers, bms_queue)
+    except serial.SerialException as e:
+        logger.error("SerialException({0}) opening BmsClient: {1}"
+                     .format(e.errno, e.strerror))
+        exit("Could not open BmsClient")
+    except (OSError, IOError):
+        exc_type, exc_value = sys.exc_info()[:2]
+        logger.error("Error opening BMSClient: %s: %s"
+                     % (str(exc_type), str(exc_value)))
+        exit("Could not open BmsClient")
+    except ValueError:
+        logger.error("ValueError with BmsClient config")
+        exit("Could not open BmsClient")
+    else:
+        clients.append(bms)
+        threads.append(bms)
 
     #######################################
     # Other Threads
     #######################################
-    woodward = None
-    if 'woodward' in config['enabled']:
-        try:
-            woodward = WoodwardControl(
-                config['woodward'], handlers
-            )
-        # ValueError can be from a missing value in the config map
-        # or from an error in the parameters to PWM.start(...)
-        except ValueError as e:
-            logger.error("ValueError: %s"
-                         % (e.args[0]))
-            exit("WoodwardControl thread did not start")
-        else:
-            clients.append(woodward)
-            threads.append(woodward)
-
-    filewriter = None
-    if 'filewriter' in config['enabled']:
-        csv_header = build_csv_header(clients, logger)
-        log_queue = queue.Queue()
-        try:
-            filewriter = FileWriter(
-                config['filewriter'], handlers, log_queue, bms_queue,
-                csv_header)
-        except ValueError as e:
-            logger.error("FileWriter did not start with message \"{0}\""
-                         .format(str(e)))
-        except (IOError, OSError) as e:
-            logger.error("FileWriter did not start with message \"{0}\""
-                         .format(str(e)))
-        else:
-            threads.append(filewriter)
+    # Woodward thread
+    try:
+        woodward = WoodwardControl(
+            config['woodward'], handlers
+        )
+    # ValueError can be from a missing value in the config map
+    # or from an error in the parameters to PWM.start(...)
+    except ValueError as e:
+        logger.error("ValueError: %s"
+                     % (e.args[0]))
+        exit("WoodwardControl thread did not start")
     else:
-        log_queue = None
+        clients.append(woodward)
+        threads.append(woodward)
+
+    # Open filewriter thread
+    csv_header = build_csv_header(clients, logger)
+    log_queue = queue.Queue()
+    try:
+        filewriter = FileWriter(
+            config['filewriter'], handlers, log_queue, bms_queue,
+            csv_header)
+    except ValueError as e:
+        logger.error("FileWriter did not start with message \"{0}\""
+                     .format(str(e)))
+    except (IOError, OSError) as e:
+        logger.error("FileWriter did not start with message \"{0}\""
+                     .format(str(e)))
+    else:
+        threads.append(filewriter)
+
 
     # Check whether we have some input
     if len(clients) == 0:
@@ -295,7 +294,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 try:
                     # Virtual LED 1
                     # From DeepSea GenComm manual, 10.57
-                    pid_enable = data_store[191 * 256 + 0]
+                    pid_enable = data_store[DeepSeaClient.VIRTUAL_LED_1]
                     if not woodward.in_auto and pid_enable:
                         woodward.integral_term = 0.0
                         woodward.set_auto(True)
