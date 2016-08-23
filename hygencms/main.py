@@ -225,17 +225,14 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     for thread in threads:
         thread.start()
 
-    going = False
-    while not going:
-        blink_leds(fuel_gauge, battery_gauge)
-        try:
-            fuel = data_store[DeepSeaClient.FUEL_LEVEL]
-            batt = data_store[DeepSeaClient.BATTERY_LEVEL]
-        except KeyError:
-            pass
-        else:
-            if fuel is not None and batt is not None:
-                going = True
+    # Don't wait for DeepSea connection
+    blink_leds(fuel_gauge, battery_gauge)
+    try:
+        fuel = data_store[DeepSeaClient.FUEL_LEVEL]
+        batt = data_store[DeepSeaClient.BATTERY_LEVEL]
+    except KeyError:
+        pass
+    else:
         update_gauges(fuel_gauge, battery_gauge)
 
     # Keeps track of the next scheduled time for each interval
