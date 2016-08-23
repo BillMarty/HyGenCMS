@@ -225,6 +225,19 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     for thread in threads:
         thread.start()
 
+    going = False
+    while not going:
+        blink_leds(fuel_gauge, battery_gauge)
+        try:
+            fuel = data_store[DeepSeaClient.FUEL_LEVEL]
+            batt = data_store[DeepSeaClient.BATTERY_LEVEL]
+        except KeyError:
+            pass
+        else:
+            if fuel is not None and batt is not None:
+                going = True
+        update_gauges(fuel_gauge, battery_gauge)
+
     # Keeps track of the next scheduled time for each interval
     # Key = period of job
     # value = monotonic scheduled time
@@ -554,3 +567,17 @@ def power_off():
     :return: :const:`None`
     """
     subprocess.call(["poweroff"])
+
+
+def blink_leds(fuel_gauge, batt_gauge):
+    """
+    Do a blinking LED show at startup
+
+    :return: :const:`None`
+    """
+    for i in range(11):
+        fuel_gauge.set_bar_level(i)
+        batt_gauge.set_bar_level(i)
+        gpio.write(pins.USB_LED, i % 2)
+        gpio.write(pins.SPARE_LED, i % 2)
+        time.sleep(0.2)
