@@ -83,8 +83,13 @@ command:
     sudo whoami
 
 It should prompt for hygen's password, then print ``root``. This
-confirms that sudo has been enabled. Next we will setup the network
-(remember to stay logged in as hygen).
+confirms that sudo has been enabled. Now delete the default ``debian``
+user::
+
+    sudo deluser debian
+
+Now we will setup the network (remember to stay logged in as
+hygen).
 
 
 Network Setup
@@ -251,7 +256,7 @@ include the ``man`` command. Add it using the following commands:
 
     sudo apt-get install man-db manpages manpages-dev
     # Try the man command
-    man lsblk  # We'll use this next
+    man lsblk  # We'll use this next. q to quit
 
 
 Grow Root Partition
@@ -432,8 +437,8 @@ cloning from our private GitHub repository.
     cd ~
     sudo apt-get install git
     git clone https://github.com/BillMarty/HyGenCMS.git
-    # Manually install doctools, as it hangs if installed automatically
-    sudo pip3 install doctools
+    # Manually install docutils, as it hangs if installed automatically
+    sudo pip3 install docutils
 
 We then can install the executable. For instructions on this part, see
 :ref:`hygencms-installation`.
