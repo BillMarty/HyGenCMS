@@ -21,7 +21,7 @@ class FileWriter(AsyncIOThread):
     If a drive is plugged in, begins logging files on drive again.
     """
     # Location to store log files if a USB is not available
-    fallback_directory = '/home/hygen'
+    fallback_directory = None
 
     def __init__(self, config, handlers, log_queue, bms_queue, csv_header):
         """
@@ -291,6 +291,8 @@ class FileWriter(AsyncIOThread):
         drive = usbdrive.mount_point()
 
         if drive is None:
+            if self.fallback_directory is None:
+                return None
             log_directory = path.join(self.fallback_directory,
                                       self.relative_directory)
         else:
@@ -315,7 +317,7 @@ class FileWriter(AsyncIOThread):
             the null file.
         """
         directory = self.get_directory()
-        if not path.isdir(directory):
+        if directory is None or not path.isdir(directory):
             return open(os.devnull)  # If the directory doesn't exist, fail
 
         # Find unique file name for this hour
@@ -350,7 +352,7 @@ class FileWriter(AsyncIOThread):
             the null file.
         """
         directory = self.get_directory()
-        if not path.isdir(directory):
+        if directory is None or not path.isdir(directory):
             return open(os.devnull)  # If the directory doesn't exist, fail
 
         # Find unique file name for this hour
