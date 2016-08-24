@@ -209,8 +209,20 @@ class FileWriter(AsyncIOThread):
                     prev_hour = hour
 
                 elif self._header_changed:
-                    # Print all the lines we have in the queue
-                    self.print_from_queue(self._log_file, self._log_queue)
+                    # Get all the lines before the None flag
+                    more = True
+                    while more:
+                        try:
+                            line = self._log_queue.get(False)
+                        except queue.Empty:
+                            # Sleep if there aren't any lines
+                            time.sleep(0.1)
+                        else:
+                            # Handle None flag
+                            if line is None:
+                                more = False
+                            else:
+                                self._write_line(self._log_file, line)
 
                     # Close file and get new one (with new CSV header)
                     self._log_file.close()

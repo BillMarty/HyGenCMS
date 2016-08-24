@@ -101,6 +101,8 @@ class DeepSeaClient(AsyncIOThread):
             if self.new_input_list:
                 self._input_list = self.add_mandatory_measurements(self.new_input_list)
                 self.new_input_list = None
+                # We need to open a new log file if we get a new input list.
+                self.new_log_file = True
 
     @staticmethod
     def add_mandatory_measurements(measurement_list):

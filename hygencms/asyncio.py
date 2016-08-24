@@ -30,6 +30,10 @@ class AsyncIOThread(Thread):
         self.daemon = False
         self.cancelled = False
 
+        # Flag for whether we need to start a new log file (if
+        # configuration changed)
+        self.new_log_file = False
+
         self._logger = None
         self.start_logger(handlers)
 
