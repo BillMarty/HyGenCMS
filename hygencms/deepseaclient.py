@@ -302,9 +302,6 @@ class DeepSeaClient(AsyncIOThread):
         Get a CSV line of the data we currently have.
         Does not include newline or trailing comma.
 
-        Only includes values which have been updated since
-        we last wrote them to file.
-
         :return: A String containing the csv line.
         :rtype: string
         """
