@@ -319,7 +319,7 @@ class BmsStatus:
         if type(line) not in [str, bytes]:
             raise ValueError("Passed the wrong type for line")
 
-        line = str(line)
+        line = line.decode('utf-8')
 
         if len(line) < 125:
             raise ValueError("Line is too short")
@@ -496,7 +496,10 @@ class BmsClient(AsyncIOThread):
                 except queue.Full:
                     pass  # Ignore
 
-                self.status.update(line)
+                try:
+                    self.status.update(line)
+                except ValueError:
+                    pass  # Ignore
 
     @staticmethod
     def fletcher16(data):
