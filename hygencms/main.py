@@ -177,7 +177,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         logger.error("ValueError with BmsClient config")
         exit("Could not open BmsClient")
     else:
-        clients.append(bms)
+        # clients.append(bms)
         threads.append(bms)
 
     #######################################
@@ -196,7 +196,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                      % (e.args[0]))
         exit("WoodwardControl thread did not start")
     else:
-        clients.append(woodward)
+        # clients.append(woodward)
         threads.append(woodward)
 
     # Open filewriter thread
@@ -256,14 +256,13 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         try:
             now = monotonic.monotonic()
             now_time = time.time()
-            csv_parts = [str(now_time)]
 
             ###########################
             # Every tenth of a second
             ###########################
             if now >= next_run[0.1]:
                 # Put the data for the "fast log file" into the queue
-                csv_parts = [str(now_time)]
+                csv_parts = ['{:.1f}'.format(now_time)]
                 for addr in [DeepSeaClient.RPM,
                              DeepSeaClient.BATTERY_LEVEL,
                              DeepSeaClient.GENERATOR_CURRENT]:
@@ -271,7 +270,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                         value = data_store[addr]
                     except KeyError:
                         value = '' # We might not have these on first run
-                    csv_parts.append(str(value))
+
+                    if value is not None:
+                        csv_parts.append(str(value))
+                    else:
+                        value = ''
                 fast_log_queue.put(','.join(csv_parts))
 
                 # Connect the analog current in to the woodward process
@@ -333,6 +336,8 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 new_log_file = False
                 for client in clients:
                     new_log_file = new_log_file or client.new_log_file
+
+                csv_parts = ["{:.1f}".format(now_time)]
 
                 # Get the CSV line from each client, and reset
                 # new_log_file flag, as we've gotten the message.
