@@ -318,7 +318,7 @@ class FileWriter(AsyncIOThread):
         """
         directory = self.get_directory()
         if directory is None or not path.isdir(directory):
-            return open(os.devnull)  # If the directory doesn't exist, fail
+            return open(os.devnull, 'w')  # If the directory doesn't exist, fail
 
         # Find unique file name for this hour
         now = datetime.now()
@@ -353,7 +353,7 @@ class FileWriter(AsyncIOThread):
         """
         directory = self.get_directory()
         if directory is None or not path.isdir(directory):
-            return open(os.devnull)  # If the directory doesn't exist, fail
+            return open(os.devnull, 'w')  # If the directory doesn't exist, fail
 
         # Find unique file name for this hour
         now = datetime.now()
