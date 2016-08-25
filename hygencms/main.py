@@ -269,12 +269,12 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     try:
                         value = data_store[addr]
                     except KeyError:
-                        value = '' # We might not have these on first run
+                        value = ''  # We might not have these on first run
 
                     if value is not None:
                         csv_parts.append(str(value))
                     else:
-                        value = ''
+                        csv_parts.append('')
                 fast_log_queue.put(','.join(csv_parts))
 
                 # Connect the analog current in to the woodward process
