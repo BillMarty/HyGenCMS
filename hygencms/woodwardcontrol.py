@@ -236,10 +236,20 @@ class WoodwardControl(AsyncIOThread):
         if not self.in_auto:
             return self.output
 
+        # Time for PID calculation
         now = monotonic()
         time_change = (now - self.last_time)
 
+        # Slew-rate limiting
+        dt = now - self._last_compute_time
+        self._last_compute_time = now
+        output = self.output
+
         if time_change >= self._sample_time:
+            # Set output limits based on the slew rate
+            self.set_output_limits(output - dt * self.slew,
+                                   output + dt * self.slew)
+
             # Compute error variable
             error = self.setpoint - self.process_variable
 
@@ -270,10 +280,6 @@ class WoodwardControl(AsyncIOThread):
         else:
             ideal_output = self._ideal_output
 
-        # Slew-rate limiting
-        dt = now - self._last_compute_time
-        self._last_compute_time = now
-        output = self.output
         if ideal_output == output:
             return output
         elif ideal_output > output + (self.slew * dt):
