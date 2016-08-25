@@ -382,7 +382,7 @@ class FileWriter(AsyncIOThread):
 
         file_path = os.path.join(
             directory,
-            base_file_name + "_run%d.csv" % i)
+            base_file_name + "_file%d.csv" % i)
 
         # Try opening the file, else open the null file
         try:
