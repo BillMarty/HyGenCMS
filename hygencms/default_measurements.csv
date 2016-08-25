@@ -2,7 +2,7 @@ Check out the Expansion Module MODBUS Addresses,,,,,
 name,units,addr,len,gain,offset,[period (optional)]
 Time,sec,1792,2,1,0
 Engine Runtime,sec,1798,2,1,0
-Engine Starts (number of starts)
+Engine Starts,#,1808,2,1,0
 Engine Speed,RPM,1030,1,1,0,0.1
 300V Bus Voltage,V,1223,1,1,0,0.1
 Generator Current,A,1224,2,0.1,0,0.1
