@@ -306,7 +306,8 @@ class DeepSeaClient(AsyncIOThread):
         :rtype: string
         """
         values = []
-        for m in self._input_list:
+        input_list = self._input_list
+        for m in input_list:
             key = m[self.ADDRESS]
             try:
                 val = self._data_store[key]
