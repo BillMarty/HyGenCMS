@@ -217,7 +217,7 @@ class FileWriter(AsyncIOThread):
 
                     self._fast_log_file.close()
                     self._fast_log_file = self.new_fast_logfile()
-                    self._write_line(self._slow_log_file, self._slow_csv_header)
+                    self._write_line(self._fast_log_file, self._fast_csv_header)
 
                     self._bms_file.close()
                     self._bms_file = self.new_bmsfile()
