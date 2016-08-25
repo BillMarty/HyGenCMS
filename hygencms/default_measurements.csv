@@ -1,0 +1,21 @@
+Check out the Expansion Module MODBUS Addresses,,,,,
+name,units,addr,len,gain,offset,[period (optional)]
+Time,sec,1792,2,1,0
+Engine Runtime,sec,1798,2,1,0
+Engine Starts (number of starts)
+Engine Speed,RPM,1030,1,1,0,0.1
+300V Bus Voltage,V,1223,1,1,0,0.1
+Generator Current,A,1224,2,0.1,0,0.1
+300V Load Current,A,1226,2,0.1,0
+300V Battery Current,A,1230,2,0.1,0
+48V Load Voltage,V,43813,1,-1,0
+48V Load Current,A,43817,1,1,0
+Fuel Level,%,1027,1,1,0
+Oil Pressure,kPa,1024,1,1,0
+Exhaust Gas Temp,degC,43978,1,1,0
+Coolant Temp,degC,1025,1,1,0
+Alternator Temp,degC,43979,1,1,0
+Inlet Temp,degC,43980,1,1,0
+Battery Bay Temp,degC,43981,1,1,0
+Engine Inlet Temp,degC,43982,1,1,0
+Outlet Temp,degC,43983,1,1,0

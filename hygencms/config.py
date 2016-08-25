@@ -18,8 +18,13 @@ defaults = {
     # DeepSea Configuration
     'deepsea': {
         # Where to find the measurement list
-        'mlistfile':\
-        '/home/hygen/HyGenCMS/hygencms/cur_rpm.csv',
+        'mlistfile': \
+            '/home/hygen/HyGenCMS/hygencms/default_measurements.csv',
+        # TODO Make sure we've accounted for the following in the default
+        # (check with B. Marty - any decisions made with Battery current?
+        # Fuel system pressures (3 pressures)
+        # Water in fuel sensor
+
         # Possible mode values are 'rtu' or 'tcp'
         'mode': 'rtu',
         # RTU settings

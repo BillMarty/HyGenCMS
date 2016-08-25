@@ -272,7 +272,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                         value = ''  # We might not have these on first run
 
                     if value is not None:
-                        csv_parts.append(str(value))
+                        csv_parts.append('{:.1f}'.format(value))
                     else:
                         csv_parts.append('')
                 fast_log_queue.put(','.join(csv_parts))
