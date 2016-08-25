@@ -247,8 +247,8 @@ class WoodwardControl(AsyncIOThread):
 
         if time_change >= self._sample_time:
             # Set output limits based on the slew rate
-            self.set_output_limits(output - dt * self.slew,
-                                   output + dt * self.slew)
+            self.set_output_limits(output - time_change * self.slew,
+                                   output + time_change * self.slew)
 
             # Compute error variable
             error = self.setpoint - self.process_variable
