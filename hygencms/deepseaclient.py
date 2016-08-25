@@ -270,7 +270,7 @@ class DeepSeaClient(AsyncIOThread):
 
             if val is None:
                 display = "%20s %10s %10s" % (name, "ERR", m[self.UNITS])
-            elif m[self.UNITS] == "sec":
+            elif m[self.ADDRESS] == self.TIME:
                 t = time.gmtime(val)
                 time_string = time.strftime("%Y-%m-%d %H:%M:%S", t)
                 display = "%20s %21s" % (name, time_string)
