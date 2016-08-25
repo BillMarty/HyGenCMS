@@ -492,7 +492,7 @@ class BmsClient(AsyncIOThread):
 
                 try:
                     self.queue.put(str(time.strftime("%Y-%m-%d %H:%M:%S"))
-                                   + ',' + str(line))
+                                   + ',' + line.decode('utf-8'))
                 except queue.Full:
                     pass  # Ignore
 
