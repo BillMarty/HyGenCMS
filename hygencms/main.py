@@ -201,11 +201,12 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
     # Open filewriter thread
     csv_header = build_csv_header(clients, logger)
-    log_queue = queue.Queue()
+    slow_log_queue = queue.Queue()
+    fast_log_queue = queue.Queue()
     try:
         filewriter = FileWriter(
-            config['filewriter'], handlers, log_queue, bms_queue,
-            csv_header)
+            config['filewriter'], handlers, slow_log_queue, fast_log_queue,
+            bms_queue, csv_header)
     except ValueError as e:
         logger.error("FileWriter did not start with message \"{0}\""
                      .format(str(e)))
@@ -261,34 +262,17 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             # Every tenth of a second
             ###########################
             if now >= next_run[0.1]:
-                # Get CSV data to the log file
-
-                # If any of the clients say we should get a new log
-                # file, get a new log file.
-                new_log_file = False
-                for client in clients:
-                    new_log_file = new_log_file or client.new_log_file
-
-                # Get the CSV line from each client, and reset
-                # new_log_file flag, as we've gotten the message.
-                for client in clients:
-                    csv_parts.append(client.csv_line())
-                    client.new_log_file = False
-
-                # Send a None over the queue (signal to filewriter
-                # to start a new file)
-                if new_log_file:
+                # Put the data for the "fast log file" into the queue
+                csv_parts = [str(now_time)]
+                for addr in [DeepSeaClient.RPM,
+                             DeepSeaClient.BATTERY_LEVEL,
+                             DeepSeaClient.GENERATOR_CURRENT]:
                     try:
-                        log_queue.put(None)
-                    except queue.Full:
-                        exit("File writer queue full. Exiting.")
-
-                # Put the csv data in the logfile
-                if len(csv_parts) > 0 and log_queue:
-                    try:
-                        log_queue.put(','.join(csv_parts))
-                    except queue.Full:
-                        exit("File writer queue full. Exiting.")
+                        value = data_store[addr]
+                    except KeyError:
+                        value = '' # We might not have these on first run
+                    csv_parts.append(str(value))
+                fast_log_queue.put(','.join(csv_parts))
 
                 # Connect the analog current in to the woodward process
                 if woodward and not woodward.cancelled:
@@ -340,6 +324,36 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 # If not in daemon, print to screen
                 if not daemon:
                     print_data(clients)
+
+                ###############################
+                # Get CSV data to the log file
+                ###############################
+                # If any of the clients say we should get a new log
+                # file, get a new log file.
+                new_log_file = False
+                for client in clients:
+                    new_log_file = new_log_file or client.new_log_file
+
+                # Get the CSV line from each client, and reset
+                # new_log_file flag, as we've gotten the message.
+                for client in clients:
+                    csv_parts.append(client.csv_line())
+                    client.new_log_file = False
+
+                # Send a None over the queue (signal to filewriter
+                # to start a new file)
+                if new_log_file:
+                    try:
+                        slow_log_queue.put(None)
+                    except queue.Full:
+                        exit("File writer queue full. Exiting.")
+
+                # Put the csv data in the logfile
+                if len(csv_parts) > 0 and slow_log_queue:
+                    try:
+                        slow_log_queue.put(','.join(csv_parts))
+                    except queue.Full:
+                        exit("File writer queue full. Exiting.")
 
                 # # Read in the config file to update the tuning coefficients
                 # try:

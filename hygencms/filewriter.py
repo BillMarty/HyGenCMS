@@ -23,7 +23,8 @@ class FileWriter(AsyncIOThread):
     # Location to store log files if a USB is not available
     fallback_directory = None
 
-    def __init__(self, config, handlers, log_queue, bms_queue, csv_header):
+    def __init__(self, config, handlers, slow_log_queue, fast_log_queue,
+                 bms_queue, csv_header):
         """
         Initialize a filewriter which writes to file whatever is put
         on its queue.
@@ -38,7 +39,7 @@ class FileWriter(AsyncIOThread):
         :param handlers:
             All the log handlers to log to
 
-        :param log_queue:
+        :param slow_log_queue:
             The queue to pull csv lines off
 
         :param bms_queue:
@@ -61,9 +62,11 @@ class FileWriter(AsyncIOThread):
         self.check_config(config)
 
         self.relative_directory = config['ldir']  # Relative directory on USB
-        self._log_queue = log_queue
+        self._slow_log_queue = slow_log_queue
+        self._fast_log_queue = fast_log_queue
         self._bms_queue = bms_queue
-        self._csv_header = csv_header
+        self._slow_csv_header = csv_header
+        self._fast_csv_header = 'time,rpm,voltage,current'
         self._header_changed = False
 
         # Set the base directory to use
@@ -74,7 +77,8 @@ class FileWriter(AsyncIOThread):
             self.base_directory = self.fallback_directory
 
         # Open file
-        self._log_file = open(os.devnull, 'w')
+        self._slow_log_file = open(os.devnull, 'w')
+        self._fast_log_file = open(os.devnull, 'w')
         self._bms_file = open(os.devnull, 'w')
 
         # Private variables behind properties
@@ -140,10 +144,12 @@ class FileWriter(AsyncIOThread):
         Close the file object on object deletion.
         """
         try:
-            if self._log_file:
-                self._log_file.close()
+            if self._slow_log_file:
+                self._slow_log_file.close()
             if self._bms_file:
                 self._bms_file.close()
+            if self._fast_log_file:
+                self._fast_log_file.close()
         except IOError:
             pass
 
@@ -176,32 +182,42 @@ class FileWriter(AsyncIOThread):
             try:
                 hour = datetime.now().hour
                 if self.mount_drive:
-                    self._log_file.close()
+                    self._slow_log_file.close()
+                    self._fast_log_file.close()
                     self._bms_file.close()
                     usbdrive.mount(self.mount_drive)
 
                     self.base_directory = self.mount_drive
-                    self._log_file = self.new_logfile()
+                    self._slow_log_file = self.new_logfile()
+                    self._fast_log_file = self.new_fast_logfile()
                     self._bms_file = self.new_bmsfile()
-                    self._write_line(self._log_file, self._csv_header)
+                    self._write_line(self._slow_log_file, self._slow_csv_header)
+                    self._write_line(self._fast_log_file, self._fast_csv_header)
                     self.mount_drive = None
 
                 elif self.eject_drive:
-                    self._log_file.close()
+                    self._slow_log_file.close()
+                    self._fast_log_file.close()
                     self._bms_file.close()
                     usbdrive.unmount_mounted()
                     self.safe_to_remove = True
 
                     self.base_directory = self.fallback_directory
-                    self._log_file = self.new_logfile()
+                    self._slow_log_file = self.new_logfile()
+                    self._fast_log_file = self.new_fast_logfile()
                     self._bms_file = self.new_bmsfile()
-                    self._write_line(self._log_file, self._csv_header)
+                    self._write_line(self._slow_log_file, self._slow_csv_header)
+                    self._write_line(self._fast_log_file, self._fast_csv_header)
                     self.eject_drive = False
 
                 elif hour != prev_hour:
-                    self._log_file.close()
-                    self._log_file = self.new_logfile()
-                    self._write_line(self._log_file, self._csv_header)
+                    self._slow_log_file.close()
+                    self._slow_log_file = self.new_logfile()
+                    self._write_line(self._slow_log_file, self._slow_csv_header)
+
+                    self._fast_log_file.close()
+                    self._fast_log_file = self.new_fast_logfile()
+                    self._write_line(self._slow_log_file, self._slow_csv_header)
 
                     self._bms_file.close()
                     self._bms_file = self.new_bmsfile()
@@ -213,7 +229,7 @@ class FileWriter(AsyncIOThread):
                     more = True
                     while more:
                         try:
-                            line = self._log_queue.get(False)
+                            line = self._slow_log_queue.get(False)
                         except queue.Empty:
                             # Sleep if there aren't any lines
                             time.sleep(0.1)
@@ -222,16 +238,17 @@ class FileWriter(AsyncIOThread):
                             if line is None:
                                 more = False
                             else:
-                                self._write_line(self._log_file, line)
+                                self._write_line(self._slow_log_file, line)
 
                     # Close file and get new one (with new CSV header)
-                    self._log_file.close()
-                    self._log_file = self.new_logfile()
-                    self._write_line(self._log_file, self._csv_header)
+                    self._slow_log_file.close()
+                    self._slow_log_file = self.new_logfile()
+                    self._write_line(self._slow_log_file, self._slow_csv_header)
                     self._header_changed = False
 
                 # Print out lines
-                self.print_from_queue(self._log_file, self._log_queue)
+                self.print_from_queue(self._slow_log_file, self._slow_log_queue)
+                self.print_from_queue(self._fast_log_file, self._fast_log_queue)
                 self.print_from_queue(self._bms_file, self._bms_queue)
 
                 time.sleep(0.1)
@@ -342,6 +359,41 @@ class FileWriter(AsyncIOThread):
             self._logger.info("Opened new log file at %s" % f.name)
             return f
 
+    def new_fast_logfile(self):
+        """
+        Open a new logfile for the current hour. If opening the file fails,
+        returns the null file.
+
+        :return:
+            A writeable file object from open(), either a log file or
+            the null file.
+        """
+        directory = self.get_directory()
+        if directory is None or not path.isdir(directory):
+            return open(os.devnull, 'w')  # If the directory doesn't exist, fail
+
+        # Find unique file name for this hour
+        now = datetime.now()
+        base_file_name = now.strftime("%Y-%m-%d_%H")
+        i = 0
+        while path.exists(path.join(directory,
+                                    base_file_name + "_fast%d.csv" % i)):
+            i += 1
+
+        file_path = os.path.join(
+            directory,
+            base_file_name + "_run%d.csv" % i)
+
+        # Try opening the file, else open the null file
+        try:
+            f = open(file_path, 'w')
+        except IOError:
+            self._logger.critical("Failed to open log file: %s" % file_path)
+            return open(os.devnull, 'w')  # return a null file
+        else:
+            self._logger.info("Opened new log file at %s" % f.name)
+            return f
+
     def new_bmsfile(self):
         """
         Open a new file for the BMS stream for the current hour. If
@@ -384,5 +436,5 @@ class FileWriter(AsyncIOThread):
         :param csv_header:
         :return:
         """
-        self._csv_header = csv_header
+        self._slow_csv_header = csv_header
         self._header_changed = True
