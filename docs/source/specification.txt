@@ -61,4 +61,4 @@ description, as it is primarily used for debugging.
   remove the USB drive.
 
 * The USB drive should be formatted using ext2, ext3, ext4, or fat32.
-  It must be sized >= 16 GB for 6 months data.
+  It must be sized >= 16 GB for 6 months data. The USB is filled at approximately 22 GB per year.

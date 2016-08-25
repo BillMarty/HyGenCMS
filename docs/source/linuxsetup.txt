@@ -246,6 +246,16 @@ autoclean any packages we haven't asked for.
     sudo apt-get clean
     sudo apt-get autoclean
 
+Recent versions of Debian come with a kernel on line 4.4.x. We'd prefer
+to stay on 4.1.x, as some drivers are broken in 4.4.x, so we'll grab
+the most recent 4.1.x kernel:
+
+.. code:: bash
+
+    sudo apt-cache search linux-image-4.1. | grep bone
+
+Choose the most recent one and install it with ``sudo apt-get install``.
+
 On Linux systems, each program provides a manual page which describes
 its functionality and how to use the program. These manpages, as they
 are called, are an invaluable resource in using a Linux system.
@@ -409,14 +419,14 @@ executable. The second line actually calls the script.
 .. code:: bash
 
     #!/bin/bash
-	sudo perl /opt/scripts/device/bone/show-pins.pl | sort
+    sudo perl /opt/scripts/device/bone/show-pins.pl | sort
 
 After creating and saving the file, make it executable and reboot.
 
 .. code:: bash
 
     # Save and make it executable
-	sudo chmod +x /usr/local/bin/show-pins
+    sudo chmod +x /usr/local/bin/show-pins
 
     # Reboot one more time to apply all our settings
     sudo reboot

@@ -280,6 +280,7 @@ class WoodwardControl(AsyncIOThread):
         else:
             ideal_output = self._ideal_output
 
+        # Move via the given slew rate to the ideal output
         if ideal_output == output:
             return output
         elif ideal_output > output + (self.slew * dt):
