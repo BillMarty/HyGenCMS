@@ -59,3 +59,6 @@ description, as it is primarily used for debugging.
   pressed. This switch is on pin ``P8_09``. The USB LED activity will
   be illuminated when the disk has been ejected and it is safe to
   remove the USB drive.
+
+* The USB drive should be formatted using ext2, ext3, ext4, or fat32.
+  It must be sized >= 16 GB for 6 months data.
