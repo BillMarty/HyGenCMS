@@ -29,7 +29,7 @@ install Sphinx itself.
 
     sudo pip3 install Sphinx sphinx_rtd_theme
 
-Then in the ``HyGenCMS/docs`` folder, run ``make html`` to make the
+Then in the ``HyGenCMS/docs`` folder, run ``sudo make html`` to make the
 Sphinx documentation. Of course, the ``docs/build`` directory is
 ignored in git, so we have to use another method to get the
 documentation up to the Dropbox folder. The easiest is a USB drive.

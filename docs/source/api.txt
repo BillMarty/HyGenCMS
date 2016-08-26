@@ -168,15 +168,6 @@ hygencms.config
    :show-inheritance:
 
 
-hygencms.hygen_logger
-^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: hygencms.hygen_logger
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
 hygencms.utils
 ^^^^^^^^^^^^^^
 
