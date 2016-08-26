@@ -251,6 +251,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     shutdown = False
     ejecting = False
     potential_new_measurement_list = False
+    heartbeat = False
     while going:
         # noinspection PyBroadException
         try:
@@ -316,6 +317,10 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     if usbdrive.mounted():
                         filewriter.eject_drive = True
                         ejecting = True
+
+                # Toggle the spare LED like a heartbeat
+                heartbeat = not heartbeat
+                gpio.write(pins.SPARE_LED, heartbeat)
 
                 # Schedule next run
                 next_run[0.5] = now + 0.5
