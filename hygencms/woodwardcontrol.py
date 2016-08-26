@@ -189,6 +189,11 @@ class WoodwardControl(AsyncIOThread):
         Set limits on the output. If the current output or integral term is
         outside those limits, bring it inside the boundaries.
         """
+		if out_min < 0:
+			out_min = 0
+		if out_max > 100:
+			out_max = 100
+
         if out_max < out_min:
             return
         self.out_min = out_min
@@ -223,8 +228,14 @@ class WoodwardControl(AsyncIOThread):
         Initialize the PID to match the current output.
         """
         self.last_input = self.process_variable
+		self._ideal_output = self.output
         self.integral_term = self.output
-        if self.integral_term > self.out_max:
+		
+		now = monotonic()
+		self.last_time = now
+		self._last_compute_time = now
+        
+		if self.integral_term > self.out_max:
             self.integral_term = self.out_max
         elif self.integral_term < self.out_min:
             self.integral_term = self.out_min
