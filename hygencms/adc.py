@@ -16,6 +16,7 @@ all pinmuxing is done ahead-of-time for all pins which are to be used.
 
 import glob
 import os
+import time
 
 from recordclass import recordclass
 
@@ -73,10 +74,25 @@ def setup():
 
     # Calculate paths
     if adc_setup:
-        try:
-            base_path = glob.glob('/sys/bus/iio/devices/iio:device?')[0]
-        except IndexError:
-            return False
+        path_success = False
+        #Apparently, file system additions due to adding BB-ADC cape take time, ...
+        #   so we build in delay and retry :-)
+        for delay in range(1,11):
+            time.sleep(0.2)
+            try:
+                base_path = glob.glob('/sys/bus/iio/devices/iio:device?')[0]
+            except IndexError:
+                continue
+            else:
+                path_success = True
+                break
+
+        if path_success:
+            logger.debug('ADC path_success at delay = ' + str(delay))
+        else:
+            logger.debug('ADC path failed!')
+            adc_setup = False
+            return adc_setup
 
         for _, pin in pins.items():
             path = os.path.join(base_path, 'in_voltage{:d}_raw'.format(pin.id))
