@@ -21,7 +21,7 @@ from daemon import pidfile, DaemonContext
 from .config import defaults
 from .main import main as main_entry
 
-debug = False
+debug = True
 
 
 def main():
