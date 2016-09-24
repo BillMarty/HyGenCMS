@@ -17,6 +17,7 @@ all pinmuxing is done ahead-of-time for all pins which are to be used.
 import glob
 import os
 import time
+import logging
 
 from recordclass import recordclass
 
@@ -88,9 +89,15 @@ def setup():
                 break
 
         if path_success:
-            logger.debug('ADC path_success at delay = ' + str(delay))
+            #logger.debug('ADC path_success at delay = ' + str(delay))
+            print('ADC path_success at delay = ' + str(delay))
+            try:
+                logger.debug('ADC path_success at delay = ' + str(delay))
+            except:
+                #ignore
         else:
-            logger.debug('ADC path failed!')
+            #logger.debug('ADC path failed!')
+            print('ADC path failed!')
             adc_setup = False
             return adc_setup
 
