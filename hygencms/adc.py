@@ -49,7 +49,7 @@ pins = {
 SLOTS = '/sys/devices/platform/bone_capemgr/slots'
 
 
-def setup():
+def setup(logger):
     """
     Setup the ADC for use. Load the ADC cape if needed.
 

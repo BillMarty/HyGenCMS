@@ -49,7 +49,7 @@ class AnalogClient(AsyncIOThread):
         self.last_updated = monotonic()
 
         # Open the ADC
-        adc.setup()
+        adc.setup(self._logger)
 
         # Log to info that we've started
         self._logger.info("Started analogclient")
