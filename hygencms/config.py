@@ -29,7 +29,7 @@ defaults = {
         'mode': 'rtu',
         # RTU settings
         'baudrate': 19200,  # serial port baudrate
-        'dev': '/dev/tty1',  # serial device
+        'dev': '/dev/ttyO1',  # serial device, not a typo, 'oh one, not zero one'
         'id': 10,  # Set on deepsea - slave ID
     },
 
@@ -37,7 +37,7 @@ defaults = {
     'bms': {
         # serial port settings
         'baudrate': 9600,
-        'dev': '/dev/tty4',
+        'dev': '/dev/ttyO4' # not a typo, 'Oh four, not zero four'
     },
 
     # Control signal to Woodward
