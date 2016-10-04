@@ -101,8 +101,10 @@ def main():
             main_entry(config, handlers, daemon=True, watchdog=args.watchdog,
                        power_off_enabled=args.poweroff, time_from_deepsea=args.time)
     else:
-        main_entry(config, handlers, daemon=False, watchdog=args.watchdog,
-                   power_off_enabled=args.poweroff, time_from_deepsea=args.time)
+        # main_entry(config, handlers, daemon=False, watchdog=args.watchdog,
+        #            power_off_enabled=args.poweroff, time_from_deepsea=args.time)
+        main_entry(config, handlers, daemon=False, watchdog=False,
+                    power_off_enabled=args.poweroff, time_from_deepsea=args.time)
 
 
 if __name__ == '__main__':
