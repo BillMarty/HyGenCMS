@@ -387,6 +387,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 #     woodward.setpoint = wc['setpoint']
 
                 if check_kill_switch():
+                    logger.info("check_kill_switch() = True")
                     going = False
                     shutdown = True
 
