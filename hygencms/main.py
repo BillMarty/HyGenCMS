@@ -314,15 +314,15 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
 
                 # Connect the Shutdown signal virtual LED from the deepSea to the CMS_FAULT relay,
                 #   which has been wired to the OPEN_CONTACTOR# signal on the 300V pcb.
-                try:
-                    open_contactor = data_store[DeepSeaClient.VIRTUAL_LED_2]
-                    if open_contactor:
-                        logger.info("Opening contactor")
-                        gpio.write(pins.CMS_FAULT, True)
-                except UnboundLocalError:
-                    pass
-                except KeyError:
-                    logger.critical("Key does not exist for the Shutdown V LED")
+                # try:
+                #     open_contactor = data_store[DeepSeaClient.VIRTUAL_LED_2]
+                #     if open_contactor:
+                #         logger.info("Opening contactor")
+                #         gpio.write(pins.CMS_FAULT, True)
+                # except UnboundLocalError:
+                #     pass
+                # except KeyError:
+                #     logger.critical("Key does not exist for the Shutdown V LED")
 
                 # Check the eject button to see whether it's held
                 if gpio.read(pins.USB_SW) == gpio.LOW and not ejecting:
@@ -387,7 +387,8 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                 #     woodward.setpoint = wc['setpoint']
 
                 if check_kill_switch():
-                    logger.info("check_kill_switch() = True")
+                    logger.info("check_kill_switch() = True, opening contactor")
+                    gpio.write(pins.CMS_FAULT, True)
                     going = False
                     shutdown = True
 
