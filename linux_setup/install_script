@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#Script to automate some install actions after doing a git pull operation
+echo '@@ Git Install Script :-)'
+
+#This script assumes it is being run by root/super user.
+
+#A correct uEnv.txt is required to install the universal cape on boot.
+cp /home/hygen/HyGenCMS/linux_setup/uEnv.txt /boot
+echo '@@ uEnv.txt copied'
+
+#The banner text shown on the login screen is configured in /etc/banner.
+cp /home/hygen/HyGenCMS/linux_setup/banner /etc
+echo '@@ login banner copied'
+
+#After git pull operations, we need to install the updated code.
+echo '@@ running setup.py installation'
+cd /home/hygen/HyGenCMS
+python3 setup.py install
