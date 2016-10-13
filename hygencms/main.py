@@ -247,6 +247,13 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         60.0: 0,
         3600.0: 0,
     }
+
+    #Debug - Why does shutdown take a long time?
+    if power_off_enabled:
+        logger.info("power_off_enabled is True")
+    else:
+        logger.info("power_off_enabled is False")
+
     going = True
     shutdown = False
     ejecting = False
@@ -311,18 +318,6 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
                     pass
                 except KeyError:
                     logger.critical("Key does not exist for the PID enable flag")
-
-                # Connect the Shutdown signal virtual LED from the deepSea to the CMS_FAULT relay,
-                #   which has been wired to the OPEN_CONTACTOR# signal on the 300V pcb.
-                # try:
-                #     open_contactor = data_store[DeepSeaClient.VIRTUAL_LED_2]
-                #     if open_contactor:
-                #         logger.info("Opening contactor")
-                #         gpio.write(pins.CMS_FAULT, True)
-                # except UnboundLocalError:
-                #     pass
-                # except KeyError:
-                #     logger.critical("Key does not exist for the Shutdown V LED")
 
                 # Check the eject button to see whether it's held
                 if gpio.read(pins.USB_SW) == gpio.LOW and not ejecting:
@@ -493,8 +488,11 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         except Exception as e:  # Log any other exceptions
             utils.log_exception(logger, e)
 
+    logger.info("Exited while loop.")
     if shutdown and power_off_enabled:
+        logger.info("Calling power_off().")
         power_off()
+    logger.info("Calling exit(exit_code).")
     exit(exit_code)
 
 
