@@ -72,8 +72,7 @@ else:
 data_store = {pins.GEN_CUR: None}
 
 
-def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False,
-         time_from_deepsea=False):
+def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False):
     """
     Enter a main loop, polling values from sources enabled in config.
 
@@ -93,10 +92,6 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
     :param watchdog:
         A Boolean of whether to use the hardware watchdog timer on the
         BeagleBone Black.
-
-    :param power_off_enabled:
-        A Boolean of whether to watch the power-off relay and power off
-        the BeagleBone if it is set.
 
     :param time_from_deepsea:
         A Boolean of whether to set the Linux system time from the
@@ -247,12 +242,6 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
         60.0: 0,
         3600.0: 0,
     }
-
-    #Debug - Why does shutdown take a long time?
-    if power_off_enabled:
-        logger.info("power_off_enabled is True")
-    else:
-        logger.info("power_off_enabled is False")
 
     going = True
     shutdown = False
@@ -489,7 +478,7 @@ def main(config, handlers, daemon=False, watchdog=False, power_off_enabled=False
             utils.log_exception(logger, e)
 
     logger.info("Exited while loop.")
-    if shutdown and power_off_enabled:
+    if shutdown:
         logger.info("Calling power_off().")
         power_off()
     logger.info("Calling exit(exit_code).")
