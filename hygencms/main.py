@@ -41,6 +41,7 @@ from os import path
 
 import monotonic
 import serial
+import ast
 
 from . import gpio
 from . import pins
@@ -362,16 +363,16 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
                     except queue.Full:
                         exit("File writer queue full. Exiting.")
 
-                # # Read in the config file to update the tuning coefficients
-                # try:
-                # 	with open(TUNING_FILE) as f:
-                # 		s = f.read()
-                # 	wc = ast.literal_eval(s)
-                # except IOError:
-                #     pass
-                # else:
-                #     woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
-                #     woodward.setpoint = wc['setpoint']
+                # Read in the config file to update the tuning coefficients
+                try:
+                	with open(TUNING_FILE) as f:
+                		s = f.read()
+                	wc = ast.literal_eval(s)
+                except IOError:
+                    pass
+                else:
+                    woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
+                    woodward.setpoint = wc['setpoint']
 
                 if check_kill_switch():
                     logger.info("check_kill_switch() = True, opening contactor")
