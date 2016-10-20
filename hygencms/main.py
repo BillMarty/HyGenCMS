@@ -50,6 +50,7 @@ from .analogclient import AnalogClient
 from .bbid import MAC_ID0
 from .bbio_common import setup_io
 from .bmsclient import BmsClient
+from .config import TUNING_FILE
 from .deepseaclient import DeepSeaClient
 from .filewriter import FileWriter
 from .groveledbar import GroveLedBar
@@ -363,7 +364,9 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
 
                 # Read in the config file to update the tuning coefficients
                 try:
-                    wc = get_configuration()['woodward']
+                	with open(TUNING_FILE) as f:
+                		s = f.read()
+                	wc = ast.literal_eval(s)
                 except IOError:
                     pass
                 else:
