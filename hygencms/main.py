@@ -361,14 +361,14 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
                     except queue.Full:
                         exit("File writer queue full. Exiting.")
 
-                # # Read in the config file to update the tuning coefficients
-                # try:
-                #     wc = get_configuration()['woodward']
-                # except IOError:
-                #     pass
-                # else:
-                #     woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
-                #     woodward.setpoint = wc['setpoint']
+                # Read in the config file to update the tuning coefficients
+                try:
+                    wc = get_configuration()['woodward']
+                except IOError:
+                    pass
+                else:
+                    woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
+                    woodward.setpoint = wc['setpoint']
 
                 if check_kill_switch():
                     logger.info("check_kill_switch() = True, opening contactor")
