@@ -69,3 +69,5 @@ defaults = {
         'ldir': 'logs',
     },
 }
+
+TUNING_FILE = '/home/hygen/HyGenCMS/hygencms/tuning.py'
