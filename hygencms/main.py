@@ -463,6 +463,7 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             time.sleep(0.01)
 
         except KeyboardInterrupt:
+            logger.info("Dying due to KeyboardInterrupt.")
             going = False
             # Standard exit code when interrupted by Ctrl-C
             # http://tldp.org/LDP/abs/html/exitcodes.html
@@ -470,6 +471,7 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             stop_threads(threads)
 
         except SystemExit:
+            logger.info("Dying due to SystemExit.")
             going = False
             exit_code = 0
             stop_threads(threads)
