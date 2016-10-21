@@ -1,6 +1,7 @@
 # Woodward configuration - pulled out from config.py to make PID tuning updates easier.
 {
-    'pin': pins.WW_PWM,
+    #The 'pin' value is set at boot and has no need to change later, so no reason for it to live in this file.
+    #'pin': pins.WW_PWM,
     'Kp': 0.0,
     'Ki': 0.5,
     'Kd': 0.0,
