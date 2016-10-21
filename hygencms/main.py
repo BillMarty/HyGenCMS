@@ -251,12 +251,6 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
     potential_new_measurement_list = False
     heartbeat = False
 
-    #Debug
-    if watchdog:
-        logger.info("watchdog is True")
-    else:
-        logger.info("watchdog is False")
-
     while going:
         # noinspection PyBroadException
         try:
@@ -426,7 +420,6 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             ###########################
             if now >= next_run[10.0]:
                 if watchdog:
-                    logger.info("Updating watchdog.")
                     update_watchdog()
 
                 # Ensure analog and woodward control are running
