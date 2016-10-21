@@ -475,7 +475,8 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             stop_threads(threads)
 
         except SystemExit:
-            logger.info("Dying due to SystemExit.")
+            exception_info = str(sys.exc_info())
+            logger.info("Dying due to SystemExit: " + exception_info)
             going = False
             exit_code = 0
             stop_threads(threads)
