@@ -250,6 +250,13 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
     ejecting = False
     potential_new_measurement_list = False
     heartbeat = False
+
+    #Debug
+    if watchdog:
+        logger.info("watchdog is True")
+    else:
+        logger.info("watchdog is False")
+
     while going:
         # noinspection PyBroadException
         try:
@@ -387,9 +394,6 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             # Once every 5 seconds
             ###########################
             if now >= next_run[5.0]:
-                if watchdog:
-                    update_watchdog()
-
                 # Check for new USB drive
                 plugged = usbdrive.plugged()
                 if plugged:
@@ -421,6 +425,10 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             # Once every 10 seconds
             ###########################
             if now >= next_run[10.0]:
+                if watchdog:
+                    logger.info("Updating watchdog.")
+                    update_watchdog()
+
                 # Ensure analog and woodward control are running
                 if analog.cancelled or woodward.cancelled:
                     logger.error("Missing analog or woodward")
