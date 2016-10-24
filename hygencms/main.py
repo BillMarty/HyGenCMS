@@ -636,7 +636,8 @@ def power_off():
 
     :return: :const:`None`
     """
-    subprocess.call(["poweroff"])
+    #subprocess.call(["poweroff"])
+    logger.info(str(subprocess.check_output("poweroff", stderr=subprocess.STDOUT)))
 
 
 def blink_leds(fuel_gauge, batt_gauge):
