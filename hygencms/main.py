@@ -327,6 +327,12 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
                 heartbeat = not heartbeat
                 gpio.write(pins.SPARE_LED, heartbeat)
 
+                if check_kill_switch():
+                    logger.info("check_kill_switch() = True, opening contactor")
+                    gpio.write(pins.CMS_FAULT, True)
+                    going = False
+                    shutdown = True
+
                 # Schedule next run
                 next_run[0.5] = now + 0.5
 
@@ -383,12 +389,6 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
                         woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
                         woodward.setpoint = wc['setpoint']
                         last_wc = wc
-
-                if check_kill_switch():
-                    logger.info("check_kill_switch() = True, opening contactor")
-                    gpio.write(pins.CMS_FAULT, True)
-                    going = False
-                    shutdown = True
 
                 # Schedule next run
                 next_run[1.0] = now + 1.0
