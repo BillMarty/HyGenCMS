@@ -473,6 +473,7 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             # Standard exit code when interrupted by Ctrl-C
             # http://tldp.org/LDP/abs/html/exitcodes.html
             exit_code = 130
+            close_watchdog()
             stop_threads(threads)
 
         except SystemExit:
@@ -480,6 +481,7 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             logger.info("Dying due to SystemExit: " + exception_info)
             going = False
             exit_code = 0
+            close_watchdog()
             stop_threads(threads)
 
         except Exception as e:  # Log any other exceptions
@@ -490,6 +492,7 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
         logger.info("Calling power_off().")
         power_off()
     logger.info("Calling exit(exit_code).")
+    close_watchdog()
     exit(exit_code)
 
 
@@ -539,6 +542,13 @@ def update_watchdog():
     with open("/dev/watchdog", 'w') as f:
         f.write('\n')
 
+def close_watchdog():
+    """
+    When we exit, we should shutdown the watchdog daemon politely so as
+    not to surprise the user with a reboot.
+    """
+    with open("/dev/watchdog", 'w') as f:
+        f.write('V')
 
 def update_gauges(fuel_gauge, battery_gauge):
     """
