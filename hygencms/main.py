@@ -551,9 +551,9 @@ def close_watchdog():
     not to surprise the user with a reboot.
     """
     logger.info('Closing watchdog...')
-    with open("/dev/watchdog", 'w') as f:
-        f.write('v')
-        f.close()
+    f = open("/dev/watchdog", 'w')
+    f.write('V')
+    f.close()
 
 def update_gauges(fuel_gauge, battery_gauge):
     """
