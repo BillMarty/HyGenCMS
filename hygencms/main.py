@@ -549,6 +549,7 @@ def close_watchdog():
     """
     with open("/dev/watchdog", 'w') as f:
         f.write('V')
+        f.close()
 
 def update_gauges(fuel_gauge, battery_gauge):
     """
