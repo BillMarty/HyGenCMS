@@ -185,6 +185,10 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
     #######################################
     # Woodward thread
     woodward = None
+
+    # Let's remember the last woodward configuration so we don't needlessly update.
+    last_wc = config['woodward']
+
     try:
         woodward = WoodwardControl(
             config['woodward'], handlers
@@ -375,8 +379,11 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
                 except IOError:
                     pass
                 else:
-                    woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
-                    woodward.setpoint = wc['setpoint']
+                    if wc != last_wc:
+                        logger.info("Updating PID tuning with " + str(wc))
+                        woodward.set_tunings(wc['Kp'], wc['Ki'], wc['Kd'])
+                        woodward.setpoint = wc['setpoint']
+                        last_wc = wc
 
                 if check_kill_switch():
                     logger.info("check_kill_switch() = True, opening contactor")
