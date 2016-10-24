@@ -369,9 +369,9 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
 
                 # Read in the config file to update the tuning coefficients
                 try:
-                	with open(TUNING_FILE) as f:
-                		s = f.read()
-                	wc = ast.literal_eval(s)
+                    with open(TUNING_FILE) as f:
+                        s = f.read()
+                    wc = ast.literal_eval(s)
                 except IOError:
                     pass
                 else:
@@ -545,6 +545,7 @@ def update_watchdog():
     with open("/dev/watchdog", 'w') as f:
         f.write('\n')
 
+
 def close_watchdog():
     """
     When we exit, we should shutdown the watchdog daemon politely so as
@@ -554,6 +555,7 @@ def close_watchdog():
     f = open("/dev/watchdog", 'w')
     f.write('V')
     f.close()
+
 
 def update_gauges(fuel_gauge, battery_gauge):
     """

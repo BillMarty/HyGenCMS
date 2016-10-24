@@ -74,6 +74,9 @@ class WoodwardControl(AsyncIOThread):
         self.set_tunings(wconfig['Kp'],
                          wconfig['Ki'],
                          wconfig['Kd'])
+
+        self._logger.info("Setting PID tunings: " + str(wconfig))
+
         try:
             self.slew = wconfig['slew']  # Units of % duty cycle / sec
         except KeyError:  # If not included in configuration
