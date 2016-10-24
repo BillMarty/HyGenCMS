@@ -99,13 +99,12 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
         A Boolean of whether to set the Linux system time from the
         DeepSea time.
     """
+
+    global logger   # Make the logger reference available everywhere.
     logger = logging.getLogger(__name__)
     for h in handlers:
         logger.addHandler(h)
     logger.setLevel(logging.DEBUG)
-
-    # Make the logger reference available everywhere.
-    global logger
 
     # Keep a list of all threads we have running
     threads = []
