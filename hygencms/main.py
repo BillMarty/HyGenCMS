@@ -104,6 +104,9 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
         logger.addHandler(h)
     logger.setLevel(logging.DEBUG)
 
+    # Make the logger reference available everywhere.
+    global logger
+
     # Keep a list of all threads we have running
     threads = []
     clients = []
@@ -547,6 +550,7 @@ def close_watchdog():
     When we exit, we should shutdown the watchdog daemon politely so as
     not to surprise the user with a reboot.
     """
+    logger.info('Closing watchdog...')
     with open("/dev/watchdog", 'w') as f:
         f.write('V')
         f.close()
