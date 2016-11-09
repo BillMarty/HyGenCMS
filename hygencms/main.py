@@ -205,11 +205,9 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
     # Open filewriter thread
     csv_header = build_csv_header(clients, logger)
     slow_log_queue = queue.Queue()
-    fast_log_queue = queue.Queue()
     try:
         filewriter = FileWriter(
-            config['filewriter'], handlers, slow_log_queue, fast_log_queue,
-            bms_queue, csv_header)
+            config['filewriter'], handlers, slow_log_queue, bms_queue, csv_header)
     except ValueError as e:
         logger.error("FileWriter did not start with message \"{0}\""
                      .format(str(e)))
@@ -267,21 +265,9 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             # Every tenth of a second
             ###########################
             if now >= next_run[0.1]:
-                # Put the data for the "fast log file" into the queue
-                csv_parts = ['{:.1f}'.format(now_time)]
-                for addr in [DeepSeaClient.RPM,
-                             DeepSeaClient.BATTERY_LEVEL,
-                             DeepSeaClient.GENERATOR_CURRENT]:
-                    try:
-                        value = data_store[addr]
-                    except KeyError:
-                        value = ''  # We might not have these on first run
 
-                    if value is not None:
-                        csv_parts.append('{:.1f}'.format(value))
-                    else:
-                        csv_parts.append('')
-                fast_log_queue.put(','.join(csv_parts))
+                # Removed fast_log_queue operations.  Deep Sea couldn't respond this quickly, and
+                #    the fast logs were useless clutter.
 
                 # Connect the analog current in to the woodward process
                 if woodward and not woodward.cancelled:

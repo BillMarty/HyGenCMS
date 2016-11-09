@@ -91,7 +91,7 @@ class DeepSeaClient(AsyncIOThread):
                         if value is not None:
                             self._data_store[key] = value
                             self._last_updated[key] = t
-                time.sleep(0.01)
+                time.sleep(0.1)
             except Exception:  # Log exceptions but don't exit
                 exc_type, exc_value = sys.exc_info()[:2]
                 self._logger.error("%s raised in DeepSea thread: %s"
