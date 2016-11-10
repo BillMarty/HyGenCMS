@@ -49,7 +49,7 @@ description, as it is primarily used for debugging.
 * The software will record data from DeepSea, BMS, and analog inputs to
   CSV files on a USB drive. The data which is recorded will be
   determined by the configuration files ``hygen_logger.py`` and
-  ``mdf.csv``. During normal operation, the software will create one
+  ``default_measurements.csv``. During normal operation, the software will create one
   CSV file per hour on the USB drive.
 
 * The software will illuminate the USB LED during writes to USB drive.
