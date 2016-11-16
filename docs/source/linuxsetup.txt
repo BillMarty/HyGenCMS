@@ -275,7 +275,9 @@ Grow Root Partition
 We chose to install the console image, because it has very minimal
 software installed. However, the image is also only a 2 GB image, so
 we're not using our entire MicroSD, so we won't be using the entire EMMC
-when we flash it. We'll use ``fdisk`` to fix this. ``fdisk`` is an
+when we flash it.
+
+We'll use ``fdisk`` to fix this. ``fdisk`` is an
 interactive program, so comments in the Bash below will narrate what
 actions to take inside it.
 
@@ -313,6 +315,9 @@ Now check to make sure we've succeeded in using the full disk using
 
 ``df`` ought to report that ``/dev/mmcblk0p1`` is 3.7G now, with about
 25% usage.
+
+If you find that your full-size image won't flash in the "Flash Internal eMMC"
+step below, build a new image where you skip this "Grow Root Partition" step.
 
 
 Install Necessary Libraries
@@ -354,38 +359,6 @@ device tree overlays in that repository are already installed in kernel
     sudo make install_target  # This installs the utility but not the DTOs
 
 
-Setup universal cape loading on boot
-------------------------------------
-
-The ``config-pin`` utility is part of the ``beaglebone-universal-io``
-project, the current way of using BeagleBone capes. For a thorough
-explanation of what capes are and how the BeagleBone IO stack works,
-this `blog post <http://www.righto.com/2016/08/the-beaglebones-io-pins-inside-software.html>`_
-provides an excellent explanation.
-
-Now that you've read that, you know that what the universal cape does
-is inform the kernel where all the pieces of hardware on the BBB are,
-and how to load up the necessary drivers. We'll want to make sure one
-of these handy universal capes is loaded.
-
-The next step will load the universal cape on boot. With your editor of
-choice, open ``/boot/uEnv.txt`` as root. Uncomment the line below
-"Beaglebone Black: HDMI (Audio/Video) disabled". This line should say
-something like ``dtb=am335x-boneblack-emmc-overlay.dtb``. Also
-uncomment the line just below ``##Example 4.1.x`` which enables
-extra parts. Add ``univ-emmc`` and ``BB-ADC`` to that line, as shown
-below::
-
-    cape_enable=bone_capemgr.enable_partno=univ-emmc,BB-ADC
-
-.. warning::
-
-   Syntax errors in the ``uEnv.txt`` file can make the system
-   unbootable. Double check any changes before rebooting to keep from
-   bricking your machine. If the machine *is* bricked, follow the
-   instructions in :ref:`bricked` to restore to a bootable state.
-
-
 Setup USB Mounting
 ------------------
 
@@ -409,7 +382,7 @@ will create a small script file at ``/usr/local/bin/show-pins`` and
 make it executable.
 
 .. code:: bash
-	
+
     sudo nano /usr/local/bin/show-pins
 
 Edit the file to contain the following two lines. The first line is a
@@ -432,6 +405,46 @@ After creating and saving the file, make it executable and reboot.
     sudo reboot
 
 
+Setup universal cape loading on boot
+------------------------------------
+
+The ``config-pin`` utility is part of the ``beaglebone-universal-io``
+project, the current way of using BeagleBone capes. For a thorough
+explanation of what capes are and how the BeagleBone IO stack works,
+this `blog post <http://www.righto.com/2016/08/the-beaglebones-io-pins-inside-software.html>`_
+provides an excellent explanation.
+
+Now that you've read that, you know that what the universal cape does
+is inform the kernel where all the pieces of hardware on the BBB are,
+and how to load up the necessary drivers. We'll want to make sure one
+of these handy universal capes is loaded.
+
+The next step will load the universal cape on boot. With your editor of
+choice, open ``/boot/uEnv.txt`` as root. Find the line ``##Example 4.1.x``
+which enables extra parts. It probably has two lines beneath it that
+start ``#cape_disable=...`` and ``#cape_enable=...``.  Below those lines,
+add new lines as below, to load the ``univ-emmc`` cape.
+::
+
+    #Hygen - load universal i/o cape.
+    cape_enable=bone_capemgr.enable_partno=univ-emmc
+
+.. warning::
+
+   Syntax errors in the ``uEnv.txt`` file can make the system
+   unbootable. Double check any changes before rebooting to keep from
+   bricking your machine. If the machine *is* bricked, follow the
+   instructions in :ref:`bricked` to restore to a bootable state.
+
+   Because of the lengthy process required to get to this point,
+   you may want to stop before modifying uEnv.txt, and capture the
+   partially updated image from your SD card to an image file on your
+   computer using the Win32DiskImager or Etcher tool. I have seen the
+   Win32DiskImager read process change the content of the SD card so that
+   it won't boot.  In these cases, writing the just-read image file back
+   to the card produces a bootable image.
+
+
 Hygen Software
 --------------
 
@@ -439,9 +452,8 @@ It's finally time to add our software to the mix. We'll do this by
 cloning from our private GitHub repository.
 
 .. note::
-    The way
-    we add our software may change if we install our software to some native
-    Linux directory rather than in hygen's home directory.
+    The way we add our software may change if we install our software
+    to some native Linux directory rather than in hygen's home directory.
 
 .. code:: bash
 
@@ -531,6 +543,7 @@ On restart, these new changes will take effect.
 
 .. _flash-emmc:
 
+
 Flash Internal eMMC
 -------------------
 
@@ -564,6 +577,7 @@ script ``beaglebone-black-make-microSD-flasher-from-eMMC.sh``.
 
 .. _bricked:
 
+
 Fixing a Bricked System
 -----------------------
 
@@ -583,6 +597,7 @@ then continue from :ref:`bricked-booted` below.
 
 
 .. _bricked-booted:
+
 
 Once booted
 ^^^^^^^^^^^
