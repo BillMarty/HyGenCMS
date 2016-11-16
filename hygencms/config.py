@@ -16,6 +16,7 @@ from . import pins
 ###############################
 defaults = {
     # DeepSea Configuration
+
     'deepsea': {
         # Where to find the measurement list
         'mlistfile': \
