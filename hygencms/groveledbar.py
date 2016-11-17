@@ -63,6 +63,9 @@ class GroveLedBar:
         """
         if level > 10:
             level = 10
+        if level < 1:
+            level = 1   # Minimum gauge reading should always show a single red bar so that "empty" can be
+                        #   differentiated from "gauge broken", i.e. no lights.
 
         if not invert_direction:
             self._bit_states[0] = RED if 0 < level else LOW
