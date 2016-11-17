@@ -397,6 +397,8 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             # Once every 5 seconds
             ###########################
             if now >= next_run[5.0]:
+                update_gauges(fuel_gauge, battery_gauge)
+
                 # Check for new USB drive
                 plugged = usbdrive.plugged()
                 if plugged:
@@ -458,11 +460,10 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
             ###########################
             # Once every minute
             ###########################
-            if now >= next_run[60.0]:
-                update_gauges(fuel_gauge, battery_gauge)
-
-                # Schedule next run
-                next_run[60.0] = now + 60.0
+            # if now >= next_run[60.0]:
+            #
+            #     # Schedule next run
+            #     next_run[60.0] = now + 60.0
 
             ###########################
             # Once every hour
@@ -582,8 +583,9 @@ def update_gauges(fuel_gauge, battery_gauge):
     except AssertionError:
         fuel_gauge.set_bar_level(1)
     else:
-        fuel /= 10  # Scale to 10
-        fuel_gauge.set_bar_level(fuel)
+        #fuel /= 10  # Scale to 10
+        scaled_fuel = (fuel + 5)//10
+        fuel_gauge.set_bar_level(scaled_fuel)
 
     # See DeepSea_Modbus_manualGenComm.docx, 10.6 (#199)
     try:
@@ -597,8 +599,9 @@ def update_gauges(fuel_gauge, battery_gauge):
     else:
         # Scale the range from 259 to 309 to 0-10
         # noinspection PyTypeChecker
-        battery_charge = int(round((battery_charge - 259) * 0.2))
-        battery_gauge.set_bar_level(battery_charge)
+        #battery_charge = int(round((battery_charge - 259) * 0.2))
+        scaled_battery_charge = (battery_charge - 255)//5
+        battery_gauge.set_bar_level(scaled_battery_charge)
 
 
 def check_kill_switch():
