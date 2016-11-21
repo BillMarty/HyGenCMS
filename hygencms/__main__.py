@@ -15,6 +15,7 @@ including PID files, start / stop, and context management.
 import argparse
 import logging
 import signal
+import os
 
 from daemon import pidfile, DaemonContext
 
@@ -56,6 +57,15 @@ def main():
     # We don't want to use up our write cycles in production.
     fh = None
     if debug:
+        # Make sure the logs directory exists
+        dir_contents = os.listdir('/home/hygen')
+        if 'logs' not in dir_contents:
+            try:
+                os.mkdir('logs', mode = 0o777)
+            except:
+                # No place to log the exception yet :-|
+                pass
+
         # Create file handler
         fh = logging.FileHandler(
             '/home/hygen/logs/errors.log')
