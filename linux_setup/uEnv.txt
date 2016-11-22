@@ -1,6 +1,6 @@
 #Docs: http://elinux.org/Beagleboard:U-boot_partitioning_layout_2.0
 
-uname_r=4.1.9-bone16
+uname_r=4.4.19-ti-r41
 #uuid=
 #dtb=
 
@@ -37,7 +37,7 @@ cmdline=coherent_pool=1M quiet cape_universal=enable
 #cape_disable=bone_capemgr.disable_partno=
 #cape_enable=bone_capemgr.enable_partno=
 
-#Hygen - load universal i/o cape.
+# HyGen - install universal cape
 cape_enable=bone_capemgr.enable_partno=univ-emmc
 
 ##enable Generic eMMC Flasher:
