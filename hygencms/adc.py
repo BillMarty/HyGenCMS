@@ -76,9 +76,11 @@ def setup(logger):
     # Calculate paths
     if adc_setup:
         path_success = False
-        #Apparently, file system additions due to adding BB-ADC cape take time, ...
-        #   so we build in delay and retry :-)
-        for delay in range(1,101):
+        # Apparently, file system additions due to adding BB-ADC cape take
+        # time, ..., so we build in delay and retry :-)
+        # 11/23/16 - With new linux image, it takes 13 * 0.2 seconds
+        #   for the files system updates.
+        for delay in range(1,26):
             time.sleep(0.2)
             try:
                 base_path = glob.glob('/sys/bus/iio/devices/iio:device?')[0]
