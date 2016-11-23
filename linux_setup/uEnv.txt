@@ -38,7 +38,7 @@ cmdline=coherent_pool=1M quiet cape_universal=enable
 #cape_enable=bone_capemgr.enable_partno=
 
 # HyGen - install universal cape
-cape_enable=bone_capemgr.enable_partno=univ-emmc
+cape_enable=bone_capemgr.enable_partno=univ-emmc,BB-ADC
 
 ##enable Generic eMMC Flasher:
 ##make sure, these tools are installed: dosfstools rsync
