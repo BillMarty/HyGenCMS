@@ -78,7 +78,7 @@ def setup(logger):
         path_success = False
         #Apparently, file system additions due to adding BB-ADC cape take time, ...
         #   so we build in delay and retry :-)
-        for delay in range(1,11):
+        for delay in range(1,101):
             time.sleep(0.2)
             try:
                 base_path = glob.glob('/sys/bus/iio/devices/iio:device?')[0]
