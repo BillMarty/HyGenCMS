@@ -1,23 +1,15 @@
 #!/bin/bash
 
 #Script to automate some install actions after doing a git pull operation
-echo '@@ Git Install Script :-)'
+echo '@@ HyGen Install Script :-)'
 
 #This script assumes it is being run by root/super user.
-if [ 'whoami' = "root" ]
+if [ "$(whoami)" != "root" ]
 then
-    echo "You are the super user :-)"
-else
-    echo "You need to be super user to run this script."
-fi
-
-#Product version wants ethernet DHCP.
-#Development version wants static ip address.
-if [ $1 = "product" ]
-then
-    echo "Detected product argument."
-else
-    echo "Assuming you want a development install."
+    echo
+    echo "!!You need to be super user to run this script!!"
+    echo
+    exit 1
 fi
 
 #A correct uEnv.txt is required to install the universal cape on boot.
@@ -29,6 +21,10 @@ cp /home/hygen/HyGenCMS/linux_setup/banner /etc
 echo '@@ login banner copied'
 
 #After git pull operations, we need to install the updated code.
-#echo '@@ running setup.py installation'
-#cd /home/hygen/HyGenCMS
-#python3 setup.py install
+echo '@@ running setup.py installation'
+cd /home/hygen/HyGenCMS
+python3 setup.py install
+
+# Say goodbye.
+echo '@@ HyGen Install Script Completed :-)'
+
