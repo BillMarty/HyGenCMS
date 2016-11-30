@@ -583,10 +583,8 @@ def update_gauges(fuel_gauge, battery_gauge):
     except AssertionError:
         battery_gauge.set_bar_level(1)
     else:
-        # Scale the range from 259 to 309 to 0-10
-        # noinspection PyTypeChecker
-        #battery_charge = int(round((battery_charge - 259) * 0.2))
-        scaled_battery_charge = (battery_charge - 255)//5
+        # Scale the range from 269 to 304 to 0-10
+        scaled_battery_charge = (battery_charge - 266)//3
         battery_gauge.set_bar_level(scaled_battery_charge)
 
 
