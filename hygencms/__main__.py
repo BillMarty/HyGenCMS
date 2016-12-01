@@ -58,23 +58,17 @@ def main():
     fh = None
     if debug:
         # Make sure the logs directory exists
-        print('Working Directory: {}'.format(os.getcwd()))
         dir_contents = os.listdir('/home/hygen')
         if 'logs' not in dir_contents:
-            print('logs not in dir_contents')
             try:
-                print('trying mkdir logs...')
                 os.chdir('/home/hygen')
-                print('Working Directory: {}'.format(os.getcwd()))
                 os.mkdir('logs', mode = 0o777)
             except:
                 # No place to log the exception yet :-|
-                print('!!Exception on mkdir logs!!')
-                #pass
+                pass
 
         # Create file handler
-        fh = logging.FileHandler(
-            '/home/hygen/logs/errors.log')
+        fh = logging.FileHandler('/home/hygen/logs/errors.log')
         fh.setLevel(logging.INFO)
         handlers.append(fh)
 
