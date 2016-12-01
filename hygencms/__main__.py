@@ -60,11 +60,14 @@ def main():
         # Make sure the logs directory exists
         dir_contents = os.listdir('/home/hygen')
         if 'logs' not in dir_contents:
+            print('logs not in dir_contents')
             try:
+                print('trying mkdir logs...')
                 os.mkdir('logs', mode = 0o777)
             except:
                 # No place to log the exception yet :-|
-                pass
+                print('!!Exception on mkdir logs!!')
+                #pass
 
         # Create file handler
         fh = logging.FileHandler(
