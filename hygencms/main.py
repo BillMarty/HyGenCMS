@@ -56,6 +56,7 @@ from .deepseaclient import DeepSeaClient
 from .filewriter import FileWriter
 from .groveledbar import GroveLedBar
 from .woodwardcontrol import WoodwardControl
+from .powerclient import PowerClient
 
 #################################################
 # Conditional import for Python 2/3 compatibility
