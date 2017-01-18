@@ -42,7 +42,8 @@ class PowerClient(AsyncIOThread):
         #   voltage measurement
         deepsea_dict = config["deepsea"]
         measurement_file = deepsea_dict["mlistfile"]
-        deepsea_measurement_list = DeepSeaClient.read_measurement_description(measurement_file)
+        deepsea_measurement_list = \
+            DeepSeaClient.read_measurement_description(measurement_file)
         for m in deepsea_measurement_list:
             if m[NAME] == "300V Bus Voltage":
                 self.hibus_voltage = m
@@ -53,8 +54,8 @@ class PowerClient(AsyncIOThread):
         self.data_store["calc_300v_pwr"] = 0.0
         # Debug - write the voltage and current values that we're reading so
         #   I know the reading is working.
-        self.data_store["pwr:voltage"] = 0.0
-        self.data_store["pwr:current"] = 0.0
+        self.data_store["pwr.voltage"] = 0.0
+        self.data_store["pwr.current"] = 0.0
         # Log to info that we've started
         self._logger.info("Started PowerClient")
 
@@ -64,8 +65,41 @@ class PowerClient(AsyncIOThread):
         as the product of GEN_CUR and deep sea bus voltage.
         """
         while not self.cancelled:
-            # Try reading GEN_CUR and deep sea bus voltage.
-
-
+            # Try reading GEN_CUR.
+            try:
+                current = self.data_store[self.analog_current[PIN]]
+            except:
+                exc_type, exc_value = sys.exc_info()[:2]
+                self._logger.info('!!Current reading error: {} {}'
+                                  .format(exc_type, exc_value))
+            # Try reading hi bus voltage.
+            try:
+                voltage = self.data_store[self.hibus_voltage[PIN]]
+            except:
+                exc_type, exc_value = sys.exc_info()[:2]
+                self._logger.info('!!Voltage reading error: {} {}'
+                                  .format(exc_type, exc_value))
+            # Calculate and store power, and the input values
+            self.data_store["calc_300v_pwr"] = voltage * current
+            self.data_store["pwr:voltage"] = voltage
+            self.data_store["pwr:current"] = current
+        time.sleep(0.25)
 
     def print_data(self):
+        """
+        Print PowerClient's data of interest.
+        """
+        # Calculated power.
+        display = "%20s %10.2f %10s" % ("calc_300v_pwr",
+                                        self.data_store["calc_300v_pwr"],
+                                        "kW")
+        print(display)
+        # Input variables
+        display = "%20s %10.2f %10s" % ("pwr.voltage",
+                                        self.data_store["pwr.voltage"],
+                                        "V")
+        print(display)
+        display = "%20s %10.2f %10s" % ("pwr.current",
+                                        self.data_store["pwr.current"],
+                                        "A")
+        print(display)
