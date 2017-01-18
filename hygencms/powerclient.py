@@ -10,9 +10,9 @@ from monotonic import monotonic
 from . import pins
 from .asyncio import AsyncIOThread
 
-# TODO Instantiate the power client in main.
 # TODO Update setpoint in config.py and tuning.py.
 # TODO We're not using an_300v_volt, so let's comment it out.
+# TODO Add my calculated power to the run log file.
 
 class PowerClient(AsyncIOThread):
     """
@@ -34,6 +34,7 @@ class PowerClient(AsyncIOThread):
         super(PowerClient, self).__init__(handlers)
         self.cancelled = False
         self.data_store = data_store
+        self.new_log_file = False
         # Input items:
         #   current measurement
         analog_dict = config["analog"]
@@ -103,3 +104,15 @@ class PowerClient(AsyncIOThread):
                                         self.data_store["pwr.current"],
                                         "A")
         print(display)
+
+    def csv_header(self):
+        """
+        Empty for now, just to keep main happy.
+        """
+        return ''
+
+    def csv_line(self):
+        """
+        Empty for now, just to keep main happy.
+        """
+        return ''

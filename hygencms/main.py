@@ -180,6 +180,18 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
         # clients.append(bms)
         threads.append(bms)
 
+    # Client to calculate generator power
+    try:
+        powerclient = PowerClient(config, handlers, data_store)
+    except:
+        exc_type, exc_value = sys.exc_info()[:2]
+        logger.error( "Error opening the power client: {} {}"
+                      .format(exc_type, exc_value))
+        exit("Could not open AnalogClient")
+    else:
+        clients.append(powerclient)
+        threads.append(powerclient)
+
     #######################################
     # Other Threads
     #######################################
