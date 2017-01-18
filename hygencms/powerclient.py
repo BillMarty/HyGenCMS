@@ -40,6 +40,8 @@ class PowerClient(AsyncIOThread):
         analog_dict = config["analog"]
         analog_measurements = analog_dict["measurements"]
         self.analog_current = analog_measurements[0]
+        # Debug
+        print('self.analog_current: {}'.format(self.analog_current))
         #   voltage measurement
         deepsea_dict = config["deepsea"]
         measurement_file = deepsea_dict["mlistfile"]
@@ -51,6 +53,8 @@ class PowerClient(AsyncIOThread):
         if not self.hibus_voltage:
             self._logger.info("!!PowerClient failed to read voltage"
                               "measurement info!!")
+        # Debug
+        print('self.hibus_voltage: {}'.format(self.hibus_voltage))
         # Initialize our output variable in the data store.
         self.data_store["calc_300v_pwr"] = 0.0
         # Debug - write the voltage and current values that we're reading so
