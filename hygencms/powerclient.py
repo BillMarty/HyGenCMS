@@ -93,9 +93,12 @@ class PowerClient(AsyncIOThread):
                 self._logger.info('!!Voltage reading error: {} {}'
                                   .format(exc_type, exc_value))
             # Calculate and store power, and the input values
-            self.data_store["calc_300v_pwr"] = voltage * current
-            self.data_store["pwr:voltage"] = voltage
-            self.data_store["pwr:current"] = current
+            # In early passes, voltage and current may be None types, until
+            #   readings come in.  Prevent the exception...
+            if voltage and current:
+                self.data_store["calc_300v_pwr"] = voltage * current
+                self.data_store["pwr:voltage"] = voltage
+                self.data_store["pwr:current"] = current
         time.sleep(0.25)
 
     def print_data(self):
