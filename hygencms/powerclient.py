@@ -9,6 +9,7 @@ import logging
 from monotonic import monotonic
 from . import pins
 from .asyncio import AsyncIOThread
+from .deepseaclient import DeepSeaClient
 
 # TODO Update setpoint in config.py and tuning.py.
 # TODO We're not using an_300v_volt, so let's comment it out.
