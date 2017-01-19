@@ -106,7 +106,7 @@ class PowerClient(AsyncIOThread):
         # Calculated power.
         display = '%20s %10.2f %10s' % ('calc_300v_pwr',
                                         self.data_store['calc_300v_pwr'],
-                                        'kW')
+                                        'W')
         print(display)
         # Input variables
         display = '%20s %10.2f %10s' % ('pwr.voltage',
