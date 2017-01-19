@@ -62,6 +62,8 @@ class PowerClient(AsyncIOThread):
         #   I know the reading is working.
         self.data_store["pwr.voltage"] = 0.0
         self.data_store["pwr.current"] = 0.0
+        # Debug
+        self.first_pass = True
         # Log to info that we've started
         self._logger.info("Started PowerClient")
 
@@ -71,6 +73,11 @@ class PowerClient(AsyncIOThread):
         as the product of GEN_CUR and deep sea bus voltage.
         """
         while not self.cancelled:
+            # Debug - verify that logger writes work from here.
+            if self.first_pass:
+                self._logger.info('Verified - logger writes are working :-)')
+                self.first_pass = False
+                print(self.data_store)
             # Try reading GEN_CUR.
             try:
                 current = self.data_store[self.analog_current[PowerClient.PIN]]
