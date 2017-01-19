@@ -49,7 +49,7 @@ class PowerClient(AsyncIOThread):
         deepsea_measurement_list = \
             DeepSeaClient.read_measurement_description(measurement_file)
         for m in deepsea_measurement_list:
-            if m[NAME] == "300V Bus Voltage":
+            if m[PowerClient.NAME] == "300V Bus Voltage":
                 self.hibus_voltage = m
         if not self.hibus_voltage:
             self._logger.info("!!PowerClient failed to read voltage"
@@ -73,14 +73,14 @@ class PowerClient(AsyncIOThread):
         while not self.cancelled:
             # Try reading GEN_CUR.
             try:
-                current = self.data_store[self.analog_current[PIN]]
+                current = self.data_store[self.analog_current[PowerClient.PIN]]
             except:
                 exc_type, exc_value = sys.exc_info()[:2]
                 self._logger.info('!!Current reading error: {} {}'
                                   .format(exc_type, exc_value))
             # Try reading hi bus voltage.
             try:
-                voltage = self.data_store[self.hibus_voltage[PIN]]
+                voltage = self.data_store[self.hibus_voltage[PowerClient.PIN]]
             except:
                 exc_type, exc_value = sys.exc_info()[:2]
                 self._logger.info('!!Voltage reading error: {} {}'
