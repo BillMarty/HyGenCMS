@@ -57,7 +57,7 @@ class PowerClient(AsyncIOThread):
         # print('self.hibus_voltage: {}'.format(self.hibus_voltage))
         # Initialize our output variables in the data store.
         self.parameters = ['calc_300v_pwr', 'pwr.voltage', 'pwr.current']
-        for key in parameters:
+        for key in self.parameters:
             self.data_store[key] = 0.0
         # Log to info that we've started
         self._logger.info('Started PowerClient')
