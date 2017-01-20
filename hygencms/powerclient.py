@@ -11,7 +11,8 @@ from .deepseaclient import DeepSeaClient
 # TODO Update setpoint in config.py and tuning.py.
 # TODO We're not using an_300v_volt, so let's comment it out.
 # TODO Add my calculated power to the run log file.
-
+# TODO Update print_data() to use new python formatting.
+# TODO Update print_data() to use green text :-)
 
 class PowerClient(AsyncIOThread):
     """
@@ -40,7 +41,7 @@ class PowerClient(AsyncIOThread):
         analog_measurements = analog_dict['measurements']
         self.analog_current = analog_measurements[0]
         # Debug
-        print('self.analog_current: {}'.format(self.analog_current))
+        # print('self.analog_current: {}'.format(self.analog_current))
         #   voltage measurement
         deepsea_dict = config['deepsea']
         measurement_file = deepsea_dict['mlistfile']
@@ -51,17 +52,13 @@ class PowerClient(AsyncIOThread):
                 self.hibus_voltage = m
         if not self.hibus_voltage:
             self._logger.info('!!PowerClient failed to read voltage'
-                              'measurement info!!')
+                              'measurement!!')
         # Debug
-        print('self.hibus_voltage: {}'.format(self.hibus_voltage))
-        # Initialize our output variable in the data store.
-        self.data_store['calc_300v_pwr'] = 0.0
-        # Debug - write the voltage and current values that we're reading so
-        #   I know the reading is working.
-        self.data_store['pwr.voltage'] = 0.0
-        self.data_store['pwr.current'] = 0.0
-        # Debug
-        self.first_pass = True
+        # print('self.hibus_voltage: {}'.format(self.hibus_voltage))
+        # Initialize our output variables in the data store.
+        self.parameters = ['calc_300v_pwr', 'pwr.voltage', 'pwr.current']
+        for key in parameters:
+            self.data_store[key] = 0.0
         # Log to info that we've started
         self._logger.info('Started PowerClient')
 
@@ -71,11 +68,6 @@ class PowerClient(AsyncIOThread):
         as the product of GEN_CUR and deep sea bus voltage.
         """
         while not self.cancelled:
-            # Debug - verify that logger writes work from here.
-            if self.first_pass:
-                self._logger.info('Verified - logger writes are working :-)')
-                self.first_pass = False
-                print(self.data_store)
             # Try reading GEN_CUR.
             try:
                 current = self.data_store[self.analog_current[PowerClient.PIN]]
@@ -120,12 +112,20 @@ class PowerClient(AsyncIOThread):
 
     def csv_header(self):
         """
-        Empty for now, just to keep main happy.
+        Return the CSV header line with no new line or trailing comma.
         """
-        return ''
+        return ','.join(name for name in self.parameters)
 
     def csv_line(self):
         """
-        Empty for now, just to keep main happy.
+        Return a CSV line of the data we currently have.
+        The line is returned with no new line or trailing comma.
         """
-        return ''
+        values = []
+        for key in self.parameters:
+            value = self.data_store[key]
+            if value is None:
+                values.append('')
+            else:
+                values.append('{:.2f}'.format(val))
+        return ','.join(values)
