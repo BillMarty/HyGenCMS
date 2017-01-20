@@ -185,12 +185,15 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
         powerclient = PowerClient(config, handlers, data_store)
     except:
         exc_type, exc_value = sys.exc_info()[:2]
-        logger.error( "Error opening the power client: {} {}"
-                      .format(exc_type, exc_value))
-        exit("Could not open AnalogClient")
+        logger.error('Error opening the power client: {} {}'
+                     .format(exc_type, exc_value))
+        exit('Could not open AnalogClient')
     else:
         clients.append(powerclient)
         threads.append(powerclient)
+        # Let the world know that this is a constant power unit, not a
+        #   constant current unit.
+        logger.info('Using constant power control...')
 
     #######################################
     # Other Threads
@@ -283,14 +286,24 @@ def main(config, handlers, daemon=False, watchdog=False, time_from_deepsea=False
                 #    the fast logs were useless clutter.
 
                 # Connect the analog current in to the woodward process
+                # if woodward and not woodward.cancelled:
+                #     try:
+                #         cur = data_store[pins.GEN_CUR]
+                #         if cur is not None:
+                #             woodward.process_variable = cur
+                #     except KeyError:
+                #         logger.critical('Generator current is not being measured.')
+                #         exit('Generator current is not being measured.')
+
+                # Connect the calculated power to the woodward process
                 if woodward and not woodward.cancelled:
                     try:
-                        cur = data_store[pins.GEN_CUR]
-                        if cur is not None:
-                            woodward.process_variable = cur
+                        power = data_store['calc_300v_pwr']
+                        if power is not None:
+                            woodward.process_variable = power
                     except KeyError:
-                        logger.critical('Generator current is not being measured.')
-                        exit('Generator current is not being measured.')
+                        logger.critical('!!Generator power measurement error!!')
+                        exit('!!Generator power measurement error!!')
 
                 # Schedule next run
                 next_run[0.1] = now + 0.1

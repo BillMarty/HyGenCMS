@@ -6,6 +6,7 @@
     'Ki': 0.4,
     'Kd': 0.0,
     'slew': 25,  # In percent per second max change
-    'setpoint': 25.0,  # Amps
+    #'setpoint': 25.0,  # Amps
+    'setpoint': 6000.0,  # Watts
     'period': 1.0
 }
