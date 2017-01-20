@@ -127,5 +127,5 @@ class PowerClient(AsyncIOThread):
             if value is None:
                 values.append('')
             else:
-                values.append('{:.2f}'.format(val))
+                values.append('{:.2f}'.format(value))
         return ','.join(values)
