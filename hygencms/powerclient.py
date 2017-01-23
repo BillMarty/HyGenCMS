@@ -99,25 +99,16 @@ class PowerClient(AsyncIOThread):
         Print PowerClient's data of interest.
         """
         # Calculated power.
-        # display = '%20s %10.2f %10s' % ('calc_300v_pwr',
-        #                                 self.data_store['calc_300v_pwr'],
-        #                                 'W')
-        display = '{:20s} {:10.2f} {:10s}'.format('calc_300v_pwr',
+        display = '{:>20s}{:10.2f}{:>10s}'.format('calc_300v_pwr',
                                         self.data_store['calc_300v_pwr'],
                                         'W')
         PowerClient.pr_green(display)
         # Input variables
-        # display = '%20s %10.2f %10s' % ('pwr.voltage',
-        #                                 self.data_store['pwr.voltage'],
-        #                                 'V')
-        display = '{:20s} {:10.2f} {:10s}'.format('pwr.voltage',
+        display = '{:>20s} {:10.2f} {:>10s}'.format('pwr.voltage',
                                         self.data_store['pwr.voltage'],
                                         'V')
         PowerClient.pr_red(display)
-        # display = '%20s %10.2f %10s' % ('pwr.current',
-        #                                 self.data_store['pwr.current'],
-        #                                 'A')
-        display = '{:20s} {:10.2f} {:10s}'.format('pwr.current',
+        display = '{:>20s} {:10.2f} {:>10s}'.format('pwr.current',
                                          self.data_store['pwr.current'],
                                          'A')
         PowerClient.pr_red(display)
