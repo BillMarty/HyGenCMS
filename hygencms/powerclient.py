@@ -8,11 +8,6 @@ import time
 from .asyncio import AsyncIOThread
 from .deepseaclient import DeepSeaClient
 
-# TODO Update setpoint in config.py and tuning.py.
-# TODO We're not using an_300v_volt, so let's comment it out.
-# TODO Add my calculated power to the run log file.
-# TODO Update print_data() to use new python formatting.
-# TODO Update print_data() to use green text :-)
 
 class PowerClient(AsyncIOThread):
     """
@@ -26,6 +21,14 @@ class PowerClient(AsyncIOThread):
     PIN = 2
     GAIN = 3
     OFFSET = 4
+
+    @staticmethod
+    def pr_red(prt):
+        print("\033[91m {}\033[00m".format(prt))
+
+    @staticmethod
+    def pr_green(prt):
+        print("\033[92m {}\033[00m".format(prt))
 
     def __init__(self, config, handlers, data_store):
         """
@@ -96,19 +99,28 @@ class PowerClient(AsyncIOThread):
         Print PowerClient's data of interest.
         """
         # Calculated power.
-        display = '%20s %10.2f %10s' % ('calc_300v_pwr',
+        # display = '%20s %10.2f %10s' % ('calc_300v_pwr',
+        #                                 self.data_store['calc_300v_pwr'],
+        #                                 'W')
+        display = '{:20s} {:10.2f} {:10s}'.format('calc_300v_pwr',
                                         self.data_store['calc_300v_pwr'],
                                         'W')
-        print(display)
+        PowerClient.pr_green(display)
         # Input variables
-        display = '%20s %10.2f %10s' % ('pwr.voltage',
+        # display = '%20s %10.2f %10s' % ('pwr.voltage',
+        #                                 self.data_store['pwr.voltage'],
+        #                                 'V')
+        display = '{:20s} {:10.2f} {:10s}'.format('pwr.voltage',
                                         self.data_store['pwr.voltage'],
                                         'V')
-        print(display)
-        display = '%20s %10.2f %10s' % ('pwr.current',
-                                        self.data_store['pwr.current'],
-                                        'A')
-        print(display)
+        PowerClient.pr_red(display)
+        # display = '%20s %10.2f %10s' % ('pwr.current',
+        #                                 self.data_store['pwr.current'],
+        #                                 'A')
+        display = '{:20s} {:10.2f} {:10s}'.format('pwr.current',
+                                         self.data_store['pwr.current'],
+                                         'A')
+        PowerClient.pr_red(display)
 
     def csv_header(self):
         """
